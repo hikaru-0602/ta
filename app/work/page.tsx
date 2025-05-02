@@ -165,35 +165,35 @@ export default function Work() {
         <h1 className="text-2xl font-bold mb-4">仕事情報入力</h1>
         <form className="w-full max-w-lg space-y-6">
           {/* ユーザ情報 */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">ユーザ情報</h2>
+          <div className="space-y-4 bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">ユーザ情報</h2>
             <div>
-              <label className="block mb-1 font-medium">氏名</label>
+              <label className="block mb-1 font-medium text-gray-700">氏名</label>
               <input
                 type="text"
                 name="name"
                 value={userInfo.name}
                 onChange={handleUserChange}
-                className="w-full p-2 border rounded"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block mb-1 font-medium">ふりがな</label>
+              <label className="block mb-1 font-medium text-gray-700">ふりがな</label>
               <input
                 type="text"
                 name="furigana"
                 value={userInfo.furigana}
                 onChange={handleUserChange}
-                className="w-full p-2 border rounded"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block mb-1 font-medium">学年</label>
+              <label className="block mb-1 font-medium text-gray-700">学年</label>
               <select
                 name="grade"
                 value={userInfo.grade}
                 onChange={handleUserChange}
-                className="w-full p-2 border rounded"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="1年">1年</option>
                 <option value="2年">2年</option>
@@ -202,39 +202,70 @@ export default function Work() {
               </select>
             </div>
             <div>
-              <label className="block mb-1 font-medium">学籍番号</label>
+              <label className="block mb-1 font-medium text-gray-700">学籍番号</label>
               <input
                 type="text"
                 name="studentId"
                 value={userInfo.studentId}
                 onChange={handleUserChange}
-                className="w-full p-2 border rounded"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
 
           {/* 仕事リスト */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">登録済みの仕事</h2>
-            <ul className="space-y-2">
+          <div className="space-y-4 bg-gray-50 p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">登録済みの仕事</h2>
+            <ul className="space-y-4">
               {workList.map((work, index) => (
-                <li key={index} className="p-4 border rounded shadow">
-                  <p className="font-bold">科目名: {work.subject}</p>
-                  {work.schedules.map((schedule, i) => {
-                    const { startTime, endTime, breakTime } = calculateStartEndTimes(schedule.periods);
-                    const totalMinutes = schedule.periods.length * 90 - breakTime; // 各時限90分と仮定
+                <li
+                  key={index}
+                  className="p-4 bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                >
+                  <div className="flex justify-between items-center">
+                    <p className="text-lg font-bold text-gray-800">科目名: {work.subject}</p>
+                    <button
+                      onClick={() => removeSchedule(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="mt-2 space-y-2">
+                    {work.schedules.map((schedule, i) => {
+                      const { startTime, endTime, breakTime } = calculateStartEndTimes(schedule.periods);
+                      const totalMinutes = schedule.periods.length * 90 - breakTime;
 
-                    return (
-                      <div key={i} className="mt-2">
-                        <p>曜日: {schedule.day}</p>
-                        <p>時限: {schedule.periods.join(", ")}</p>
-                        <p>開始時間: {startTime}</p>
-                        <p>終了時間: {endTime}</p>
-                        <p>休憩時間: {breakTime}分</p>
-                        <p>実働時間: {Math.floor(totalMinutes / 60)}時間{totalMinutes % 60}分</p>
-                      </div>
-                    );
-                  })}
+                      return (
+                        <div
+                          key={i}
+                          className="p-3 bg-gray-50 rounded-lg border border-gray-200"
+                        >
+                          <p className="text-sm text-gray-600">曜日: {schedule.day}</p>
+                          <p className="text-sm text-gray-600">時限: {schedule.periods.join(", ")}</p>
+                          <p className="text-sm text-gray-600">開始時間: {startTime}</p>
+                          <p className="text-sm text-gray-600">終了時間: {endTime}</p>
+                          <p className="text-sm text-gray-600">休憩時間: {breakTime}分</p>
+                          <p className="text-sm text-gray-600">
+                            実働時間: {Math.floor(totalMinutes / 60)}時間{totalMinutes % 60}分
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -244,7 +275,7 @@ export default function Work() {
         {/* 仕事追加ボタン */}
         <button
           onClick={() => setIsDialogOpen(true)}
-          className="fixed bottom-8 right-8 bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-600"
+          className="fixed bottom-8 right-8 bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-4 rounded-full shadow-lg hover:from-blue-600 hover:to-indigo-600"
         >
           仕事追加
         </button>
@@ -425,12 +456,20 @@ export default function Work() {
                               </button>
                             </div>
                           </div>
-                          <button
-                            onClick={saveScheduleTimeEdit}
-                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                          >
-                            保存
-                          </button>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => setEditingIndex(null)} // キャンセルボタンで編集モードを終了
+                              className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400"
+                            >
+                              キャンセル
+                            </button>
+                            <button
+                              onClick={saveScheduleTimeEdit} // 保存ボタン
+                              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                            >
+                              保存
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <div className="text-sm text-gray-600">
@@ -451,26 +490,34 @@ export default function Work() {
                     </div>
                   );
                 })}
-                <button
-                  onClick={addSchedule}
-                  className="text-blue-500 hover:text-blue-700"
-                >
-                  + スケジュールを追加
-                </button>
+
+                {/* 編集モードでない場合のみスケジュール追加ボタンを表示 */}
+                {editingIndex === null && (
+                  <button
+                    onClick={addSchedule}
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    + スケジュールを追加
+                  </button>
+                )}
               </div>
               <div className="flex justify-end mt-4 space-x-2">
-                <button
-                  onClick={() => setIsDialogOpen(false)}
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                >
-                  キャンセル
-                </button>
-                <button
-                  onClick={addWork}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  登録
-                </button>
+                {editingIndex === null && ( // 編集モードでない場合のみ表示
+                  <>
+                    <button
+                      onClick={() => setIsDialogOpen(false)}
+                      className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                    >
+                      キャンセル
+                    </button>
+                    <button
+                      onClick={addWork}
+                      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      登録
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
