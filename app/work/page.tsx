@@ -14,7 +14,7 @@ export default function Work() {
 
   const [workInfo, setWorkInfo] = useState({
     subject: "",
-    schedules: [{ day: "月曜日", periods: ["1限"] }],
+    schedules: [{ day: "月曜日", periods: ["1限"], startTime: "", endTime: "", breakTime: "" }],
     startTime: "",
     endTime: "",
     breakTime: "",
@@ -30,14 +30,15 @@ export default function Work() {
 
   const [workList, setWorkList] = useState<Work[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const periodTimes: Record<"1限" | "2限" | "3限" | "4限" | "5限" | "6限", { start: string; end: string }> = {
     "1限": { start: "09:00", end: "10:30" },
     "2限": { start: "10:40", end: "12:10" },
-    "3限": { start: "13:00", end: "14:30" },
-    "4限": { start: "14:40", end: "16:10" },
-    "5限": { start: "16:20", end: "17:50" },
-    "6限": { start: "18:00", end: "19:30" },
+    "3限": { start: "13:10", end: "14:40" },
+    "4限": { start: "14:50", end: "16:20" },
+    "5限": { start: "16:30", end: "18:00" },
+    "6限": { start: "18:10", end: "19:40" },
   };
 
   const handleUserChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -59,15 +60,53 @@ export default function Work() {
     if (field === "day" && typeof value === "string") {
       updatedSchedules[index][field] = value;
     } else if (field === "periods" && Array.isArray(value)) {
-      updatedSchedules[index][field] = value;
+      // 時限を並び替える処理を追加
+      const sortedPeriods = value.sort((a, b) => {
+        const periodOrder = ["1限", "2限", "3限", "4限", "5限", "6限"];
+        return periodOrder.indexOf(a) - periodOrder.indexOf(b);
+      });
+      updatedSchedules[index][field] = sortedPeriods;
     }
     setWorkInfo((prev) => ({ ...prev, schedules: updatedSchedules }));
+  };
+
+  const handleScheduleTimeEdit = (
+    index: number,
+    field: "startTime" | "endTime" | "breakTime",
+    value: string
+  ) => {
+    const updatedSchedules = workInfo.schedules.map((schedule, i) =>
+      i === index ? { ...schedule, [field]: value } : schedule
+    );
+    updatedSchedules[index][field] = value;
+    setWorkInfo((prev) => ({ ...prev, schedules: updatedSchedules }));
+  };
+
+  const saveScheduleTimeEdit = () => {
+    setEditingIndex(null); // 編集モードを終了
+  };
+
+  const calculateWorkingTime = (startTime: string, endTime: string, breakTime: number) => {
+    const [startHour, startMinute] = startTime.split(":").map(Number);
+    const [endHour, endMinute] = endTime.split(":").map(Number);
+
+    const startTotalMinutes = startHour * 60 + startMinute;
+    const endTotalMinutes = endHour * 60 + endMinute;
+
+    const workingMinutes = endTotalMinutes - startTotalMinutes - breakTime;
+    return {
+      hours: Math.floor(workingMinutes / 60),
+      minutes: workingMinutes % 60,
+    };
   };
 
   const addSchedule = () => {
     setWorkInfo((prev) => ({
       ...prev,
-      schedules: [...prev.schedules, { day: "月曜日", periods: ["1限"] }],
+      schedules: [
+        ...prev.schedules,
+        { day: "月曜日", periods: ["1限"], startTime: "", endTime: "", breakTime: "" },
+      ],
     }));
   };
 
@@ -77,12 +116,26 @@ export default function Work() {
   };
 
   const calculateStartEndTimes = (periods: string[]) => {
-    if (periods.length === 0) return { startTime: "", endTime: "" };
+    if (periods.length === 0) return { startTime: "", endTime: "", breakTime: 0 };
 
     const startTime = periodTimes[periods[0] as "1限" | "2限" | "3限" | "4限" | "5限" | "6限"].start;
     const endTime = periodTimes[periods[periods.length - 1] as "1限" | "2限" | "3限" | "4限" | "5限" | "6限"].end;
 
-    return { startTime, endTime };
+    // 休憩時間を計算
+    let totalBreakTime = 0;
+    for (let i = 0; i < periods.length - 1; i++) {
+      const currentEnd = periodTimes[periods[i] as "1限" | "2限" | "3限" | "4限" | "5限" | "6限"].end;
+      const nextStart = periodTimes[periods[i + 1] as "1限" | "2限" | "3限" | "4限" | "5限" | "6限"].start;
+
+      // 時間を分に変換して差を計算
+      const [currentEndHour, currentEndMinute] = currentEnd.split(":").map(Number);
+      const [nextStartHour, nextStartMinute] = nextStart.split(":").map(Number);
+      const breakTime = (nextStartHour * 60 + nextStartMinute) - (currentEndHour * 60 + currentEndMinute);
+
+      totalBreakTime += breakTime;
+    }
+
+    return { startTime, endTime, breakTime: totalBreakTime };
   };
 
   const addWork = () => {
@@ -97,7 +150,7 @@ export default function Work() {
 
     setWorkInfo({
       subject: "",
-      schedules: [{ day: "月曜日", periods: ["1限"] }],
+      schedules: [{ day: "月曜日", periods: ["1限"], startTime: "", endTime: "", breakTime: "" }],
       startTime: "",
       endTime: "",
       breakTime: "",
@@ -166,15 +219,22 @@ export default function Work() {
             <ul className="space-y-2">
               {workList.map((work, index) => (
                 <li key={index} className="p-4 border rounded shadow">
-                  <p>科目名: {work.subject}</p>
-                  {work.schedules.map((schedule, i) => (
-                    <p key={i}>
-                      曜日: {schedule.day}, 時限: {schedule.periods.join(", ")}
-                    </p>
-                  ))}
-                  <p>開始時間: {work.startTime}</p>
-                  <p>終了時間: {work.endTime}</p>
-                  <p>休憩時間: {work.breakTime}分</p>
+                  <p className="font-bold">科目名: {work.subject}</p>
+                  {work.schedules.map((schedule, i) => {
+                    const { startTime, endTime, breakTime } = calculateStartEndTimes(schedule.periods);
+                    const totalMinutes = schedule.periods.length * 90 - breakTime; // 各時限90分と仮定
+
+                    return (
+                      <div key={i} className="mt-2">
+                        <p>曜日: {schedule.day}</p>
+                        <p>時限: {schedule.periods.join(", ")}</p>
+                        <p>開始時間: {startTime}</p>
+                        <p>終了時間: {endTime}</p>
+                        <p>休憩時間: {breakTime}分</p>
+                        <p>実働時間: {Math.floor(totalMinutes / 60)}時間{totalMinutes % 60}分</p>
+                      </div>
+                    );
+                  })}
                 </li>
               ))}
             </ul>
@@ -205,59 +265,192 @@ export default function Work() {
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                {workInfo.schedules.map((schedule, index) => (
-                  <div key={index} className="flex items-center space-x-4">
-                    {/* 曜日選択 */}
-                    <div className="flex-1">
-                      <label className="block mb-1 font-medium">曜日</label>
-                      <select
-                        value={schedule.day}
-                        onChange={(e) =>
-                          handleScheduleChange(index, "day", e.target.value)
-                        }
-                        className="w-full p-2 border rounded"
-                      >
-                        <option value="月曜日">月曜日</option>
-                        <option value="火曜日">火曜日</option>
-                        <option value="水曜日">水曜日</option>
-                        <option value="木曜日">木曜日</option>
-                        <option value="金曜日">金曜日</option>
-                      </select>
-                    </div>
+                {workInfo.schedules.map((schedule, index) => {
+                  const { startTime, endTime, breakTime } = calculateStartEndTimes(schedule.periods);
+                  const { hours, minutes } = calculateWorkingTime(
+                    schedule.startTime || startTime,
+                    schedule.endTime || endTime,
+                    Number(schedule.breakTime) || breakTime
+                  );
 
-                    {/* 時限選択 */}
-                    <div className="flex-1">
-                      <label className="block mb-1 font-medium">時限</label>
-                      <div className="flex flex-wrap gap-2">
-                        {["1限", "2限", "3限", "4限", "5限", "6限"].map((period) => (
-                          <label key={period} className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              value={period}
-                              checked={schedule.periods.includes(period)}
-                              onChange={(e) => {
-                                const selectedPeriods = schedule.periods.includes(period)
-                                  ? schedule.periods.filter((p) => p !== period)
-                                  : [...schedule.periods, period];
-                                handleScheduleChange(index, "periods", selectedPeriods);
-                              }}
-                              className="form-checkbox"
-                            />
-                            <span>{period}</span>
-                          </label>
-                        ))}
+                  const adjustTime = (time: string, minutes: number) => {
+                    const [hour, min] = time.split(":").map(Number);
+                    const totalMinutes = hour * 60 + min + minutes;
+                    const adjustedHour = Math.floor((totalMinutes + 1440) % 1440 / 60); // 24時間制で調整
+                    const adjustedMinutes = (totalMinutes + 1440) % 1440 % 60;
+                    return `${String(adjustedHour).padStart(2, "0")}:${String(adjustedMinutes).padStart(2, "0")}`;
+                  };
+
+                  return (
+                    <div key={index} className="flex flex-col space-y-2">
+                      <div className="flex items-center space-x-4">
+                        {/* 曜日選択 */}
+                        <div className="flex-1">
+                          <label className="block mb-1 font-medium">曜日</label>
+                          <select
+                            value={schedule.day}
+                            onChange={(e) =>
+                              handleScheduleChange(index, "day", e.target.value)
+                            }
+                            className="w-full p-2 border rounded"
+                          >
+                            <option value="月曜日">月曜日</option>
+                            <option value="火曜日">火曜日</option>
+                            <option value="水曜日">水曜日</option>
+                            <option value="木曜日">木曜日</option>
+                            <option value="金曜日">金曜日</option>
+                          </select>
+                        </div>
+
+                        {/* 時限選択 */}
+                        <div className="flex-1">
+                          <label className="block mb-1 font-medium">時限</label>
+                          <div className="flex flex-wrap gap-2">
+                            {["1限", "2限", "3限", "4限", "5限", "6限"].map((period) => (
+                              <label key={period} className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  value={period}
+                                  checked={schedule.periods.includes(period)}
+                                  onChange={(e) => {
+                                    const selectedPeriods = schedule.periods.includes(period)
+                                      ? schedule.periods.filter((p) => p !== period)
+                                      : [...schedule.periods, period];
+                                    handleScheduleChange(index, "periods", selectedPeriods);
+                                  }}
+                                  className="form-checkbox"
+                                />
+                                <span>{period}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* 削除ボタン */}
+                        <button
+                          onClick={() => removeSchedule(index)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          削除
+                        </button>
                       </div>
-                    </div>
 
-                    {/* 削除ボタン */}
-                    <button
-                      onClick={() => removeSchedule(index)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      削除
-                    </button>
-                  </div>
-                ))}
+                      {/* 時間表示または編集モード */}
+                      {editingIndex === index ? (
+                        <div className="flex flex-col space-y-2">
+                          <div>
+                            <label className="block mb-1 font-medium">開始時間</label>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() =>
+                                  handleScheduleTimeEdit(index, "startTime", adjustTime(schedule.startTime || startTime, -10))
+                                }
+                                className="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400"
+                              >
+                                -10分
+                              </button>
+                              <input
+                                type="time"
+                                value={schedule.startTime || startTime}
+                                onChange={(e) =>
+                                  handleScheduleTimeEdit(index, "startTime", e.target.value)
+                                }
+                                className="w-full p-2 border rounded"
+                              />
+                              <button
+                                onClick={() =>
+                                  handleScheduleTimeEdit(index, "startTime", adjustTime(schedule.startTime || startTime, 10))
+                                }
+                                className="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400"
+                              >
+                                +10分
+                              </button>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block mb-1 font-medium">終了時間</label>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() =>
+                                  handleScheduleTimeEdit(index, "endTime", adjustTime(schedule.endTime || endTime, -10))
+                                }
+                                className="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400"
+                              >
+                                -10分
+                              </button>
+                              <input
+                                type="time"
+                                value={schedule.endTime || endTime}
+                                onChange={(e) =>
+                                  handleScheduleTimeEdit(index, "endTime", e.target.value)
+                                }
+                                className="w-full p-2 border rounded"
+                              />
+                              <button
+                                onClick={() =>
+                                  handleScheduleTimeEdit(index, "endTime", adjustTime(schedule.endTime || endTime, 10))
+                                }
+                                className="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400"
+                              >
+                                +10分
+                              </button>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block mb-1 font-medium">休憩時間 (分)</label>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() =>
+                                  handleScheduleTimeEdit(index, "breakTime", String(Number(schedule.breakTime || breakTime) - 10))
+                                }
+                                className="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400"
+                              >
+                                -10分
+                              </button>
+                              <input
+                                type="number"
+                                value={schedule.breakTime || breakTime}
+                                onChange={(e) =>
+                                  handleScheduleTimeEdit(index, "breakTime", e.target.value)
+                                }
+                                className="w-full p-2 border rounded"
+                              />
+                              <button
+                                onClick={() =>
+                                  handleScheduleTimeEdit(index, "breakTime", String(Number(schedule.breakTime || breakTime) + 10))
+                                }
+                                className="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400"
+                              >
+                                +10分
+                              </button>
+                            </div>
+                          </div>
+                          <button
+                            onClick={saveScheduleTimeEdit}
+                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                          >
+                            保存
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="text-sm text-gray-600">
+                          <p>開始時間: {schedule.startTime || startTime}</p>
+                          <p>終了時間: {schedule.endTime || endTime}</p>
+                          <p>休憩時間: {schedule.breakTime || breakTime}分</p>
+                          <p>
+                            実働時間: {hours}時間{minutes}分
+                          </p>
+                          <button
+                            onClick={() => setEditingIndex(index)}
+                            className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                          >
+                            編集
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
                 <button
                   onClick={addSchedule}
                   className="text-blue-500 hover:text-blue-700"
