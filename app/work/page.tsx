@@ -6,10 +6,10 @@ import { useState, useEffect } from "react";
 export default function Work() {
   const [userInfo, setUserInfo] = useState({
     name: "",
-    furigana: "",
-    grade: "1年",
-    studentId: "",
-    accountStatus: "未登録",
+    name_kana: "",
+    grade: "学部１年生",
+    value: "1",
+    id: "",
   });
 
   const [workInfo, setWorkInfo] = useState({
@@ -208,8 +208,33 @@ export default function Work() {
     }
   };
 
+  const loadUserInfoFromLocalStorage = () => {
+    const savedUserInfo = localStorage.getItem("userInfo");
+    if (savedUserInfo) {
+      setUserInfo(JSON.parse(savedUserInfo));
+    } else {
+      alert("保存されたユーザ情報が見つかりません。");
+    }
+  };
+
+  const handleUserRegister = () => {
+    // ローカルストレージに保存
+    saveUserInfoToLocalStorage();
+    //alert("ユーザ情報を登録しました！");
+  };
+
+  const saveUserInfoToLocalStorage = () => {
+    localStorage.setItem("userInfo", JSON.stringify(userInfo));
+    //alert("ユーザ情報を保存しました！");
+    alert(JSON.stringify(userInfo));
+  };
+
   useEffect(() => {
     loadWorkDataFromLocalStorage();
+  }, []);
+
+  useEffect(() => {
+    loadUserInfoFromLocalStorage();
   }, []);
 
   return (
@@ -232,6 +257,7 @@ export default function Work() {
                 name="name"
                 value={userInfo.name}
                 onChange={handleUserChange}
+                placeholder="例: 山田 太郎"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               />
             </div>
@@ -239,9 +265,10 @@ export default function Work() {
               <label className="block mb-2 font-medium text-gray-700">ふりがな</label>
               <input
                 type="text"
-                name="furigana"
-                value={userInfo.furigana}
+                name="name_kana"
+                value={userInfo.name_kana}
                 onChange={handleUserChange}
+                placeholder="例: やまだ たろう"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               />
             </div>
@@ -249,8 +276,12 @@ export default function Work() {
               <label className="block mb-2 font-medium text-gray-700">学年</label>
               <select
                 name="grade"
-                value={userInfo.grade}
-                onChange={handleUserChange}
+                value={userInfo.value} // 修正: value を userInfo.value に変更
+                onChange={(e) => {
+                  const gradeValue = e.target.value;
+                  const gradeText = e.target.options[e.target.selectedIndex].text;
+                  setUserInfo((prev) => ({ ...prev, grade: gradeText, value: gradeValue }));
+                }}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               >
                 <option value="1">学部１年生</option>
@@ -268,11 +299,20 @@ export default function Work() {
               <label className="block mb-2 font-medium text-gray-700">学籍番号</label>
               <input
                 type="text"
-                name="studentId"
-                value={userInfo.studentId}
+                name="id"
+                value={userInfo.id}
                 onChange={handleUserChange}
+                placeholder="例: 1234567"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               />
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={handleUserRegister}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+              >
+                登録
+              </button>
             </div>
           </div>
 
@@ -306,7 +346,7 @@ export default function Work() {
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-6 w-6"
                         fill="none"
-                        viewBox="0 0 24 24"
+                        viewBox="0 24 24"
                         stroke="currentColor"
                       >
                         <path
