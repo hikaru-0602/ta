@@ -25,7 +25,7 @@ export default function Header() {
           } sm:flex sm:items-center sm:gap-4`}
         >
           <Link
-            href="/"
+            href="/calendar"
             className="block px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-800 rounded"
           >
             勤務表

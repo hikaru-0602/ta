@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect} from "react";
 
 //業務情報を管理するためのカスタムフック
 export const useWorkInfo = () => {
   //業務情報を管理するための状態を定義
   const [workInfo, setWorkInfo] = useState({
+    label: "", //仕事のラベル
     subject: "", //科目名
     category: "準備等", //業務内容
     schedules: [
@@ -25,6 +26,7 @@ export const useWorkInfo = () => {
   const [workData, setWorkData] = useState<
     {
       id: number; //業務ID
+      label: string; //仕事のラベル
       classname: string; //科目名
       category: string; //業務内容
       teacher: string; //担当教員
@@ -80,11 +82,15 @@ export const useWorkInfo = () => {
       updatedSchedules[index][field] = value;
     } else if (field === "periods" && Array.isArray(value)) {
       // 時限を並び替える処理
-      const sortedPeriods = value.sort((a, b) => {
-        const periodOrder = ["1限", "2限", "3限", "4限", "5限", "6限"];
-        return periodOrder.indexOf(a) - periodOrder.indexOf(b);
-      });
+      const periodOrder = ["1限", "2限", "3限", "4限", "5限", "6限"];
+      const sortedPeriods = value.sort((a, b) => periodOrder.indexOf(a) - periodOrder.indexOf(b));
       updatedSchedules[index][field] = sortedPeriods;
+
+      // 時限が変更された場合、休憩時間を再計算
+      const { breakTime } = calculateStartEndTimes(sortedPeriods);
+      updatedSchedules[index].breakTime = `${breakTime}`; // 再計算した休憩時間を文字列として設定
+      updatedSchedules[index].startTime = periodTimes[sortedPeriods[0] as "1限" | "2限" | "3限" | "4限" | "5限" | "6限"].start;
+      updatedSchedules[index].endTime = periodTimes[sortedPeriods[sortedPeriods.length - 1] as "1限" | "2限" | "3限" | "4限" | "5限" | "6限"].end;
     }
 
     setWorkInfo((prev) => ({ ...prev, schedules: updatedSchedules }));
@@ -97,9 +103,16 @@ export const useWorkInfo = () => {
     value: string
   ) => {
     const updatedSchedules = workInfo.schedules.map((schedule, i) =>
-      i === index ? { ...schedule, [field]: value } : schedule
+      i === index ? { ...schedule, [field]: field === "breakTime" ? value : value} : schedule
     );
+    console.log(field, value, updatedSchedules); // デバッグログ
     setWorkInfo((prev) => ({ ...prev, schedules: updatedSchedules }));
+    console.log(workInfo.schedules); // デバッグログ
+  };
+
+  const adjustBreakTime = (currentBreakTime: string, adjustment: number): string => {
+    const breakTime = Math.max(0, Number(currentBreakTime) + adjustment); // 0未満にならないように調整
+    return String(breakTime); // 文字列として返す
   };
 
   //スケジュール編集を保存する関数
@@ -114,8 +127,15 @@ export const useWorkInfo = () => {
 
     const startTotalMinutes = startHour * 60 + startMinute;
     const endTotalMinutes = endHour * 60 + endMinute;
+    //console.log("startTotalMinutes", startTotalMinutes);
+    //console.log("endTotalMinutes", endTotalMinutes);
+    console.log("breakTime,計算用", breakTime);
 
-    const workingMinutes = endTotalMinutes - startTotalMinutes - breakTime;
+    // 休憩時間が 0 分の場合、開始時刻から終了時刻までの時間をそのまま計算
+    const workingMinutes = breakTime === 0
+      ? endTotalMinutes - startTotalMinutes -10
+      : endTotalMinutes - startTotalMinutes - breakTime;
+
     return {
       hours: Math.floor(workingMinutes / 60),
       minutes: workingMinutes % 60,
@@ -133,6 +153,10 @@ export const useWorkInfo = () => {
     }));
   };
 
+  useEffect(() => {
+    console.log("Updated workInfo.schedules:", workInfo.schedules);
+  }, [workInfo.schedules]);
+
   //スケジュールを削除する関数
   const removeSchedule = (index: number) => {
     const updatedSchedules = workInfo.schedules.filter((_, i) => i !== index);
@@ -148,6 +172,7 @@ export const useWorkInfo = () => {
 
     //休憩時間を計算
     let totalBreakTime = 0;
+
     for (let i = 0; i < periods.length - 1; i++) {
       const currentEnd = periodTimes[periods[i] as "1限" | "2限" | "3限" | "4限" | "5限" | "6限"].end;
       const nextStart = periodTimes[periods[i + 1] as "1限" | "2限" | "3限" | "4限" | "5限" | "6限"].start;
@@ -167,26 +192,26 @@ export const useWorkInfo = () => {
   const addWork = (workid: number) => {
     const updatedWorkData = workData.map((work) => {
       if (work.id === workid) {
-        // workid が一致する場合、入力内容でデータを更新
+        // 更新時の時間計算
+        const { startTime, endTime, breakTime } = calculateStartEndTimes(workInfo.schedules[0].periods);
+        const finalStartTime = workInfo.schedules[0].startTime || startTime;
+        const finalEndTime = workInfo.schedules[0].endTime || endTime;
+        const finalBreakTime = Number(workInfo.schedules[0].breakTime) || breakTime;
+
+        const { hours, minutes } = calculateWorkingTime(finalStartTime, finalEndTime, finalBreakTime);
+
         return {
           ...work,
+          label: workInfo.label,
           classname: workInfo.subject,
           category: workInfo.category,
           teacher: workInfo.teacher,
           dayofweek: workInfo.schedules[0].day, // 最初のスケジュールの曜日を使用
           schedule: workInfo.schedules[0].periods.map((period) => parseInt(period[0], 10)), // 時限を数値配列に変換
-          starttime: workInfo.schedules[0].startTime,
-          endtime: workInfo.schedules[0].endTime,
-          breaktime: Number(workInfo.schedules[0].breakTime),
-          worktime: `${calculateWorkingTime(
-            workInfo.schedules[0].startTime,
-            workInfo.schedules[0].endTime,
-            Number(workInfo.schedules[0].breakTime)
-          ).hours}時間${calculateWorkingTime(
-            workInfo.schedules[0].startTime,
-            workInfo.schedules[0].endTime,
-            Number(workInfo.schedules[0].breakTime)
-          ).minutes}分`,
+          starttime: finalStartTime,
+          endtime: finalEndTime,
+          breaktime: finalBreakTime,
+          worktime: `${hours}時間${minutes}分`, // 実働時間を計算して更新
         };
       }
       return work; // 一致しない場合はそのまま
@@ -196,23 +221,24 @@ export const useWorkInfo = () => {
     if (!workData.some((work) => work.id === workid)) {
       const newWorkData = workInfo.schedules.map((schedule) => {
         const { startTime, endTime, breakTime } = calculateStartEndTimes(schedule.periods);
-        const { hours, minutes } = calculateWorkingTime(
-          schedule.startTime || startTime,
-          schedule.endTime || endTime,
-          Number(schedule.breakTime) || breakTime
-        );
+        const finalStartTime = schedule.startTime || startTime;
+        const finalEndTime = schedule.endTime || endTime;
+        const finalBreakTime = Number(schedule.breakTime) || breakTime;
+
+        const { hours, minutes } = calculateWorkingTime(finalStartTime, finalEndTime, finalBreakTime);
 
         return {
           id: workid,
+          label: workInfo.label,
           classname: workInfo.subject,
           category: workInfo.category,
           teacher: workInfo.teacher,
           dayofweek: schedule.day,
           schedule: schedule.periods.map((period) => parseInt(period[0], 10)),
-          starttime: schedule.startTime || startTime,
-          endtime: schedule.endTime || endTime,
-          breaktime: Number(schedule.breakTime) || breakTime,
-          worktime: `${hours}時間${minutes}分`,
+          starttime: finalStartTime,
+          endtime: finalEndTime,
+          breaktime: finalBreakTime,
+          worktime: `${hours}時間${minutes}分`, // 実働時間を計算して設定
         };
       });
 
@@ -225,15 +251,7 @@ export const useWorkInfo = () => {
     localStorage.setItem("workData", JSON.stringify(updatedWorkData));
 
     // 業務情報を初期化
-    setWorkInfo({
-      subject: "",
-      category: "準備等", // 初期値をリセット
-      schedules: [{ day: "月曜日", periods: ["1限"], startTime: "", endTime: "", breakTime: "" }],
-      startTime: "",
-      endTime: "",
-      breakTime: "",
-      teacher: "",
-    });
+    initworkInfo();
     setIsDialogOpen(false);
   };
 
@@ -266,6 +284,20 @@ export const useWorkInfo = () => {
     return id;
   };
 
+  //業務情報を初期化する関数
+  const initworkInfo = () => {
+    setWorkInfo({
+      label: "",
+      subject: "",
+      category: "準備等", // 初期値をリセット
+      schedules: [{ day: "月曜日", periods: ["1限"], startTime: "", endTime: "", breakTime: "" }],
+      startTime: "",
+      endTime: "",
+      breakTime: "",
+      teacher: "",
+    });
+  };
+
   //フックが返すオブジェクト
   return {
     workInfo, //業務情報の状態
@@ -291,5 +323,6 @@ export const useWorkInfo = () => {
     loadWorkDataFromLocalStorage, //ローカルストレージから業務データを読み込む関数
     periodTimes, //時限ごとの開始時刻と終了時刻
     generateUniqueId, //ユニークなIDを生成する関数
+    initworkInfo, //業務情報を初期化する関数
   };
 };

@@ -35,7 +35,8 @@ export default function Work() {
     addWork,
     handleDeleteWork,
     loadWorkDataFromLocalStorage,
-    generateUniqueId
+    generateUniqueId,
+    initworkInfo
   } = useWorkInfo();
 
   const [id, setId] = useState<number>(100);
@@ -45,6 +46,7 @@ export default function Work() {
   useEffect(() => {
     loadUserInfoFromLocalStorage();
     loadWorkDataFromLocalStorage();
+    initworkInfo();
   }, []);
 
   return (
@@ -149,6 +151,7 @@ export default function Work() {
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex-1">
+                      <p className="text-lg font-bold text-gray-800">ラベル: {work.label}</p>
                       <p className="text-sm font-bold text-gray-800">科目名: {work.classname}</p>
                       <p className="text-sm text-gray-600">業務内容: {work.category}</p>
                       <p className="text-sm text-gray-600">教員名: {work.teacher}</p>
@@ -233,6 +236,7 @@ export default function Work() {
           calculateStartEndTimes={calculateStartEndTimes}
           calculateWorkingTime={calculateWorkingTime}
           addWork={() => addWork(id)}
+          initworkInfo={initworkInfo}
           editingIndex={editingIndex}
           setEditingIndex={setEditingIndex}
           saveScheduleTimeEdit={saveScheduleTimeEdit}

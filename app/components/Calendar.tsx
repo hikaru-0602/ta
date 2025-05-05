@@ -288,7 +288,7 @@ export default function Calendar() {
                 )
                 .map((shift, index) => (
                   <li key={index} className="mb-2 flex justify-between">
-                    {shift.starttime}~{shift.endtime} {shift.classname}
+                    {shift.starttime}~{shift.endtime} {shift.label}
                     <button
                       onClick={() => handleRemoveShift(shift.id, shift.month, shift.day)} // 正しい引数を渡す
                       className="ml-2 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
@@ -315,7 +315,7 @@ export default function Calendar() {
                 )
                 .map((work, index) => (
                   <li key={index} className="mb-2 flex justify-between">
-                    {work.starttime}~{work.endtime} {work.classname}
+                    {work.starttime}~{work.endtime} {work.label}
                     <button
                       onClick={() => handleAddShift(work)}
                       className="ml-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"

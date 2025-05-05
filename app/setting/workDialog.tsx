@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 interface WorkDialogProps {
   isDialogOpen: boolean;
   workInfo: {
+    label: string;
     subject: string;
     category: string;
     teacher: string;
@@ -16,6 +17,7 @@ interface WorkDialogProps {
   };
   workData: {
     id: number; //業務ID
+    label: string; //ラベル名
     classname: string; //科目名
     category: string; //業務内容
     teacher: string; //担当教員
@@ -35,6 +37,7 @@ interface WorkDialogProps {
   calculateStartEndTimes: (periods: string[]) => { startTime: string; endTime: string; breakTime: number };
   calculateWorkingTime: (startTime: string, endTime: string, breakTime: number) => { hours: number; minutes: number };
   addWork: (workid: number) => void;
+  initworkInfo: () => void;
   editingIndex: number | null;
   setEditingIndex: (index: number | null) => void;
   saveScheduleTimeEdit: () => void;
@@ -49,18 +52,31 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
   setIsDialogOpen,
   handleWorkChange,
   handleScheduleChange,
+  handleScheduleTimeEdit,
   addSchedule,
   removeSchedule,
   calculateStartEndTimes,
   calculateWorkingTime,
   addWork,
   setEditingIndex,
+  initworkInfo,
 }) => {
   if (!isDialogOpen) return null;
 
   const checkWorkIdExists = () => {
     const exists = workData.some((work) => work.id === workid);
     return exists ? true : false; // workidが存在する場合はtrueを返す
+  };
+
+  const adjustTime = (time: string, adjustment: number): string => {
+    const [hour, minute] = time.split(":").map(Number);
+    const totalMinutes = hour * 60 + minute + adjustment;
+
+    const adjustedHour = Math.floor(totalMinutes / 60);
+    const adjustedMinute = totalMinutes % 60;
+
+    // 時間を "HH:MM" フォーマットで返す
+    return `${String(adjustedHour).padStart(2, "0")}:${String(adjustedMinute).padStart(2, "0")}`;
   };
 
   // workInfoを更新するuseEffect
@@ -70,6 +86,12 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
       if (existingWork) {
         // workInfoを更新
         setEditingIndex(workid); // 編集中のインデックスを設定
+        handleWorkChange({
+          target: {
+            name: "label",
+            value: existingWork.label,
+          },
+        } as React.ChangeEvent<HTMLInputElement>);
         handleWorkChange({
           target: {
             name: "subject",
@@ -88,6 +110,8 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
             value: existingWork.teacher,
           },
         } as React.ChangeEvent<HTMLInputElement>);
+        handleScheduleChange(0, "day", existingWork.dayofweek);
+        handleScheduleChange(0, "periods", existingWork.schedule.map((period) => `${period}限`));
       }
     }
   }, [workid, workData, isDialogOpen]); // workid, workData, isDialogOpenが変更されたときに実行
@@ -102,6 +126,16 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
         <h2 className="text-xl font-bold mb-4 text-center">
           {checkWorkIdExists() ? "編集" : "仕事を追加"}
         </h2>
+        <div>
+          <label className="block mb-1 font-medium">ラベル名</label>
+          <input
+            type="text"
+            name="label"
+            value={workInfo.label || ""}
+            onChange={handleWorkChange}
+            className="w-full p-2 border rounded"
+          />
+        </div>
         <div className="space-y-4">
           <div>
             <label className="block mb-1 font-medium">科目名</label>
@@ -190,9 +224,88 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                   </button>
                 </div>
                 <div className="text-sm text-gray-600">
-                  <p>開始時間: {schedule.startTime || startTime}</p>
-                  <p>終了時間: {schedule.endTime || endTime}</p>
-                  <p>休憩時間: {schedule.breakTime || breakTime}分</p>
+                  <div className="flex items-center space-x-2">
+                    <p>開始時間: {schedule.startTime || startTime}</p>
+                    <button
+                      onClick={() =>
+                        handleScheduleTimeEdit(
+                          index,
+                          "startTime",
+                          adjustTime(schedule.startTime || startTime, -10)
+                        )
+                      }
+                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                    >
+                      -10分
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleScheduleTimeEdit(
+                          index,
+                          "startTime",
+                          adjustTime(schedule.startTime || startTime, 10)
+                        )
+                      }
+                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                    >
+                      +10分
+                    </button>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <p>終了時間: {schedule.endTime || endTime}</p>
+                    <button
+                      onClick={() =>
+                        handleScheduleTimeEdit(
+                          index,
+                          "endTime",
+                          adjustTime(schedule.endTime || endTime, -10)
+                        )
+                      }
+                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                    >
+                      -10分
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleScheduleTimeEdit(
+                          index,
+                          "endTime",
+                          adjustTime(schedule.endTime || endTime, 10)
+                        )
+                      }
+                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                    >
+                      +10分
+                    </button>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <p>休憩時間: {schedule.breakTime || breakTime}分</p>
+                    <button
+                      onClick={() => {
+                        handleScheduleTimeEdit(
+                          index,
+                          "breakTime",
+                          String(Math.max(0, Number(schedule.breakTime || breakTime) - 10))
+                        );
+                        console.log("breakTimeaaa", String(Math.max(0, Number(schedule.breakTime || breakTime) - 10)));
+                      }}
+                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                    >
+                      -10分
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleScheduleTimeEdit(
+                          index,
+                          "breakTime",
+                          `${Number(schedule.breakTime || breakTime) + 10}`
+                        )
+                      }
+                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                    >
+                      +10分
+                    </button>
+                  </div>
                   <p>
                     実働時間: {hours}時間{minutes}分
                   </p>
@@ -206,7 +319,10 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
         </div>
         <div className="flex justify-end mt-4 space-x-2">
           <button
-            onClick={() => setIsDialogOpen(false)}
+            onClick={() => {
+              setIsDialogOpen(false);
+              initworkInfo();
+            }}
             className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
           >
             キャンセル
