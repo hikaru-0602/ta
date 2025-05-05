@@ -1,10 +1,10 @@
 "use client";
 
-import Header from "../components/Header";
+import Header from "../components/header";
 import { useState, useEffect } from "react";
-import { useUserInfo } from "./user";
-import { useWorkInfo } from "./work";
-import WorkDialog from "./workDialog";
+import { useUserInfo } from "./user_setting";
+import { useWorkInfo } from "./work_setting";
+import WorkDialog from "./work_dialog";
 
 export default function Work() {
   //ユーザ情報のカスタムフックを使用

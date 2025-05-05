@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import holidays from "../../data/holidays.json";
-import AddShiftDialog, { handleAddShift, handleRemoveShift } from "./AddShiftDialog";
-import EditShiftDialog, {handleEditShift, handleSaveEditedShift} from "./EditShiftDialog";
-import ExportDialog, {handleCloseExportDialog, handleExportSubject} from "./ExportDialog";
-import { getYearAndMonth } from "./ExcelData";
+import AddShiftDialog, { handleAddShift, handleRemoveShift } from "./add_shift_dialog";
+import EditShiftDialog, {handleEditShift, handleSaveEditedShift} from "./edit_shift_dialog";
+import ExportDialog, {handleCloseExportDialog, handleExportSubject} from "./export_dialog";
+import { getYearAndMonth } from "./excel_data";
 
 export default function Calendar() {
   const today = new Date();

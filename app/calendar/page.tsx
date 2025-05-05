@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Header from "./components/header";
-import Calendar from "./calendar/calendar";
-import Page from "./calendar/page";
+import Header from "../components/header";
+import Calendar from "./calendar";
 
 export default function Home() {
   const [workData, setWorkData] = useState<any[]>([]);
@@ -24,7 +23,7 @@ export default function Home() {
     <>
       <Header />
       <div className="flex flex-col items-center justify-center min-h-screen p-8 mt-16">
-        <Page />
+        <Calendar />
       </div>
     </>
   );

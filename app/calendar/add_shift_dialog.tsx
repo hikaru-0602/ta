@@ -1,94 +1,105 @@
 import React from "react";
 
+//時間をDateオブジェクトに変換する関数
 export const parseTime = (time: string): Date => {
-  const [hours, minutes] = time.split(":").map(Number);
-  const date = new Date();
-  date.setHours(hours, minutes, 0, 0);
-  return date;
+  const [hours, minutes] = time.split(":").map(Number); //時間と分を分割して数値に変換
+  const date = new Date(); //現在の日付を基準に新しいDateオブジェクトを作成
+  date.setHours(hours, minutes, 0, 0); //時間と分を設定
+  return date; //変換したDateオブジェクトを返す
 };
 
+//シフトを追加する関数
 export const handleAddShift = (
-  work: any,
-  selectedDate: Date | null,
-  shiftData: any[],
-  setShiftData: Function,
-  saveShiftsToLocalStorage: Function
+  work: any, //追加するシフトデータ
+  selectedDate: Date | null, //選択された日付
+  shiftData: any[], //既存のシフトデータ
+  setShiftData: Function, //シフトデータを更新する関数
+  saveShiftsToLocalStorage: Function //シフトデータをlocalStorageに保存する関数
 ) => {
-  if (!selectedDate) return;
+  if (!selectedDate) return; //日付が選択されていない場合は処理を終了
 
+  //選択された日付のシフトを取得
   const shiftsForDate = shiftData.filter(
     (shift) =>
       shift.month === selectedDate.getMonth() + 1 &&
       shift.day === selectedDate.getDate()
   );
 
+  //新しいシフトが既存のシフトと時間が重複しているか確認
   const isOverlapping = shiftsForDate.some((shift) => {
-    const newStart = parseTime(work.starttime);
-    const newEnd = parseTime(work.endtime);
-    const existingStart = parseTime(shift.starttime);
-    const existingEnd = parseTime(shift.endtime);
+    const newStart = parseTime(work.starttime); //新しいシフトの開始時間
+    const newEnd = parseTime(work.endtime); //新しいシフトの終了時間
+    const existingStart = parseTime(shift.starttime); //既存シフトの開始時間
+    const existingEnd = parseTime(shift.endtime); //既存シフトの終了時間
 
+    //時間が重複しているか判定
     return (
-      (newStart >= existingStart && newStart < existingEnd) ||
-      (newEnd > existingStart && newEnd <= existingEnd) ||
-      (newStart <= existingStart && newEnd >= existingEnd)
+      (newStart >= existingStart && newStart < existingEnd) || //新しい開始時間が既存の範囲内
+      (newEnd > existingStart && newEnd <= existingEnd) || //新しい終了時間が既存の範囲内
+      (newStart <= existingStart && newEnd >= existingEnd) //新しいシフトが既存の範囲を完全に包含
     );
   });
 
   if (isOverlapping) {
-    alert("このシフトは既存のシフトと時間が重複しています。");
-    return;
+    alert("このシフトは既存のシフトと時間が重複しています。"); //重複している場合はアラートを表示
+    return; //処理を終了
   }
 
+  //1日のシフト数が2件以上の場合はエラー
   const shiftCountForDate = shiftsForDate.length;
   if (shiftCountForDate >= 2) {
-    alert("働き過ぎ");
-    return;
+    alert("働き過ぎ"); //エラーを表示
+    return; //処理を終了
   }
 
+  //新しいシフトデータを作成
   const newShift = {
-    ...work,
-    month: selectedDate.getMonth() + 1,
-    day: selectedDate.getDate(),
+    ...work, //既存のデータをコピー
+    month: selectedDate.getMonth() + 1, //月を設定
+    day: selectedDate.getDate(), //日を設定
   };
 
+  //シフトデータを更新
   const updatedShifts = [...shiftData, newShift];
-  setShiftData(updatedShifts);
-  saveShiftsToLocalStorage(updatedShifts);
+  setShiftData(updatedShifts); //状態を更新
+  saveShiftsToLocalStorage(updatedShifts); //localStorageに保存
 };
 
+//シフトを削除する関数
 export const handleRemoveShift = (
-  id: string,
-  month: number,
-  day: number,
-  shiftData: any[],
-  setShiftData: Function,
-  saveShiftsToLocalStorage: Function
+  id: string, //削除するシフトのID
+  month: number, //削除するシフトの月
+  day: number, //削除するシフトの日
+  shiftData: any[], //既存のシフトデータ
+  setShiftData: Function, //シフトデータを更新する関数
+  saveShiftsToLocalStorage: Function //シフトデータをlocalStorageに保存する関数
 ) => {
+  //指定されたシフトを除外した新しいシフトデータを作成
   const updatedShifts = shiftData.filter(
     (shift) => !(shift.id === id && shift.month === month && shift.day === day)
   );
 
-  setShiftData(updatedShifts);
-  saveShiftsToLocalStorage(updatedShifts);
+  setShiftData(updatedShifts); //状態を更新
+  saveShiftsToLocalStorage(updatedShifts); //localStorageに保存
 };
 
+//AddShiftDialogコンポーネント
 export default function AddShiftDialog({
-  isDialogOpen,
-  selectedDate,
-  shiftData,
-  filteredWorkData,
-  handleAddShift,
-  handleEditShift,
-  handleRemoveShift,
-  closeDialog,
-  setShiftData,
-  saveShiftsToLocalStorage,
-  setEditingShift,
-  setIsEditDialogOpen,
+  isDialogOpen, //ダイアログが開いているかどうかの状態
+  selectedDate, //選択された日付
+  shiftData, //既存のシフトデータ
+  filteredWorkData, //フィルタリングされた業務データ
+  handleAddShift, //シフトを追加する関数
+  handleEditShift, //シフトを編集する関数
+  handleRemoveShift, //シフトを削除する関数
+  closeDialog, //ダイアログを閉じる関数
+  setShiftData, //シフトデータを更新する関数
+  saveShiftsToLocalStorage, //シフトデータをlocalStorageに保存する関数
+  setEditingShift, //編集対象のシフトを設定する関数
+  setIsEditDialogOpen, //編集ダイアログを開く関数
 }: any) {
   return (
-    isDialogOpen && (
+    isDialogOpen && ( //ダイアログが開いている場合のみ表示
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
         <div className="bg-white dark:bg-gray-800 p-6 rounded shadow-lg max-w-md w-full">
           <h2 className="text-xl font-bold mb-4">仕事リスト</h2>
