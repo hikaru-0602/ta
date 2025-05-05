@@ -31,10 +31,16 @@ export default function Header() {
             勤務表
           </Link>
           <Link
-            href="/work"
+            href="/setting"
             className="block px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-800 rounded"
           >
             仕事
+          </Link>
+          <Link
+            href="/test"
+            className="block px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-800 rounded"
+          >
+            勤務表エクスポート
           </Link>
         </nav>
       </div>
