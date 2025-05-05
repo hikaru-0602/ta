@@ -19,23 +19,27 @@ export default function Work() {
   //仕事情報のカスタムフックを使用
   const {
     workInfo,
-      workData,
-      isDialogOpen,
-      setIsDialogOpen,
-      editingIndex,
-      setEditingIndex,
-      handleWorkChange,
-      handleScheduleChange,
-      handleScheduleTimeEdit,
-      saveScheduleTimeEdit,
-      addSchedule,
-      removeSchedule,
-      calculateWorkingTime,
-      calculateStartEndTimes,
-      addWork,
-      handleDeleteWork,
-      loadWorkDataFromLocalStorage,
+    workData,
+    isDialogOpen,
+    setIsDialogOpen,
+    editingIndex,
+    setEditingIndex,
+    handleWorkChange,
+    handleScheduleChange,
+    handleScheduleTimeEdit,
+    saveScheduleTimeEdit,
+    addSchedule,
+    removeSchedule,
+    calculateWorkingTime,
+    calculateStartEndTimes,
+    addWork,
+    handleDeleteWork,
+    loadWorkDataFromLocalStorage,
+    generateUniqueId
   } = useWorkInfo();
+
+  const [id, setId] = useState<number>(100);
+  //const [id, setId] = useState<number | null>(null);
 
   //初期化時にローカルストレージからデータを読み込む
   useEffect(() => {
@@ -50,7 +54,10 @@ export default function Work() {
         <h1 className="text-3xl font-extrabold mb-6 text-gray-800 tracking-wide mt-16">
           仕事情報入力
         </h1>
-        <form className="w-full max-w-2xl space-y-8">
+        <form
+          className="w-full max-w-2xl space-y-8"
+          onSubmit={(e) => e.preventDefault()} // デフォルト動作を防ぐ
+        >
           {/* ユーザ情報 */}
           <div className="space-y-6 bg-white p-8 rounded-lg shadow-xl border border-gray-200">
             <h2 className="text-2xl font-semibold text-gray-800 border-b pb-4">
@@ -154,6 +161,17 @@ export default function Work() {
                       <p className="text-sm text-gray-600">実働: {work.worktime}</p>
                     </div>
                     <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        //alert("くりっくされた");
+                        //alert(`業務ID: ${work.id}`);
+                        setId(work.id);
+                        setIsDialogOpen(true);
+                      }}
+                    >
+                      編集
+                    </button>
+                    <button
                       onClick={() => handleDeleteWork(index)}
                       className="text-red-500 hover:text-red-700 ml-4"
                     >
@@ -181,7 +199,12 @@ export default function Work() {
 
         {/* 仕事追加ボタン */}
         <button
-          onClick={() => setIsDialogOpen(true)}
+          onClick={(e) => {
+            e.preventDefault();
+            const uniqueId = generateUniqueId();
+            setId(uniqueId);
+            setIsDialogOpen(true);
+          }}
           className="fixed bottom-8 right-8 bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-4 rounded-full shadow-lg hover:from-blue-600 hover:to-indigo-600 transition"
         >
           仕事追加
@@ -199,6 +222,8 @@ export default function Work() {
         <WorkDialog
           isDialogOpen={isDialogOpen}
           workInfo={workInfo}
+          workData={workData}
+          workid={id}
           setIsDialogOpen={setIsDialogOpen}
           handleWorkChange={handleWorkChange}
           handleScheduleChange={handleScheduleChange}
@@ -207,7 +232,7 @@ export default function Work() {
           removeSchedule={removeSchedule}
           calculateStartEndTimes={calculateStartEndTimes}
           calculateWorkingTime={calculateWorkingTime}
-          addWork={addWork}
+          addWork={() => addWork(id)}
           editingIndex={editingIndex}
           setEditingIndex={setEditingIndex}
           saveScheduleTimeEdit={saveScheduleTimeEdit}

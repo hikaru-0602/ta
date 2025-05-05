@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 interface WorkDialogProps {
   isDialogOpen: boolean;
@@ -14,6 +14,18 @@ interface WorkDialogProps {
       breakTime: string;
     }[];
   };
+  workData: {
+    id: number; //業務ID
+    classname: string; //科目名
+    category: string; //業務内容
+    teacher: string; //担当教員
+    dayofweek: string; //曜日
+    schedule: number[]; //時限（数値配列）
+    starttime: string; //開始時刻
+    endtime: string; //終了時刻
+    breaktime: number;
+    worktime: string;
+  }[];
   setIsDialogOpen: (open: boolean) => void;
   handleWorkChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   handleScheduleChange: (index: number, field: "day" | "periods", value: string | string[]) => void;
@@ -22,34 +34,74 @@ interface WorkDialogProps {
   removeSchedule: (index: number) => void;
   calculateStartEndTimes: (periods: string[]) => { startTime: string; endTime: string; breakTime: number };
   calculateWorkingTime: (startTime: string, endTime: string, breakTime: number) => { hours: number; minutes: number };
-  addWork: () => void;
+  addWork: (workid: number) => void;
   editingIndex: number | null;
   setEditingIndex: (index: number | null) => void;
   saveScheduleTimeEdit: () => void;
+  workid: number;
 }
 
 const WorkDialog: React.FC<WorkDialogProps> = ({
   isDialogOpen,
   workInfo,
+  workData,
+  workid,
   setIsDialogOpen,
   handleWorkChange,
   handleScheduleChange,
-  handleScheduleTimeEdit,
   addSchedule,
   removeSchedule,
   calculateStartEndTimes,
   calculateWorkingTime,
   addWork,
-  editingIndex,
   setEditingIndex,
-  saveScheduleTimeEdit,
 }) => {
   if (!isDialogOpen) return null;
+
+  const checkWorkIdExists = () => {
+    const exists = workData.some((work) => work.id === workid);
+    return exists ? true : false; // workidが存在する場合はtrueを返す
+  };
+
+  // workInfoを更新するuseEffect
+  useEffect(() => {
+    if (checkWorkIdExists()) {
+      const existingWork = workData.find((work) => work.id === workid);
+      if (existingWork) {
+        // workInfoを更新
+        setEditingIndex(workid); // 編集中のインデックスを設定
+        handleWorkChange({
+          target: {
+            name: "subject",
+            value: existingWork.classname,
+          },
+        } as React.ChangeEvent<HTMLInputElement>);
+        handleWorkChange({
+          target: {
+            name: "category",
+            value: existingWork.category,
+          },
+        } as React.ChangeEvent<HTMLSelectElement>);
+        handleWorkChange({
+          target: {
+            name: "teacher",
+            value: existingWork.teacher,
+          },
+        } as React.ChangeEvent<HTMLInputElement>);
+      }
+    }
+  }, [workid, workData, isDialogOpen]); // workid, workData, isDialogOpenが変更されたときに実行
+
+  useEffect(() => {
+    //alert(isDialogOpen ? "ダイアログが開きました" : "ダイアログが閉じました");
+  }, [isDialogOpen]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4">仕事を追加</h2>
+        <h2 className="text-xl font-bold mb-4 text-center">
+          {checkWorkIdExists() ? "編集" : "仕事を追加"}
+        </h2>
         <div className="space-y-4">
           <div>
             <label className="block mb-1 font-medium">科目名</label>
@@ -160,10 +212,10 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
             キャンセル
           </button>
           <button
-            onClick={addWork}
+            onClick={() => addWork(workid)}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
-            登録
+            {checkWorkIdExists() ? "更新" : "登録"}
           </button>
         </div>
       </div>

@@ -24,7 +24,7 @@ export const useWorkInfo = () => {
   //登録された業務データを管理するための状態を定義
   const [workData, setWorkData] = useState<
     {
-      id: number; //ID
+      id: number; //業務ID
       classname: string; //科目名
       category: string; //業務内容
       teacher: string; //担当教員
@@ -69,16 +69,24 @@ export const useWorkInfo = () => {
     value: string | string[]
   ) => {
     const updatedSchedules = [...workInfo.schedules];
+
+    // indexが有効かどうかを確認
+    if (!updatedSchedules[index]) {
+      console.error(`Invalid index: ${index}`);
+      return;
+    }
+
     if (field === "day" && typeof value === "string") {
       updatedSchedules[index][field] = value;
     } else if (field === "periods" && Array.isArray(value)) {
-      //時限を並び替える処理
+      // 時限を並び替える処理
       const sortedPeriods = value.sort((a, b) => {
         const periodOrder = ["1限", "2限", "3限", "4限", "5限", "6限"];
         return periodOrder.indexOf(a) - periodOrder.indexOf(b);
       });
       updatedSchedules[index][field] = sortedPeriods;
     }
+
     setWorkInfo((prev) => ({ ...prev, schedules: updatedSchedules }));
   };
 
@@ -155,48 +163,71 @@ export const useWorkInfo = () => {
     return { startTime, endTime, breakTime: totalBreakTime };
   };
 
-  //新しい業務を追加する関数
-  const addWork = () => {
-    const generateUniqueId = () => {
-      let id: number;
-      do {
-        id = Math.floor(100 + Math.random() * 900); //100〜999のランダムな3桁の数字を生成
-      } while (workData.some((work) => work.id === id)); //重複がないか確認
-      return id;
-    };
-
-    const newWorkData = workInfo.schedules.map((schedule) => {
-      const { startTime, endTime, breakTime } = calculateStartEndTimes(schedule.periods);
-      const { hours, minutes } = calculateWorkingTime(
-        schedule.startTime || startTime,
-        schedule.endTime || endTime,
-        Number(schedule.breakTime) || breakTime
-      );
-
-      return {
-        id: generateUniqueId(),
-        classname: workInfo.subject,
-        category: workInfo.category, //業務内容
-        teacher: workInfo.teacher,
-        dayofweek: schedule.day,
-        schedule: schedule.periods.map((period) => parseInt(period[0], 10)),
-        starttime: schedule.startTime || startTime,
-        endtime: schedule.endTime || endTime,
-        breaktime: Number(schedule.breakTime) || breakTime,
-        worktime: `${hours}時間${minutes}分`,
-      };
+  //新しい業務を追加または更新する関数
+  const addWork = (workid: number) => {
+    const updatedWorkData = workData.map((work) => {
+      if (work.id === workid) {
+        // workid が一致する場合、入力内容でデータを更新
+        return {
+          ...work,
+          classname: workInfo.subject,
+          category: workInfo.category,
+          teacher: workInfo.teacher,
+          dayofweek: workInfo.schedules[0].day, // 最初のスケジュールの曜日を使用
+          schedule: workInfo.schedules[0].periods.map((period) => parseInt(period[0], 10)), // 時限を数値配列に変換
+          starttime: workInfo.schedules[0].startTime,
+          endtime: workInfo.schedules[0].endTime,
+          breaktime: Number(workInfo.schedules[0].breakTime),
+          worktime: `${calculateWorkingTime(
+            workInfo.schedules[0].startTime,
+            workInfo.schedules[0].endTime,
+            Number(workInfo.schedules[0].breakTime)
+          ).hours}時間${calculateWorkingTime(
+            workInfo.schedules[0].startTime,
+            workInfo.schedules[0].endTime,
+            Number(workInfo.schedules[0].breakTime)
+          ).minutes}分`,
+        };
+      }
+      return work; // 一致しない場合はそのまま
     });
 
-    const updatedWorkData = [...workData, ...newWorkData];
+    // 新しいデータを追加する場合
+    if (!workData.some((work) => work.id === workid)) {
+      const newWorkData = workInfo.schedules.map((schedule) => {
+        const { startTime, endTime, breakTime } = calculateStartEndTimes(schedule.periods);
+        const { hours, minutes } = calculateWorkingTime(
+          schedule.startTime || startTime,
+          schedule.endTime || endTime,
+          Number(schedule.breakTime) || breakTime
+        );
+
+        return {
+          id: workid,
+          classname: workInfo.subject,
+          category: workInfo.category,
+          teacher: workInfo.teacher,
+          dayofweek: schedule.day,
+          schedule: schedule.periods.map((period) => parseInt(period[0], 10)),
+          starttime: schedule.startTime || startTime,
+          endtime: schedule.endTime || endTime,
+          breaktime: Number(schedule.breakTime) || breakTime,
+          worktime: `${hours}時間${minutes}分`,
+        };
+      });
+
+      updatedWorkData.push(...newWorkData);
+    }
+
     setWorkData(updatedWorkData);
 
-    //ローカルストレージに保存
+    // ローカルストレージに保存
     localStorage.setItem("workData", JSON.stringify(updatedWorkData));
 
-    //業務情報を初期化
+    // 業務情報を初期化
     setWorkInfo({
       subject: "",
-      category: "準備等", //初期値をリセット
+      category: "準備等", // 初期値をリセット
       schedules: [{ day: "月曜日", periods: ["1限"], startTime: "", endTime: "", breakTime: "" }],
       startTime: "",
       endTime: "",
@@ -226,6 +257,15 @@ export const useWorkInfo = () => {
     }
   };
 
+  //idを生成する関数
+  const generateUniqueId = () => {
+    let id: number;
+    do {
+      id = Math.floor(100 + Math.random() * 900); //100〜999のランダムな3桁の数字を生成
+    } while (workData.some((work) => work.id === id)); //重複がないか確認
+    return id;
+  };
+
   //フックが返すオブジェクト
   return {
     workInfo, //業務情報の状態
@@ -246,9 +286,10 @@ export const useWorkInfo = () => {
     removeSchedule, //スケジュールを削除する関数
     calculateWorkingTime, //勤務時間を計算する関数
     calculateStartEndTimes, //時限から開始時刻、終了時刻、休憩時間を計算する関数
-    addWork, //新しい業務を追加する関数
+    addWork, //新しい業務を追加または更新する関数
     handleDeleteWork, //業務データを削除する関数
     loadWorkDataFromLocalStorage, //ローカルストレージから業務データを読み込む関数
     periodTimes, //時限ごとの開始時刻と終了時刻
+    generateUniqueId, //ユニークなIDを生成する関数
   };
 };
