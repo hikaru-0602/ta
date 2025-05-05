@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Header from "./components/Header";
-import Calendar from "./components/Calendar";
+import Calendar from "./calendar/Calendar";
 
 export default function Home() {
   const [workData, setWorkData] = useState<any[]>([]);
@@ -22,7 +22,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <div className="flex flex-col items-center justify-center min-h-screen p-8">
+      <div className="flex flex-col items-center justify-center min-h-screen p-8 mt-16">
         <Calendar />
       </div>
     </>

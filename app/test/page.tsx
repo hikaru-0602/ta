@@ -121,6 +121,7 @@ const ExportPage = () => {
     }
   };
 
+  // 最初のセルが '1' の行を置き換える関数
   const handleReplaceFirstRowWithOne = async () => {
     try {
       const file = fileInputRef.current?.files?.[0];
@@ -143,7 +144,6 @@ const ExportPage = () => {
 
       worksheet.eachRow((row, rowIndex) => {
         if (replaced) return; // 最初の一回のみ処理
-
         const firstCellValue = row.getCell(1).value; // 行の1つ目のセルの値を取得
         if (firstCellValue === 1) {
           // 置き換えるデータ
@@ -284,6 +284,113 @@ const ExportPage = () => {
     }
   };
 
+  // 指定した行を置き換え、スタイルを保持する関数
+  const handleReplaceRowWithStyle = async () => {
+    try {
+      const file = fileInputRef.current?.files?.[0];
+      if (!file) {
+        alert("ファイルが選択されていません。");
+        return;
+      }
+
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+
+      const worksheet = workbook.getWorksheet("実施報告書"); // シート名で取得
+      if (!worksheet) {
+        alert("指定されたシートが見つかりません。");
+        return;
+      }
+
+      // 置き換えるデータ
+      const replacementData = [
+        1,
+        "システム管理方法論",
+        "システム管理方法論",
+        "システム管理方法論",
+        "(授業)",
+        13,
+        ":",
+        10,
+        "～",
+        15,
+        ":",
+        20,
+        { formula: 'CEILING(ROUND(((TIME(J13,L13,0)-TIME(F13,H13,0))*24-N13/60),3),0.5)', result: 2, ref: 'M13', shareType: 'shared' },
+        10,
+        17,
+        "アルゴリズムとデータ構造",
+        "アルゴリズムとデータ構造",
+        "アルゴリズムとデータ構造",
+        "(授業)",
+        6,
+        ":",
+        10,
+        "～",
+        11,
+        ":",
+        5,
+        { formula: 'CEILING(ROUND(((TIME(X13,Z13,0)-TIME(T13,V13,0))*24-AB13/60),3),0.5)', result: 5, ref: 'AA13', shareType: 'shared' },
+        10,
+      ];
+
+      const dateArray = [
+        "令和7", // 1番目
+        "令和7", // 2番目
+        "年",
+        "",
+        "5", // 5番目に月を代入
+        "月分",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "プルダウン選択セル→",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "自由記述セル→",
+        "",
+      ];
+
+      // 指定した行を取得
+      //const rowToReplace = worksheet.getRow(rowNumber);
+      const rowToReplace = worksheet.getRow(11);
+      
+      dateArray.forEach((value, colIndex) => {
+        const cell = rowToReplace.getCell(colIndex + 1); // 列番号は1から始まる
+        const originalStyle = { ...cell.style }; // 元のスタイルを保持
+        cell.value = value; // セルの値を置き換え
+        cell.style = originalStyle; // 元のスタイルを再適用
+      });
+
+      rowToReplace.commit(); // 変更を確定
+
+      // 新しいExcelファイルとして保存
+      const newWorkbookBuffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([newWorkbookBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      saveAs(blob, "modified_excel_with_style.xlsx");
+
+      //alert(`${rowNumber}行目を置き換え、スタイルを保持したExcelファイルを保存しました。`);
+    } catch (error) {
+      //console.error("Excelファイルの処理に失敗しました:", error);
+      alert("Excelファイルの処理に失敗しました。");
+    }
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       <h1>Excel データ表示</h1>
@@ -305,6 +412,13 @@ const ExportPage = () => {
 </button>
       <button onClick={handleCheckCellStyle} style={{ marginBottom: "16px" }}>
   B31セルのスタイルを確認
+</button>
+
+<button
+  onClick={handleReplaceRowWithStyle}
+  style={{ padding: "8px 16px", backgroundColor: "#4CAF50", color: "white", border: "none", borderRadius: "4px", marginTop: "16px" }}
+>
+  11行目を置き換え（スタイル保持）
 </button>
     </div>
   );

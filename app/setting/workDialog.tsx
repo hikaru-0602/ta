@@ -112,6 +112,9 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
         } as React.ChangeEvent<HTMLInputElement>);
         handleScheduleChange(0, "day", existingWork.dayofweek);
         handleScheduleChange(0, "periods", existingWork.schedule.map((period) => `${period}限`));
+        handleScheduleTimeEdit(0, "startTime", existingWork.starttime);
+        handleScheduleTimeEdit(0, "endTime", existingWork.endtime);
+        handleScheduleTimeEdit(0, "breakTime", String(existingWork.breaktime));
       }
     }
   }, [workid, workData, isDialogOpen]); // workid, workData, isDialogOpenが変更されたときに実行
@@ -279,7 +282,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                     </button>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <p>休憩時間: {schedule.breakTime || breakTime}分</p>
+                    <p>休憩時間: {schedule.breakTime || 0}分</p>
                     <button
                       onClick={() => {
                         handleScheduleTimeEdit(

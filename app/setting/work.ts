@@ -103,7 +103,12 @@ export const useWorkInfo = () => {
     value: string
   ) => {
     const updatedSchedules = workInfo.schedules.map((schedule, i) =>
-      i === index ? { ...schedule, [field]: field === "breakTime" ? value : value} : schedule
+      i === index
+        ? {
+            ...schedule,
+            [field]: field === "breakTime" ? String(Math.max(0, Number(value))) : value,
+          }
+        : schedule
     );
     console.log(field, value, updatedSchedules); // デバッグログ
     setWorkInfo((prev) => ({ ...prev, schedules: updatedSchedules }));
@@ -124,18 +129,15 @@ export const useWorkInfo = () => {
   const calculateWorkingTime = (startTime: string, endTime: string, breakTime: number) => {
     const [startHour, startMinute] = startTime.split(":").map(Number);
     const [endHour, endMinute] = endTime.split(":").map(Number);
-
+  
     const startTotalMinutes = startHour * 60 + startMinute;
     const endTotalMinutes = endHour * 60 + endMinute;
-    //console.log("startTotalMinutes", startTotalMinutes);
-    //console.log("endTotalMinutes", endTotalMinutes);
-    console.log("breakTime,計算用", breakTime);
-
-    // 休憩時間が 0 分の場合、開始時刻から終了時刻までの時間をそのまま計算
-    const workingMinutes = breakTime === 0
-      ? endTotalMinutes - startTotalMinutes -10
-      : endTotalMinutes - startTotalMinutes - breakTime;
-
+  
+    const workingMinutes = Math.max(
+      0,
+      endTotalMinutes - startTotalMinutes - breakTime // 休憩時間が 0 の場合もそのまま計算
+    );
+  
     return {
       hours: Math.floor(workingMinutes / 60),
       minutes: workingMinutes % 60,
