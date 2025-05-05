@@ -180,27 +180,30 @@ export default function Calendar() {
       </div>
 
       {/* shiftData を表示するボタン */}
-      <button
+      {/*<button
         onClick={handleShowShiftData}
         className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
       >
         シフトデータを表示
-      </button>
+      </button>*/}
 
       {/* userInfo を表示するボタン */}
-      <button
+      {/*<button
         onClick={() => alert(JSON.stringify(userInfo, null, 2))} // userInfoをアラート表示
         className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
       >
         ユーザ情報を表示
-      </button>
+      </button>*/}
 
       {/* シフト出力ボタン */}
       <button
-        onClick={handleOpenExportDialog}
+        onClick={() => {
+          handleOpenExportDialog();
+          getYearAndMonth();
+        }}
         className="mt-4 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
       >
-        シフト出力
+        Excel出力
       </button>
 
       <button onClick={getYearAndMonth} style={{ marginBottom: "16px" }}>

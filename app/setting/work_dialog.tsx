@@ -158,8 +158,8 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
               onChange={handleWorkChange}
               className="w-full p-2 border rounded"
             >
-              <option value="準備等">準備等</option>
-              <option value="授業">授業</option>
+              <option value="(準備等)">(準備等)</option>
+              <option value="(授業)">(授業)</option>
             </select>
           </div>
           <div>

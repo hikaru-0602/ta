@@ -6,7 +6,7 @@ export const useWorkInfo = () => {
   const [workInfo, setWorkInfo] = useState({
     label: "", //仕事のラベル
     subject: "", //科目名
-    category: "準備等", //業務内容
+    category: "(準備等)", //業務内容
     schedules: [
       {
         day: "月", //曜日
@@ -129,15 +129,15 @@ export const useWorkInfo = () => {
   const calculateWorkingTime = (startTime: string, endTime: string, breakTime: number) => {
     const [startHour, startMinute] = startTime.split(":").map(Number);
     const [endHour, endMinute] = endTime.split(":").map(Number);
-  
+
     const startTotalMinutes = startHour * 60 + startMinute;
     const endTotalMinutes = endHour * 60 + endMinute;
-  
+
     const workingMinutes = Math.max(
       0,
-      endTotalMinutes - startTotalMinutes - breakTime // 休憩時間が 0 の場合もそのまま計算
+      endTotalMinutes - startTotalMinutes - breakTime //休憩時間が 0 の場合もそのまま計算
     );
-  
+
     return {
       hours: Math.floor(workingMinutes / 60),
       minutes: workingMinutes % 60,
@@ -291,7 +291,7 @@ export const useWorkInfo = () => {
     setWorkInfo({
       label: "",
       subject: "",
-      category: "準備等", // 初期値をリセット
+      category: "(準備等)", // 初期値をリセット
       schedules: [{ day: "月曜日", periods: ["1限"], startTime: "", endTime: "", breakTime: "" }],
       startTime: "",
       endTime: "",
