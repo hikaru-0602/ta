@@ -1,10 +1,9 @@
 ---
-name: issueのテンプレ
-about: issue作成のためのテンプレ
-title: ''
-labels: ''
-assignees: ''
-
+name: Issueのテンプレ
+about: Issue作成のためのテンプレ
+title: ""
+labels: ""
+assignees: ""
 ---
 
-##issueの概要
+## Issue の概要
