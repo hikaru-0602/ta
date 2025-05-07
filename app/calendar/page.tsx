@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Header from "../components/header";
-import Calendar from "./calendar";
+import Header from "../components/Header";
+import Calendar from "./Calendar";
 
 export default function Home() {
   const [workData, setWorkData] = useState<any[]>([]);
