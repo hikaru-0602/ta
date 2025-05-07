@@ -301,6 +301,18 @@ const ExportPage = () => {
         10,
       ];
 
+      const kanadata46 = [
+        "ふりがな", "ふりがな", "あああ", "あああ", "あああ", "あああ", "あああ", "あああ", "あああ", "あああ", "あああ", "あああ", "あああ", "あああ", "実働時間", "実働時間", "実働時間", "実働時間", "合計",
+        { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
+        { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
+        { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
+        { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
+        { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
+        { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
+        { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
+        "時間", null,
+      ];
+
       const dateArray = [
         "令和7", // 1番目
         "令和7", // 2番目
@@ -334,9 +346,9 @@ const ExportPage = () => {
 
       // 指定した行を取得
       //const rowToReplace = worksheet.getRow(rowNumber);
-      const rowToReplace = worksheet.getRow(11);
+      const rowToReplace = worksheet.getRow(46);
 
-      dateArray.forEach((value, colIndex) => {
+      kanadata46.forEach((value, colIndex) => {
         const cell = rowToReplace.getCell(colIndex + 1); // 列番号は1から始まる
         const originalStyle = { ...cell.style }; // 元のスタイルを保持
         cell.value = value; // セルの値を置き換え
@@ -445,7 +457,7 @@ const ExportPage = () => {
         const firstCellValue = row.getCell(1).value; // 行の1つ目のセルの値を取得
         const secondCellValue = row.getCell(2).value; // 行の2つ目のセルの値を取得
 
-        if (firstCellValue === 5 && secondCellValue === null) {
+        if (firstCellValue === 1 && secondCellValue === null) {
           // 条件に一致する場合、データを置き換える
           const replacementData = dataSetIndex === 0 ? dataSet1 : dataSet2;
 
@@ -465,6 +477,65 @@ const ExportPage = () => {
       const newWorkbookBuffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([newWorkbookBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       saveAs(blob, "modified_excel_with_two_datasets.xlsx");
+
+      alert("条件に一致する行を置き換えたExcelファイルを保存しました。");
+    } catch (error) {
+      console.error("Excelファイルの処理に失敗しました:", error);
+      alert("Excelファイルの処理に失敗しました。");
+    }
+  };
+
+  // 条件に一致する行をデータセットで置き換える関数
+  const handleReplaceRowsWithMatchingData = async (dataSets: Array<Array<any>>) => {
+    try {
+      const file = fileInputRef.current?.files?.[0];
+      if (!file) {
+        alert("ファイルが選択されていません。");
+        return;
+      }
+
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+
+      const worksheet = workbook.getWorksheet("実施報告書"); // シート名で取得
+      if (!worksheet) {
+        alert("指定されたシートが見つかりません。");
+        return;
+      }
+
+      let dataSetIndex = 0; // データセットのインデックスを追跡
+
+      worksheet.eachRow((row, rowIndex) => {
+        const firstCellValue = row.getCell(1).value; // 行の1つ目のセルの値を取得
+        const secondCellValue = row.getCell(2).value; // 行の2つ目のセルの値を取得
+
+        // 配列の1つ目の要素を半角数字に変換して比較
+        const matchingDataSet = dataSets.find((dataSet) => {
+          const firstElement = Number(dataSet[0]); // 配列の1つ目の要素を半角数字に変換
+          return firstElement === firstCellValue;
+        });
+
+        if (matchingDataSet && secondCellValue === null) {
+          // 条件に一致する場合、データを置き換える
+          matchingDataSet.forEach((value, colIndex) => {
+            const cell = row.getCell(colIndex + 1); // 列番号は1から始まる
+            const originalStyle = { ...cell.style }; // 元のスタイルを保持
+            cell.value = value; // セルの値を置き換え
+            cell.style = originalStyle; // 元のスタイルを再適用
+          });
+
+          row.commit(); // 変更を確定
+          dataSetIndex = (dataSetIndex + 1) % dataSets.length; // 次のデータセットに切り替え
+        }
+      });
+
+      // 新しいExcelファイルとして保存
+      const newWorkbookBuffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([newWorkbookBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      saveAs(blob, "modified_excel_with_matching_data.xlsx");
 
       alert("条件に一致する行を置き換えたExcelファイルを保存しました。");
     } catch (error) {
@@ -504,6 +575,7 @@ const ExportPage = () => {
 <button onClick={handleReplaceRowsWithTwoDatasets} style={{ marginBottom: "16px" }}>
   条件に一致する行を2つのデータセットで置き換え
 </button>
+
     </div>
   );
 };

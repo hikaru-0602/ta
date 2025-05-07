@@ -1,5 +1,9 @@
-import React from "react";
-import { formatShiftDataForExcel, handleCheckRowsAndOutput } from "./excel_data";
+import React, { useState } from "react";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+import { formatShiftDataForExcel, handleCheckRowsAndOutput, getYearAndMonth, getUserData, getteacherData } from "./excel_data";
+import { handleReplaceRowsWithFormattedData, replaceAllData } from "./export_to_excel"; // handleReplaceRowWithYearMonthAndFormattedData をインポート
+
 
 //選択された科目名のシフトデータをエクスポートする関数
 export const handleExportSubject = (
@@ -39,7 +43,7 @@ export const handleExportSubject = (
 };
 
 //選択された科目名のシフトデータを統一してエクスポートする関数
-export const handleExportSubjectWithUnifiedShifts = (
+export const exportData = (
   selectedSubject: string, // 選択された科目名
   currentDate: Date, // 現在の日付
   shiftData: any[], // シフトデータ
@@ -56,6 +60,14 @@ export const handleExportSubjectWithUnifiedShifts = (
     alert("シフトデータが正しく読み込まれていません。");
     return;
   }
+  const teacher = ""; // 教員名を取得（最初のシフトから取得）
+
+  const savedUserInfo = localStorage.getItem("userInfo");
+  const userInfo = savedUserInfo ? JSON.parse(savedUserInfo) : null;
+  if (!userInfo) {
+    alert("ユーザ情報を登録してください");
+    return;
+  }
 
   // 現在の月のシフトデータを取得
   const currentMonthShifts = shiftData.filter(
@@ -70,34 +82,46 @@ export const handleExportSubjectWithUnifiedShifts = (
   // 日付ごとにシフトをグループ化
   const groupedShifts: { [date: string]: any[] } = {};
   filteredShifts.forEach((shift) => {
-    const dateKey = shift.date; // シフトの日付をキーにする
+    const dateKey = shift.day; // シフトの日付をキーにする
     if (!groupedShifts[dateKey]) {
       groupedShifts[dateKey] = [];
     }
     groupedShifts[dateKey].push(shift);
+    //alert(`シフトデータをグループ化しました: ${dateKey}`); // デバッグ用
+    //console.log(`シフトデータをグループ化しました: ${dateKey}`, groupedShifts[dateKey]); // デバッグ用
   });
 
   // シフトを統一
   const unifiedShifts: any[] = [];
   Object.keys(groupedShifts).forEach((dateKey) => {
     const shifts = groupedShifts[dateKey];
+    const teacher= shifts[0].teacher; // 教員名を取得（最初のシフトから取得）
     if (shifts.length === 1) {
       unifiedShifts.push(shifts[0]); // シフトが1つだけの場合はそのまま追加
     } else {
       // シフトが複数ある場合は統一
       const earliestStart = shifts.reduce((earliest, shift) =>
         shift.starttime < earliest ? shift.starttime : earliest
-      , shifts[0].starttime);
+      , shifts[0].endtime);
 
       const latestEnd = shifts.reduce((latest, shift) =>
         shift.endtime > latest ? shift.endtime : latest
       , shifts[0].endtime);
 
       const totalBreakTime = shifts.reduce((total, shift) => {
-        const start = new Date(`1970-01-01T${shift.starttime}:00`);
-        const end = new Date(`1970-01-01T${shift.endtime}:00`);
-        const duration = (end.getTime() - start.getTime()) / (1000 * 60); // シフトの時間（分）
-        return total + duration + shift.breaktime;
+        const earliestEnd = shifts.reduce((earliest, shift) =>
+          shift.endtime < earliest ? shift.endtime : earliest
+        , shifts[0].endtime); // 早い方のシフトの終了時間
+
+        const latestStart = shifts.reduce((latest, shift) =>
+          shift.starttime > latest ? shift.starttime : latest
+        , shifts[0].starttime); // 遅い方のシフトの開始時間
+
+        const start = new Date(`1970-01-01T${latestStart}:00`);
+        const end = new Date(`1970-01-01T${earliestEnd}:00`);
+        const duration = (start.getTime() - end.getTime()) / (1000 * 60); // 休憩時間（分）
+
+        return total + Math.max(0, duration) + shift.breaktime; // 負の値を防ぐために Math.max を使用
       }, 0);
 
       // 統一されたデータをそれぞれのシフトに適用
@@ -114,14 +138,36 @@ export const handleExportSubjectWithUnifiedShifts = (
 
   // シフトデータをフォーマット
   const formattedData = formatShiftDataForExcel(unifiedShifts);
+  console.log("フォーマット済みデータ:", formattedData); // デバッグ用
+  const year= currentDate.getFullYear();
+  const month = currentDate.getMonth() + 1;
+  const yearMonthArray = getYearAndMonth(year, month); // 和暦と月を含む配列を取得
+
+  const userDataArrays = getUserData(userInfo); // ユーザデータを取得
+  if (userDataArrays) {
+    const { kanadata46, namedata47, iddata48, gradadata49 } = userDataArrays;
+  }
+
+  const teacherDataArrays = getteacherData({ name: teacher }); // 教員データを取得
+  console.log("教員データ:", teacherDataArrays); // デバッグ用
 
   // 必要に応じてExcelに書き込む処理を追加
-  console.log("Excel用フォーマット済みデータ:", formattedData);
+  //console.log("Excel用フォーマット済みデータ:", formattedData);
 
   // JSON形式で出力
   const jsonOutput = JSON.stringify(unifiedShifts, null, 2);
   console.log(jsonOutput);
-  alert(`統一されたシフトデータ:\n${jsonOutput}`);
+  //alert(`統一されたシフトデータ:\n${jsonOutput}`);
+
+  if (formattedData && yearMonthArray && userDataArrays && teacherDataArrays) {
+    replaceAllData(
+      formattedData,
+      yearMonthArray,
+      userDataArrays,
+      teacherDataArrays,
+      currentDate.getFullYear()
+    );
+  }
 
   setIsExportDialogOpen(false); // ダイアログを閉じる
 };
@@ -146,29 +192,6 @@ export default function ExportDialog({
     }
   };
 
-  const handleListClick = async (subject: string) => {
-    try {
-      // public ディレクトリに配置したファイルを取得
-      const response = await fetch("/R7_5月分実施報告書 (1).xlsx");
-      if (!response.ok) {
-        throw new Error("Excelファイルの取得に失敗しました。");
-      }
-
-      const arrayBuffer = await response.arrayBuffer();
-      const file = new File([arrayBuffer], "R7_5月分実施報告書 (1).xlsx", {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-
-      // Excelファイルの読み取り処理を実行
-      await handleCheckRowsAndOutput(file);
-
-      alert(`科目「${subject}」のデータを処理しました。`);
-    } catch (error) {
-      console.error("リストタップ時の処理に失敗しました:", error);
-      alert("リストタップ時の処理に失敗しました。");
-    }
-  };
-
   return (
     isExportDialogOpen && ( //ダイアログが開いている場合のみ表示
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -178,10 +201,14 @@ export default function ExportDialog({
             {subjectNames.map((subject: string, index: number) => (
               <li
                 key={index}
-                onClick={() => {
-                  handleListClick(subject);
-                  formatShiftDataForExcel(shiftData);
-                }} // リストタップ時に処理を実行
+                onClick={() =>
+                  exportData(
+                    subject,
+                    currentDate,
+                    shiftData,
+                    setIsExportDialogOpen
+                  )
+                }
                 className="mb-2 p-2 bg-blue-500 text-white rounded cursor-pointer hover:bg-blue-600"
               >
                 {subject}
@@ -189,7 +216,7 @@ export default function ExportDialog({
             ))}
           </ul>
           <button
-            onClick={() => handleCloseExportDialog(setIsExportDialogOpen)} //ダイアログを閉じる
+            onClick={() => setIsExportDialogOpen(false)}
             className="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
           >
             閉じる

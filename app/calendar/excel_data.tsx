@@ -1,58 +1,108 @@
+//Excel入力に必要なデータ形式に変換
+
 "use client";
-import React from "react";
 import ExcelJS from "exceljs";
 
-//和暦と年月を取得し、配列を更新する関数
-export const getYearAndMonth = () => {
+//和暦と年月を取得し、配列を作成する関数
+export const getYearAndMonth = (year: number, month: number) => {
   try {
-    const currentDate = new Date(); //現在の日付を取得
-    const year = currentDate.getFullYear(); //西暦の年を取得
-    const month = currentDate.getMonth() + 1; //月を取得（0始まりのため+1）
-    const japaneseEra = `令和${year - 2018}`; //和暦に変換
+    const japaneseEra = `令和${year - 2018}`; // 和暦に変換
 
-    //和暦と月を含む配列を作成
+    // 和暦と月を含む配列を作成
     const dateArray = [
-      japaneseEra, //1番目
-      japaneseEra, //2番目
-      "年",
-      "",
-      month, //5番目に月を代入
-      "月分",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "プルダウン選択セル→",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "自由記述セル→",
-      "",
+      japaneseEra, japaneseEra, "年", "", month, "月分", "", "", "", "", "", "", "", "", "", "", "", "プルダウン選択セル→", "", "", "", "", "", "", "", "", "自由記述セル→", "",
     ];
 
-    console.log("更新された配列:", dateArray); //配列の内容をコンソールに出力
-
-    //必要に応じてこの配列をExcelに書き込む処理を追加
-    //alert("和暦変換と配列の更新が完了しました。");
+    console.log("更新された配列:", dateArray); // 配列の内容をコンソールに出力
+    return dateArray; // 配列を返す
   } catch (error) {
-    console.error("和暦変換中にエラーが発生しました:", error); //エラー内容をコンソールに出力
-    alert("和暦変換中にエラーが発生しました。"); //エラー発生時にアラートを表示
+    console.error("和暦変換中にエラーが発生しました:", error); // エラー内容をコンソールに出力
+    alert("和暦変換中にエラーが発生しました。"); // エラー発生時にアラートを表示
   }
 };
 
-// シフトデータを指定された形式の配列に変換する関数
+export const getUserData = (userData: {
+  name: string; // ユーザ名
+  name_kana: string; // ユーザ名（カナ）
+  id: string; // 学籍番号
+  grade: string; // 学年
+}) => {
+  try {
+    if (!userData) {
+      console.error("ユーザデータが存在しません。");
+      alert("ユーザデータが正しく読み込まれていません。");
+      return;
+    }
+
+    const kanadata46 = [
+      "ふりがな", "ふりがな", `${userData.name_kana}`, `${userData.name_kana}`, `${userData.name_kana}`, `${userData.name_kana}`, `${userData.name_kana}`, `${userData.name_kana}`, `${userData.name_kana}`, `${userData.name_kana}`, `${userData.name_kana}`, `${userData.name_kana}`, `${userData.name_kana}`, `${userData.name_kana}`, "実働時間", "実働時間", "実働時間", "実働時間", "合計",
+      { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
+      { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
+      { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
+      { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
+      { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
+      { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
+      { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
+      "時間", null,
+    ];
+
+    const namedata47 = [
+      "氏名", "氏名", `${userData.name}`, `${userData.name}`, `${userData.name}`, `${userData.name}`, `${userData.name}`, `${userData.name}`, `${userData.name}`, `${userData.name}`, `${userData.name}`, `${userData.name}`, `${userData.name}`, `${userData.name}`, "時給",
+      { formula: 'IFERROR(VLOOKUP(C49,Sheet2!E2:F12,2,FALSE),"")'},
+      { formula: 'IFERROR(VLOOKUP(C49,Sheet2!E2:F12,2,FALSE),"")'},
+      "円", "合計金額", "合計金額", "合計金額", "合計金額", "合計金額",
+      { formula: 'ROUNDUP(T45*P47,0)' },
+      { formula: 'ROUNDUP(T45*P47,0)' },
+      { formula: 'ROUNDUP(T45*P47,0)' },
+      { formula: 'ROUNDUP(T45*P47,0)' },
+      "円",
+    ];
+
+    const iddata48 = [
+      "学籍番号", "学籍番号", `${userData.id}`, `${userData.id}`, `${userData.id}`, `${userData.id}`, `${userData.id}`, `${userData.id}`, `${userData.id}`, `${userData.id}`, `${userData.id}`, `${userData.id}`, `${userData.id}`, `${userData.id}`, "振込先口座情報", "振込先口座情報", "振込先口座情報", "振込先口座情報", "振込先口座情報", "振込先口座情報", "振込先口座情報", "振込先口座情報", "振込先口座情報", "振込先口座情報", "振込先口座情報", "振込先口座情報", "振込先口座情報", "振込先口座情報",
+    ];
+
+    const gradadata49 = [
+      "学年", "学年", `${userData.grade}`, `${userData.grade}`, `${userData.grade}`, `${userData.grade}`, `${userData.grade}`, `${userData.grade}`, `${userData.grade}`, `${userData.grade}`, `${userData.grade}`, `${userData.grade}`, `${userData.grade}`, `${userData.grade}`, "銀行名", null, null, null, null, null, null, null, null, null, null, null, null, null,
+    ];
+
+    console.log("kanadata46:", kanadata46);
+    console.log("namedata47:", namedata47);
+    console.log("iddata48:", iddata48);
+    console.log("gradadata49:", gradadata49);
+
+    // 4つの配列をまとめて返す
+    return { kanadata46, namedata47, iddata48, gradadata49 };
+  } catch (error) {
+    console.error("ユーザデータのフォーマット中にエラーが発生しました:", error);
+    alert("ユーザデータのフォーマット中にエラーが発生しました。");
+  }
+};
+
+export const getteacherData = (teacherData: {
+  name: string; // ユーザ名
+}) => {
+  try {
+    if (!teacherData) {
+      console.error("ユーザデータが存在しません。");
+      alert("ユーザデータが正しく読み込まれていません。");
+      return;
+    }
+
+    // ユーザデータをExcel用のフォーマットに変換
+    const formattedUserData = [
+      "　上記のとおり相違ないことを確認します。", "　上記のとおり相違ないことを確認します。", "　上記のとおり相違ないことを確認します。", "　上記のとおり相違ないことを確認します。", "　上記のとおり相違ないことを確認します。", "　上記のとおり相違ないことを確認します。", "　上記のとおり相違ないことを確認します。", "　上記のとおり相違ないことを確認します。", "　上記のとおり相違ないことを確認します。", "　上記のとおり相違ないことを確認します。", "　上記のとおり相違ないことを確認します。", "　上記のとおり相違ないことを確認します。", "　上記のとおり相違ないことを確認します。", "授業担当教員氏名", null, null, null, "伊藤　恵", "伊藤　恵", "伊藤　恵", "伊藤　恵", "伊藤　恵", "伊藤　恵", "伊藤　恵", "伊藤　恵", "伊藤　恵", "伊藤　恵", null
+    ];
+    //console.log("フォーマットされたユーザデータ:", formattedUserData);
+    //alert("ユーザデータのフォーマットが完了しました。");
+    return formattedUserData; // フォーマットされたデータを返す
+  } catch (error) {
+    console.error("ユーザデータのフォーマット中にエラーが発生しました:", error);
+    alert("ユーザデータのフォーマット中にエラーが発生しました。");
+  }
+};
+
+//シフトデータを指定された形式の配列に変換する関数
 export const formatShiftDataForExcel = (shiftData: any[]) => {
   try {
     if (!shiftData || !Array.isArray(shiftData)) {
@@ -60,7 +110,6 @@ export const formatShiftDataForExcel = (shiftData: any[]) => {
       alert("シフトデータが正しく読み込まれていません。");
       return;
     }
-
     // シフトデータを指定された形式に変換
     const formattedShifts = shiftData.map((shift) => {
       const startTime = shift.starttime.split(":"); // "HH:mm" を [HH, mm] に分割
@@ -89,12 +138,12 @@ export const formatShiftDataForExcel = (shiftData: any[]) => {
       ];
     });
 
-    console.log("フォーマットされたシフトデータ:", formattedShifts); // フォーマットされたデータをコンソールに出力
+    //console.log("フォーマットされたシフトデータ:", formattedShifts); // フォーマットされたデータをコンソールに出力
 
     // 必要に応じてこの配列をExcelに書き込む処理を追加
-    alert("シフトデータのフォーマットが完了しました。");
+    //alert("シフトデータのフォーマットが完了しました。");
     console.log(organizeFormattedData(formattedShifts)); // フォーマットされたデータを整理
-    return formattedShifts;
+    return organizeFormattedData(formattedShifts); // 整理されたデータを返す
   } catch (error) {
     console.error("シフトデータのフォーマット中にエラーが発生しました:", error);
     alert("シフトデータのフォーマット中にエラーが発生しました。");
@@ -129,6 +178,7 @@ export const handleCheckRowsAndOutput = async (file: File) => {
 
       // 1つ目のセルが「1」または半角数字の場合に処理
       if (firstCellValue === 1 || (typeof firstCellValue === "string" && /^[0-9]+$/.test(firstCellValue))) {
+
         // 条件に一致する場合、データを出力用配列に追加
         outputData.push({
           firstCell: firstCellValue,
@@ -145,6 +195,7 @@ export const handleCheckRowsAndOutput = async (file: File) => {
   }
 };
 
+//1つ目の要素を基準に配列を整理する関数
 export const organizeFormattedData = (formattedData: any[]) => {
   // 数字の対応表
   const mapping = {
@@ -158,9 +209,11 @@ export const organizeFormattedData = (formattedData: any[]) => {
   // サンプル配列
   const sample = [
     null, null, null, null, null, null, ":", null, "～", null, ":", null,
-    { formula: 'CEILING(ROUND(((TIME(X13,Z13,0)-TIME(T13,V13,0))*24-AB13/60),3),0.5)', result: 5, ref: 'AA13', shareType: 'shared' },
+    { formula: 'CEILING(ROUND(((TIME(X13,Z13,0)-TIME(T13,V13,0))*24-AB13/60),3),0.5)', ref: 'AA13', shareType: 'shared' },
     null,
   ];
+
+  const nullArray = Array(14).fill(null); // nullで埋めた配列
 
   // 結果を格納する配列
   const result: any[] = [];
@@ -173,8 +226,8 @@ export const organizeFormattedData = (formattedData: any[]) => {
     const correspondingNumber = mapping[firstElement as keyof typeof mapping]; // 対応する数字を取得
 
     if (correspondingNumber === null) {
-      // 16の場合は無条件で後ろにサンプルを追加
-      result.push([...currentArray, ...sample.map((v, i) => (i === 0 ? firstElement : v))]);
+      // 16の場合は無条件で後ろにnullArrayを追加
+      result.push([...currentArray, ...nullArray]);
       processedIndexes.add(currentIndex); // 処理済みに追加
       return;
     }
@@ -213,4 +266,33 @@ export const organizeFormattedData = (formattedData: any[]) => {
   });
 
   return result;
+};
+
+// ユーザデータをExcel用にフォーマットして出力する関数
+export const formatUserDataForExcel = (userData: {
+  name: string; //ユーザ名
+  name_kana: string; //ユーザ名（カナ）
+  id: string; //学籍番号
+  grade: string; //学年
+}) => {
+  try {
+    if (!userData) {
+      console.error("ユーザデータが存在しません。");
+      alert("ユーザデータが正しく読み込まれていません。");
+      return;
+    }
+
+    // ユーザデータをExcel用のフォーマットに変換
+    const formattedUserData = [
+      userData.name, userData.name_kana,userData.id,userData.grade
+    ];
+
+    console.log("フォーマットされたユーザデータ:", formattedUserData);
+    //alert("ユーザデータのフォーマットが完了しました。");
+
+    return formattedUserData; // フォーマットされたデータを返す
+  } catch (error) {
+    console.error("ユーザデータのフォーマット中にエラーが発生しました:", error);
+    alert("ユーザデータのフォーマット中にエラーが発生しました。");
+  }
 };

@@ -20,9 +20,11 @@ export const handleSaveEditedShift = (
 ) => {
   if (!editingShift) return; //編集対象がない場合は処理を終了
 
-  //編集対象のシフトを更新
+  // 日付と科目名が一致するシフトデータのみ更新
   const updatedShifts = shiftData.map((shift) =>
-    shift.id === editingShift.id ? editingShift : shift
+    shift.day === editingShift.day && shift.classname === editingShift.classname
+      ? { ...shift, ...editingShift } // 編集内容を反映
+      : shift
   );
 
   setShiftData(updatedShifts); //状態を更新
