@@ -177,7 +177,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
             const { hours, minutes } = calculateWorkingTime(
               schedule.startTime || startTime,
               schedule.endTime || endTime,
-              Number(schedule.breakTime) || breakTime
+              Number(schedule.breakTime)
             );
 
             return (

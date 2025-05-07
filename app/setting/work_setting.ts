@@ -116,7 +116,7 @@ export const useWorkInfo = () => {
           : schedule
       );
 
-      console.log("Updated schedules:", updatedSchedules); // デバッグログ
+      //console.log("Updated schedules:", updatedSchedules); // デバッグログ
       return { ...prev, schedules: updatedSchedules };
     });
   };
@@ -142,6 +142,8 @@ export const useWorkInfo = () => {
 
     const startTotalMinutes = startHour * 60 + startMinute;
     const endTotalMinutes = endHour * 60 + endMinute;
+
+    console.log("計算時休憩時間", breakTime); // デバッグログ
 
     const workingMinutes = Math.max(
       0,
@@ -208,7 +210,9 @@ export const useWorkInfo = () => {
         const { startTime, endTime, breakTime } = calculateStartEndTimes(workInfo.schedules[0].periods);
         const finalStartTime = workInfo.schedules[0].startTime || startTime;
         const finalEndTime = workInfo.schedules[0].endTime || endTime;
-        const finalBreakTime = Number(workInfo.schedules[0].breakTime) || breakTime;
+        const finalBreakTime = Number(workInfo.schedules[0].breakTime);
+        console.log("休憩時間:", Number(workInfo.schedules[0].breakTime)); // デバッグログ
+        console.log("デバック用休憩時間", breakTime); // デバッグログ
 
         const { hours, minutes } = calculateWorkingTime(finalStartTime, finalEndTime, finalBreakTime);
 
