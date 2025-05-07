@@ -128,6 +128,7 @@ export const replaceAllData = async (
 
     // 2. handleReplaceRowsWithFormattedData の処理
     const shiftData = formattedData
+    const usedShiftData=[[]]
 
     worksheet.eachRow({ includeEmpty: true }, (row, rowIndex) => {
       if (rowIndex > 55) return; // 55行目まで処理
@@ -137,11 +138,16 @@ export const replaceAllData = async (
 
       // 配列の1番目の要素と一致するデータを探す
       const matchingData = shiftData.find(
-        (data) => Number(data[0]) === firstCellValue
+        (data) =>
+          Number(data[0]) === firstCellValue &&
+          !usedShiftData.some((usedData) => JSON.stringify(usedData) === JSON.stringify(data))
       );
 
       if (matchingData) {
-
+        //if (usedShiftData.some((usedData) => JSON.stringify(usedData) === JSON.stringify(matchingData))) {
+        //  return; // すでに使用済みのデータの場合はスキップ
+        //}
+        usedShiftData.push(matchingData); // 使用済みデータとして追加
         const firstformula = {
           formula: `CEILING(ROUND(((TIME(J${rowIndex},L${rowIndex},0)-TIME(F${rowIndex},H${rowIndex},0))*24-N${rowIndex}/60),3),0.5)`,
           result: 2,
@@ -176,6 +182,8 @@ export const replaceAllData = async (
           cell.style = originalStyle; // 元のスタイルを再適用
         });
 
+        // 使用したshiftDataを削除
+        //shiftData.splice(shiftData.indexOf(matchingData));
         row.commit(); // 変更を確定
       }
     });
