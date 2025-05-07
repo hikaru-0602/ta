@@ -30,7 +30,7 @@ interface WorkDialogProps {
   }[];
   setIsDialogOpen: (open: boolean) => void;
   handleWorkChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  handleScheduleChange: (index: number, field: "day" | "periods", value: string | string[]) => void;
+  handleScheduleChange: (index: number, field: "day" | "periods", value: string | string[],editing:boolean) => void;
   handleScheduleTimeEdit: (index: number, field: "startTime" | "endTime" | "breakTime", value: string) => void;
   addSchedule: () => void;
   removeSchedule: (index: number) => void;
@@ -110,8 +110,8 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
             value: existingWork.teacher,
           },
         } as React.ChangeEvent<HTMLInputElement>);
-        handleScheduleChange(0, "day", existingWork.dayofweek);
-        handleScheduleChange(0, "periods", existingWork.schedule.map((period) => `${period}限`));
+        handleScheduleChange(0, "day", existingWork.dayofweek,false);
+        handleScheduleChange(0, "periods", existingWork.schedule.map((period) => `${period}限`), false);
         handleScheduleTimeEdit(0, "startTime", existingWork.starttime);
         handleScheduleTimeEdit(0, "endTime", existingWork.endtime);
         handleScheduleTimeEdit(0, "breakTime", String(existingWork.breaktime));
@@ -187,7 +187,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                     <label className="block mb-1 font-medium">曜日</label>
                     <select
                       value={schedule.day}
-                      onChange={(e) => handleScheduleChange(index, "day", e.target.value)}
+                      onChange={(e) => handleScheduleChange(index, "day", e.target.value,true)}
                       className="w-full p-2 border rounded"
                     >
                       <option value="月">月曜日</option>
@@ -210,7 +210,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                               const selectedPeriods = schedule.periods.includes(period)
                                 ? schedule.periods.filter((p) => p !== period)
                                 : [...schedule.periods, period];
-                              handleScheduleChange(index, "periods", selectedPeriods);
+                              handleScheduleChange(index, "periods", selectedPeriods,true);
                             }}
                             className="form-checkbox"
                           />

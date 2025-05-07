@@ -68,7 +68,8 @@ export const useWorkInfo = () => {
   const handleScheduleChange = (
     index: number,
     field: "day" | "periods",
-    value: string | string[]
+    value: string | string[],
+    editing: boolean = false
   ) => {
     const updatedSchedules = [...workInfo.schedules];
 
@@ -87,10 +88,13 @@ export const useWorkInfo = () => {
       updatedSchedules[index][field] = sortedPeriods;
 
       // 時限が変更された場合、休憩時間を再計算
-      const { breakTime } = calculateStartEndTimes(sortedPeriods);
-      updatedSchedules[index].breakTime = `${breakTime}`; // 再計算した休憩時間を文字列として設定
-      updatedSchedules[index].startTime = periodTimes[sortedPeriods[0] as "1限" | "2限" | "3限" | "4限" | "5限" | "6限"].start;
-      updatedSchedules[index].endTime = periodTimes[sortedPeriods[sortedPeriods.length - 1] as "1限" | "2限" | "3限" | "4限" | "5限" | "6限"].end;
+      if (editing) {
+        console.log("時間を再計算中..."); // デバッグログ
+        const { startTime, endTime, breakTime } = calculateStartEndTimes(sortedPeriods);
+        updatedSchedules[index].startTime = startTime;
+        updatedSchedules[index].endTime = endTime;
+        updatedSchedules[index].breakTime = `${breakTime}`; // 休憩時間を文字列として設定
+      }
     }
 
     setWorkInfo((prev) => ({ ...prev, schedules: updatedSchedules }));
@@ -102,19 +106,25 @@ export const useWorkInfo = () => {
     field: "startTime" | "endTime" | "breakTime",
     value: string
   ) => {
-    const updatedSchedules = workInfo.schedules.map((schedule, i) =>
-      i === index
-        ? {
-            ...schedule,
-            [field]: field === "breakTime" ? String(Math.max(0, Number(value))) : value,
-          }
-        : schedule
-    );
-    console.log(field, value, updatedSchedules); // デバッグログ
-    setWorkInfo((prev) => ({ ...prev, schedules: updatedSchedules }));
-    console.log(workInfo.schedules); // デバッグログ
+    setWorkInfo((prev) => {
+      const updatedSchedules = prev.schedules.map((schedule, i) =>
+        i === index
+          ? {
+              ...schedule,
+              [field]: field === "breakTime" ? String(Math.max(0, Number(value))) : value,
+            }
+          : schedule
+      );
+
+      console.log("Updated schedules:", updatedSchedules); // デバッグログ
+      return { ...prev, schedules: updatedSchedules };
+    });
   };
 
+  // 状態が更新された後に確認する
+  useEffect(() => {
+    console.log("Updated workInfo.schedules:", workInfo.schedules);
+  }, [workInfo.schedules]);
   const adjustBreakTime = (currentBreakTime: string, adjustment: number): string => {
     const breakTime = Math.max(0, Number(currentBreakTime) + adjustment); // 0未満にならないように調整
     return String(breakTime); // 文字列として返す
