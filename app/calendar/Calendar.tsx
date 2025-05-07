@@ -67,8 +67,10 @@ export default function Calendar() {
 
   const handleDateClick = (date: Date) => {
     const holiday = isHoliday(date); // 休日判定
+    const isSunday = date.getDay() === 0; // 日曜日
+    const isSaturday = date.getDay() === 6; // 土曜日
 
-    if (holiday) {
+    if (holiday || isSunday || isSaturday) {
       alert("この日は休みのため、操作できません。");
       return; // 処理を終了
     }
