@@ -316,9 +316,11 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
               </div>
             );
           })}
-          <button onClick={addSchedule} className="text-blue-500 hover:text-blue-700">
-            + スケジュールを追加
-          </button>
+            {!checkWorkIdExists() && (
+            <button onClick={addSchedule} className="text-blue-500 hover:text-blue-700">
+              + スケジュールを追加
+            </button>
+            )}
         </div>
         <div className="flex justify-end mt-4 space-x-2">
           <button
