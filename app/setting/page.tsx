@@ -1,6 +1,6 @@
 "use client";
 
-import Header from "../components/header";
+import Header from "../components/Header";
 import { useState, useEffect } from "react";
 import { useUserInfo } from "./user_setting";
 import { useWorkInfo } from "./work_setting";
