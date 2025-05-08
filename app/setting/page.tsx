@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { useUserInfo } from "./user_setting";
 import { useWorkInfo } from "./work_setting";
 import WorkDialog from "./work_dialog";
-import { formatUserDataForExcel } from "../calendar/excel_data";
 
 export default function Work() {
   //ユーザ情報のカスタムフックを使用

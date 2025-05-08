@@ -1,4 +1,4 @@
-import { useState, useEffect} from "react";
+import { useState } from "react";
 
 //業務情報を管理するためのカスタムフック
 export const useWorkInfo = () => {

@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import ExcelJS from "exceljs";
-import { saveAs } from "file-saver";
 import { formatShiftDataForExcel, handleCheckRowsAndOutput, getYearAndMonth, getUserData, getteacherData } from "./excel_data";
 import { handleReplaceRowsWithFormattedData, replaceAllData } from "./export_to_excel"; // handleReplaceRowWithYearMonthAndFormattedData をインポート
 
