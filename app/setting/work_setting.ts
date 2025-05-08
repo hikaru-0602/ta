@@ -89,7 +89,6 @@ export const useWorkInfo = () => {
 
       // 時限が変更された場合、休憩時間を再計算
       if (editing) {
-        console.log("時間を再計算中..."); // デバッグログ
         const { startTime, endTime, breakTime } = calculateStartEndTimes(sortedPeriods);
         updatedSchedules[index].startTime = startTime;
         updatedSchedules[index].endTime = endTime;
@@ -121,15 +120,6 @@ export const useWorkInfo = () => {
     });
   };
 
-  // 状態が更新された後に確認する
-  useEffect(() => {
-    console.log("Updated workInfo.schedules:", workInfo.schedules);
-  }, [workInfo.schedules]);
-  const adjustBreakTime = (currentBreakTime: string, adjustment: number): string => {
-    const breakTime = Math.max(0, Number(currentBreakTime) + adjustment); // 0未満にならないように調整
-    return String(breakTime); // 文字列として返す
-  };
-
   //スケジュール編集を保存する関数
   const saveScheduleTimeEdit = () => {
     setEditingIndex(null); //編集モードを終了
@@ -142,9 +132,6 @@ export const useWorkInfo = () => {
 
     const startTotalMinutes = startHour * 60 + startMinute;
     const endTotalMinutes = endHour * 60 + endMinute;
-
-    console.log("計算時休憩時間", breakTime); // デバッグログ
-
     const workingMinutes = Math.max(
       0,
       endTotalMinutes - startTotalMinutes - breakTime //休憩時間が 0 の場合もそのまま計算
@@ -166,10 +153,6 @@ export const useWorkInfo = () => {
       ],
     }));
   };
-
-  useEffect(() => {
-    console.log("Updated workInfo.schedules:", workInfo.schedules);
-  }, [workInfo.schedules]);
 
   //スケジュールを削除する関数
   const removeSchedule = (index: number) => {
@@ -211,8 +194,6 @@ export const useWorkInfo = () => {
         const finalStartTime = workInfo.schedules[0].startTime || startTime;
         const finalEndTime = workInfo.schedules[0].endTime || endTime;
         const finalBreakTime = Number(workInfo.schedules[0].breakTime);
-        console.log("休憩時間:", Number(workInfo.schedules[0].breakTime)); // デバッグログ
-        console.log("デバック用休憩時間", breakTime); // デバッグログ
 
         const { hours, minutes } = calculateWorkingTime(finalStartTime, finalEndTime, finalBreakTime);
 

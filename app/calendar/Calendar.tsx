@@ -20,6 +20,7 @@ export default function Calendar() {
   const [subjectNames, setSubjectNames] = useState<string[]>([]); // 科目名リスト
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // 編集ダイアログの状態
   const [editingShift, setEditingShift] = useState<any>(null); // 編集対象のシフト
+  const [holidays, setHolidays] = useState<{ [date: string]: string }>({});
 
   const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -30,8 +31,8 @@ export default function Calendar() {
   );
 
   const isHoliday = (date: Date): boolean => {
-    const formattedDate = `${date.getMonth() + 1}-${date.getDate()}`;
-    return holidays.some((holiday) => holiday.date === formattedDate);
+    const formattedDate = date.toISOString().split("T")[0]; // YYYY-MM-DD 形式に変換
+    return holidays.hasOwnProperty(formattedDate);
   };
 
 
@@ -49,6 +50,21 @@ export default function Calendar() {
     const savedUserInfo = localStorage.getItem("userInfo");
     const parsedUserInfo = savedUserInfo ? JSON.parse(savedUserInfo) : null;
     setUserInfo(parsedUserInfo);
+
+    const fetchHolidays = async () => {
+      try {
+        const response = await fetch("https://holidays-jp.github.io/api/v1/date.json");
+        if (!response.ok) {
+          throw new Error("Failed to fetch holidays");
+        }
+        const data = await response.json();
+        setHolidays(data); // 祝日データを状態に保存
+      } catch (error) {
+        console.error("Error fetching holidays:", error);
+      }
+    };
+
+    fetchHolidays();
   }, []);
 
   const saveShiftsToLocalStorage = (shifts: any[]) => {

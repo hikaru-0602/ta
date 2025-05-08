@@ -290,7 +290,6 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           "breakTime",
                           String(Math.max(0, Number(schedule.breakTime || breakTime) - 10))
                         );
-                        console.log("breakTimeaaa", String(Math.max(0, Number(schedule.breakTime || breakTime) - 10)));
                       }}
                       className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
                     >
