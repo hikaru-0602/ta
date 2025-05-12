@@ -1,10 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AddShiftDialog, { handleAddShift, handleRemoveShift } from "./add_shift_dialog";
-import EditShiftDialog, {handleEditShift, handleSaveEditedShift} from "./edit_shift_dialog";
-import ExportDialog, {handleCloseExportDialog, handleExportSubject} from "./export_dialog";
+import { useRouter } from "next/navigation"; // Next.jsのルーターをインポート
+import AddShiftDialog, {
+  handleAddShift,
+  handleRemoveShift,
+} from "./add_shift_dialog";
+import EditShiftDialog, {
+  handleEditShift,
+  handleSaveEditedShift,
+} from "./edit_shift_dialog";
+import ExportDialog, {
+  handleCloseExportDialog,
+  handleExportSubject,
+} from "./export_dialog";
+import { useAuth } from "../firebase/context/auth";
+
 export default function Calendar() {
+  const router = useRouter(); // ルーターを初期化
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null); // 選択された日付を管理
@@ -18,9 +31,18 @@ export default function Calendar() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // 編集ダイアログの状態
   const [editingShift, setEditingShift] = useState<any>(null); // 編集対象のシフト
   const [holidays, setHolidays] = useState<{ [date: string]: string }>({});
+  const user = useAuth();
 
-  const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-  const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+  const startOfMonth = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    1
+  );
+  const endOfMonth = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() + 1,
+    0
+  );
 
   const daysInMonth = Array.from(
     { length: endOfMonth.getDate() },
@@ -31,7 +53,6 @@ export default function Calendar() {
     const formattedDate = date.toISOString().split("T")[0]; // YYYY-MM-DD 形式に変換
     return holidays.hasOwnProperty(formattedDate);
   };
-
 
   useEffect(() => {
     // クライアントサイドでのみ localStorage を使用
@@ -50,7 +71,9 @@ export default function Calendar() {
 
     const fetchHolidays = async () => {
       try {
-        const response = await fetch("https://holidays-jp.github.io/api/v1/date.json");
+        const response = await fetch(
+          "https://holidays-jp.github.io/api/v1/date.json"
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch holidays");
         }
@@ -69,16 +92,26 @@ export default function Calendar() {
   };
 
   const handlePrevMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
+    );
     setSelectedDate(null); // 月を変更したら選択をリセット
   };
 
   const handleNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
+    );
     setSelectedDate(null); // 月を変更したら選択をリセット
   };
 
   const handleDateClick = (date: Date) => {
+    if (user === null) {
+      alert("ログインしてください。");
+      router.push("/setting"); // 仕事ページにリダイレクト
+      return;
+    }
+
     const holiday = isHoliday(date); // 休日判定
     const isSunday = date.getDay() === 0; // 日曜日
     const isSaturday = date.getDay() === 6; // 土曜日
@@ -91,29 +124,28 @@ export default function Calendar() {
     setSelectedDate(date); // クリックされた日付を選択
     setFilteredWorkData(workData); // フィルタリングされたデータを保存
     setIsDialogOpen(true); // ダイアログを開く
-
-    console.log(`選択された日付: ${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`);
   };
 
   const closeDialog = () => {
     setIsDialogOpen(false); // ダイアログを閉じる
   };
 
-  //時間をDateオブジェクトに変換する関数
-  const parseTime = (time: string): Date => {
-    const [hours, minutes] = time.split(":").map(Number);
-    const date = new Date();
-    date.setHours(hours, minutes, 0, 0);
-    return date;
-  };
-
-  //シフトデータを表示するボタンのクリックハンドラー
-  const handleShowShiftData = () => {
-    alert(JSON.stringify(shiftData, null, 2)); // shiftData をアラートで表示
-  };
-
   // シフト出力ボタンのクリックハンドラー
   const handleOpenExportDialog = () => {
+    if (user === null) {
+      alert("ログインしてください。");
+      if (
+        userInfo.id === "" ||
+        userInfo.name === "" ||
+        userInfo.grade === "" ||
+        userInfo.name_kana === ""
+      ) {
+        alert("ユーザ情報を登録してください");
+      }
+      router.push("/setting"); // 仕事ページにリダイレクト
+      return;
+    }
+
     // 現在の月のシフトデータを取得
     const currentMonthShifts = shiftData.filter(
       (shift) => shift.month === currentDate.getMonth() + 1
@@ -127,8 +159,6 @@ export default function Calendar() {
     setSubjectNames(uniqueSubjectNames); // 科目名リストを状態に保存
     setIsExportDialogOpen(true); // ダイアログを開く
   };
-
-
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center p-4">
@@ -166,7 +196,9 @@ export default function Calendar() {
 
           // その日に追加されたシフトの数を計算
           const shiftCount = shiftData.filter(
-            (shift) => shift.month === date.getMonth() + 1 && shift.day === date.getDate()
+            (shift) =>
+              shift.month === date.getMonth() + 1 &&
+              shift.day === date.getDate()
           ).length;
 
           return (
@@ -177,14 +209,17 @@ export default function Calendar() {
                 selectedDate?.toDateString() === date.toDateString()
                   ? "bg-green-500 text-white" // 選択された日付のスタイル
                   : isToday
-                  ? "border-2 border-blue-500" + (isSunday || isSaturday || holiday ? " bg-red-100 dark:bg-red-200" : "") // 今日の日付のスタイル（枠線と土日の背景色）
+                  ? "border-2 border-blue-500" +
+                    (isSunday || isSaturday || holiday
+                      ? " bg-red-100 dark:bg-red-200"
+                      : "") // 今日の日付のスタイル（枠線と土日の背景色）
                   : isSunday || isSaturday || holiday
                   ? "bg-red-100 dark:bg-red-200" // 土日または休日のスタイル（薄い赤色）
                   : "bg-gray-100 dark:bg-gray-700"
               }`}
             >
               {date.getDate()}
-              {shiftCount > 0 && (
+              {shiftCount > 0 && user !== null && (
                 <div className="absolute top-1 right-1 bg-blue-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
                   {shiftCount}
                 </div>
@@ -194,36 +229,15 @@ export default function Calendar() {
         })}
       </div>
 
-      {/* shiftData を表示するボタン */}
-      {/*<button
-        onClick={handleShowShiftData}
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-      >
-        シフトデータを表示
-      </button>*/}
-
-      {/* userInfo を表示するボタン */}
-      <button
-        onClick={() => alert(JSON.stringify(userInfo, null, 2))} // userInfoをアラート表示
-        className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-      >
-        ユーザ情報を表示
-      </button>
-
       {/* シフト出力ボタン */}
       <button
         onClick={() => {
           handleOpenExportDialog();
-          //getYearAndMonth();
         }}
         className="mt-4 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
       >
         Excel出力
       </button>
-
-      {/*<button onClick={getYearAndMonth} style={{ marginBottom: "16px" }}>
-        和暦変換して配列を更新
-      </button>*/}
 
       {/* ダイアログのレンダリング部分 */}
       <AddShiftDialog

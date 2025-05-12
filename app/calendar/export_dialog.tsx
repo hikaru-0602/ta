@@ -1,7 +1,12 @@
 import React, { useState } from "react";
-import { formatShiftDataForExcel, handleCheckRowsAndOutput, getYearAndMonth, getUserData, getteacherData } from "./excel_data";
-import { handleReplaceRowsWithFormattedData, replaceAllData } from "./export_to_excel"; // handleReplaceRowWithYearMonthAndFormattedData をインポート
-
+import {
+  formatShiftDataForExcel,
+  checkRowsAndOutput,
+  getYearAndMonth,
+  getUserData,
+  getteacherData,
+} from "./excel_data";
+import { replaceAllData } from "./export_to_excel";
 
 //選択された科目名のシフトデータをエクスポートする関数
 export const handleExportSubject = (
@@ -93,27 +98,34 @@ export const exportData = (
   const unifiedShifts: any[] = [];
   Object.keys(groupedShifts).forEach((dateKey) => {
     const shifts = groupedShifts[dateKey];
-    const teacher= shifts[0].teacher; // 教員名を取得（最初のシフトから取得）
+    const teacher = shifts[0].teacher; // 教員名を取得（最初のシフトから取得）
     if (shifts.length === 1) {
       unifiedShifts.push(shifts[0]); // シフトが1つだけの場合はそのまま追加
     } else {
       // シフトが複数ある場合は統一
-      const earliestStart = shifts.reduce((earliest, shift) =>
-        shift.starttime < earliest ? shift.starttime : earliest
-      , shifts[0].endtime);
+      const earliestStart = shifts.reduce(
+        (earliest, shift) =>
+          shift.starttime < earliest ? shift.starttime : earliest,
+        shifts[0].endtime
+      );
 
-      const latestEnd = shifts.reduce((latest, shift) =>
-        shift.endtime > latest ? shift.endtime : latest
-      , shifts[0].endtime);
+      const latestEnd = shifts.reduce(
+        (latest, shift) => (shift.endtime > latest ? shift.endtime : latest),
+        shifts[0].endtime
+      );
 
       const totalBreakTime = shifts.reduce((total, shift) => {
-        const earliestEnd = shifts.reduce((earliest, shift) =>
-          shift.endtime < earliest ? shift.endtime : earliest
-        , shifts[0].endtime); // 早い方のシフトの終了時間
+        const earliestEnd = shifts.reduce(
+          (earliest, shift) =>
+            shift.endtime < earliest ? shift.endtime : earliest,
+          shifts[0].endtime
+        ); // 早い方のシフトの終了時間
 
-        const latestStart = shifts.reduce((latest, shift) =>
-          shift.starttime > latest ? shift.starttime : latest
-        , shifts[0].starttime); // 遅い方のシフトの開始時間
+        const latestStart = shifts.reduce(
+          (latest, shift) =>
+            shift.starttime > latest ? shift.starttime : latest,
+          shifts[0].starttime
+        ); // 遅い方のシフトの開始時間
 
         const start = new Date(`1970-01-01T${latestStart}:00`);
         const end = new Date(`1970-01-01T${earliestEnd}:00`);
@@ -137,7 +149,7 @@ export const exportData = (
   // シフトデータをフォーマット
   const formattedData = formatShiftDataForExcel(unifiedShifts);
   console.log("フォーマット済みデータ:", formattedData); // デバッグ用
-  const year= currentDate.getFullYear();
+  const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
   const yearMonthArray = getYearAndMonth(year, month); // 和暦と月を含む配列を取得
 
@@ -183,10 +195,12 @@ export default function ExportDialog({
   shiftData, //シフトデータ
   setIsExportDialogOpen, //ダイアログを閉じる関数
 }: any) {
-  const handleFileInput = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInput = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
-      await handleCheckRowsAndOutput(file);
+      await checkRowsAndOutput(file);
     }
   };
 

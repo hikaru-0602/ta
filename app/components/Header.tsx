@@ -36,12 +36,6 @@ export default function Header() {
           >
             仕事
           </Link>
-          <Link
-            href="/firebase"
-            className="block px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-800 rounded"
-          >
-            認証
-          </Link>
         </nav>
       </div>
     </header>

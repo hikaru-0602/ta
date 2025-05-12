@@ -12,10 +12,14 @@ export default function Home() {
     setWaiting(true);
 
     login()
+      .then((userCredential) => {
+        console.log(userCredential);
+      })
       .catch((error) => {
-        console.error(error?.code);
+        console.log(error);
       })
       .finally(() => {
+        console.log("finally");
         setWaiting(false);
       });
   };
