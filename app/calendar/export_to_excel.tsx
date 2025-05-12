@@ -17,7 +17,7 @@ export const handleReplaceRowsWithFormattedData = async () => {
 
     const worksheet = workbook.getWorksheet("実施報告書"); // シート名で取得
     if (!worksheet) {
-      alert("指定されたシートが見つかりません。");
+      //alert("指定されたシートが見つかりません。");
       return;
     }
 
@@ -43,12 +43,28 @@ export const handleReplaceRowsWithFormattedData = async () => {
 
       if (matchingData) {
         // 条件に一致する場合、データを置き換える
-        matchingData.forEach((value: string | number | boolean | Date | ExcelJS.CellErrorValue | ExcelJS.CellRichTextValue | ExcelJS.CellHyperlinkValue | ExcelJS.CellFormulaValue | ExcelJS.CellSharedFormulaValue | null | undefined, colIndex: number) => {
-          const cell = row.getCell(colIndex + 1); // 列番号は1から始まる
-          const originalStyle = { ...cell.style }; // 元のスタイルを保持
-          cell.value = value; // セルの値を置き換え
-          cell.style = originalStyle; // 元のスタイルを再適用
-        });
+        matchingData.forEach(
+          (
+            value:
+              | string
+              | number
+              | boolean
+              | Date
+              | ExcelJS.CellErrorValue
+              | ExcelJS.CellRichTextValue
+              | ExcelJS.CellHyperlinkValue
+              | ExcelJS.CellFormulaValue
+              | ExcelJS.CellSharedFormulaValue
+              | null
+              | undefined,
+            colIndex: number
+          ) => {
+            const cell = row.getCell(colIndex + 1); // 列番号は1から始まる
+            const originalStyle = { ...cell.style }; // 元のスタイルを保持
+            cell.value = value; // セルの値を置き換え
+            cell.style = originalStyle; // 元のスタイルを再適用
+          }
+        );
 
         row.commit(); // 変更を確定
         dataSetIndex = (dataSetIndex + 1) % shiftData.length; // 次のデータセットに切り替え
@@ -62,10 +78,10 @@ export const handleReplaceRowsWithFormattedData = async () => {
     });
     saveAs(blob, "updated_excel_with_formatted_data.xlsx");
 
-    alert("条件に一致する行を置き換えたExcelファイルを保存しました。");
+    //alert("条件に一致する行を置き換えたExcelファイルを保存しました。");
   } catch (error) {
     console.error("Excelファイルの処理中にエラーが発生しました:", error);
-    alert("Excelファイルの処理中にエラーが発生しました。");
+    //alert("Excelファイルの処理中にエラーが発生しました。");
   }
 };
 
@@ -93,13 +109,12 @@ const replaceRowWithArray = (
   rowToReplace.commit(); // 変更を確定
 };
 
-
 export const replaceAllData = async (
   formattedData: any[], // フォーマットされたデータ
   yearMonthArray: (string | number | boolean | Date | null | undefined)[], // 年月配列
   userDataArrays: any, // ユーザーデータ配列
   teacherDataArrays: any[], // 教員データ配列
-  year: number,
+  year: number
 ) => {
   try {
     // public ディレクトリに配置されたExcelファイルを取得
@@ -114,7 +129,7 @@ export const replaceAllData = async (
 
     const worksheet = workbook.getWorksheet("実施報告書"); // シート名で取得
     if (!worksheet) {
-      alert("指定されたシートが見つかりません。");
+      //alert("指定されたシートが見つかりません。");
       return;
     }
 
@@ -127,8 +142,8 @@ export const replaceAllData = async (
     replaceRowWithArray(worksheet, 53, teacherDataArrays);
 
     // 2. handleReplaceRowsWithFormattedData の処理
-    const shiftData = formattedData
-    const usedShiftData=[[]]
+    const shiftData = formattedData;
+    const usedShiftData = [[]];
 
     worksheet.eachRow({ includeEmpty: true }, (row, rowIndex) => {
       if (rowIndex > 55) return; // 55行目まで処理
@@ -140,7 +155,9 @@ export const replaceAllData = async (
       const matchingData = shiftData.find(
         (data) =>
           Number(data[0]) === firstCellValue &&
-          !usedShiftData.some((usedData) => JSON.stringify(usedData) === JSON.stringify(data))
+          !usedShiftData.some(
+            (usedData) => JSON.stringify(usedData) === JSON.stringify(data)
+          )
       );
 
       if (matchingData) {
@@ -152,35 +169,59 @@ export const replaceAllData = async (
           formula: `CEILING(ROUND(((TIME(J${rowIndex},L${rowIndex},0)-TIME(F${rowIndex},H${rowIndex},0))*24-N${rowIndex}/60),3),0.5)`,
           result: 2,
           ref: `M${rowIndex}`,
-          shareType: 'shared',
-        }
+          shareType: "shared",
+        };
 
         const secondformula = {
           formula: `CEILING(ROUND(((TIME(X${rowIndex},Z${rowIndex},0)-TIME(T${rowIndex},V${rowIndex},0))*24-AB${rowIndex}/60),3),0.5)`,
           ref: `AA${rowIndex}`,
-          shareType: 'shared',
-        }
+          shareType: "shared",
+        };
 
         matchingData[12] = {
-          formula: `CEILING(ROUND(((TIME(J${rowIndex-1},L${rowIndex-1},0)-TIME(F${rowIndex-1},H${rowIndex-1},0))*24-N${rowIndex-1}/60),3),0.5)`,
+          formula: `CEILING(ROUND(((TIME(J${rowIndex - 1},L${
+            rowIndex - 1
+          },0)-TIME(F${rowIndex - 1},H${rowIndex - 1},0))*24-N${
+            rowIndex - 1
+          }/60),3),0.5)`,
           result: 2,
-          ref: `M${rowIndex-1}`
+          ref: `M${rowIndex - 1}`,
         }; // M列の数式
 
         matchingData[26] = {
-          formula: `CEILING(ROUND(((TIME(X${rowIndex-1},Z${rowIndex-1},0)-TIME(T${rowIndex-1},V${rowIndex-1},0))*24-AB${rowIndex-1}/60),3),0.5)`,
-          ref: `AA${rowIndex}`
+          formula: `CEILING(ROUND(((TIME(X${rowIndex - 1},Z${
+            rowIndex - 1
+          },0)-TIME(T${rowIndex - 1},V${rowIndex - 1},0))*24-AB${
+            rowIndex - 1
+          }/60),3),0.5)`,
+          ref: `AA${rowIndex}`,
         }; // AA列の数式
 
         console.log("matchingData", matchingData); // デバッグ用
 
         // 条件に一致する場合、データを置き換える
-        matchingData.forEach((value: string | number | boolean | Date | ExcelJS.CellErrorValue | ExcelJS.CellRichTextValue | ExcelJS.CellHyperlinkValue | ExcelJS.CellFormulaValue | ExcelJS.CellSharedFormulaValue | null | undefined, colIndex: number) => {
-          const cell = row.getCell(colIndex + 1); // 列番号は1から始まる
-          const originalStyle = { ...cell.style }; // 元のスタイルを保持
-          cell.value = value; // セルの値を置き換え
-          cell.style = originalStyle; // 元のスタイルを再適用
-        });
+        matchingData.forEach(
+          (
+            value:
+              | string
+              | number
+              | boolean
+              | Date
+              | ExcelJS.CellErrorValue
+              | ExcelJS.CellRichTextValue
+              | ExcelJS.CellHyperlinkValue
+              | ExcelJS.CellFormulaValue
+              | ExcelJS.CellSharedFormulaValue
+              | null
+              | undefined,
+            colIndex: number
+          ) => {
+            const cell = row.getCell(colIndex + 1); // 列番号は1から始まる
+            const originalStyle = { ...cell.style }; // 元のスタイルを保持
+            cell.value = value; // セルの値を置き換え
+            cell.style = originalStyle; // 元のスタイルを再適用
+          }
+        );
 
         // 使用したshiftDataを削除
         //shiftData.splice(shiftData.indexOf(matchingData));
@@ -193,11 +234,16 @@ export const replaceAllData = async (
     const blob = new Blob([newWorkbookBuffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `R${year-2018}_${yearMonthArray[4]}月分実施報告書_${formattedData[0][1]}.xlsx`);
+    saveAs(
+      blob,
+      `R${year - 2018}_${yearMonthArray[4]}月分実施報告書_${
+        formattedData[0][1]
+      }.xlsx`
+    );
 
     //alert("すべての処理が完了したExcelファイルを保存しました。");
   } catch (error) {
     console.error("Excelファイルの処理中にエラーが発生しました:", error);
-    alert("Excelファイルの処理中にエラーが発生しました。");
+    //alert("Excelファイルの処理中にエラーが発生しました。");
   }
 };

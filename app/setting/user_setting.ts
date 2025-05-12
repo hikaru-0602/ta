@@ -48,7 +48,7 @@ export const useUserInfo = () => {
   //ユーザー情報をローカルストレージに保存する関数
   const saveUserInfoToLocalStorage = () => {
     localStorage.setItem("userInfo", JSON.stringify(userInfo));
-    alert(JSON.stringify(userInfo)); //保存した情報をアラートで表示
+    //alert(JSON.stringify(userInfo)); //保存した情報をアラートで表示
   };
 
   //ローカルストレージからユーザー情報を読み込む関数
@@ -72,7 +72,7 @@ export const useUserInfo = () => {
     };
 
     const userDataForExcel = getUserData(userData);
-    console.log(userDataForExcel);
+    //console.log(userDataForExcel);
     const formattedUserData = formatUserDataForExcel(userData);
 
 
