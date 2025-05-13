@@ -104,44 +104,35 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
   useEffect(() => {
     if (!isDialogOpen) return; // ダイアログが開いていない場合は早期リターン
 
-    if (checkWorkIdExists()) {
-      const existingWork = workData.find((work) => work.id === workid);
-      if (existingWork) {
-        setEditingIndex(workid);
-        handleWorkChange({
-          target: { name: "label", value: existingWork.label },
-        } as React.ChangeEvent<HTMLInputElement>);
-        handleWorkChange({
-          target: { name: "subject", value: existingWork.classname },
-        } as React.ChangeEvent<HTMLInputElement>);
-        handleWorkChange({
-          target: { name: "category", value: existingWork.category },
-        } as React.ChangeEvent<HTMLSelectElement>);
-        handleWorkChange({
-          target: { name: "teacher", value: existingWork.teacher },
-        } as React.ChangeEvent<HTMLInputElement>);
-        handleScheduleChange(0, "day", existingWork.dayofweek, false);
-        handleScheduleChange(
-          0,
-          "periods",
-          existingWork.schedule.map((period) => `${period}限`),
-          false
-        );
-        handleScheduleTimeEdit(0, "startTime", existingWork.starttime);
-        handleScheduleTimeEdit(0, "endTime", existingWork.endtime);
-        handleScheduleTimeEdit(0, "breakTime", String(existingWork.breaktime));
-      }
-    }
-  }, [
-    isDialogOpen,
-    workid,
-    workData,
-    checkWorkIdExists,
-    handleWorkChange,
-    handleScheduleChange,
-    handleScheduleTimeEdit,
-    setEditingIndex,
-  ]);
+    const existingWork = workData.find((work) => work.id === workid);
+    if (!existingWork) return;
+
+    setEditingIndex(workid);
+    handleWorkChange({
+      target: { name: "label", value: existingWork.label },
+    } as React.ChangeEvent<HTMLInputElement>);
+    handleWorkChange({
+      target: { name: "subject", value: existingWork.classname },
+    } as React.ChangeEvent<HTMLInputElement>);
+    handleWorkChange({
+      target: { name: "category", value: existingWork.category },
+    } as React.ChangeEvent<HTMLSelectElement>);
+    handleWorkChange({
+      target: { name: "teacher", value: existingWork.teacher },
+    } as React.ChangeEvent<HTMLInputElement>);
+    handleScheduleChange(0, "day", existingWork.dayofweek, false);
+    handleScheduleChange(
+      0,
+      "periods",
+      existingWork.schedule.map((period) => `${period}限`),
+      false
+    );
+    handleScheduleTimeEdit(0, "startTime", existingWork.starttime);
+    handleScheduleTimeEdit(0, "endTime", existingWork.endtime);
+    handleScheduleTimeEdit(0, "breakTime", String(existingWork.breaktime));
+
+    console.log("変更", existingWork.classname);
+  }, [isDialogOpen, workid, workData, setEditingIndex]);
 
   if (!isDialogOpen) return null;
   return (
