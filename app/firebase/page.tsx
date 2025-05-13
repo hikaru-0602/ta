@@ -2,7 +2,6 @@
 import { useAuth } from "./context/auth";
 import { login, logout } from "./lib/auth";
 import { useState } from "react";
-import { auth } from "./lib/firebase";
 
 export default function Home() {
   const user = useAuth();
@@ -26,16 +25,24 @@ export default function Home() {
   return (
     <div>
       <h1>こんにちは</h1>
-      {user === null && !waiting && <button onClick={() => {signIn();}}>ログイン</button>}
+      {user === null && !waiting && (
+        <button
+          onClick={() => {
+            signIn();
+          }}
+        >
+          ログイン
+        </button>
+      )}
       {user && (
-  <button
-    onClick={() => {
-      logout()
-    }}
-  >
-    ログアウト
-  </button>
-)}
+        <button
+          onClick={() => {
+            logout();
+          }}
+        >
+          ログアウト
+        </button>
+      )}
     </div>
   );
 }

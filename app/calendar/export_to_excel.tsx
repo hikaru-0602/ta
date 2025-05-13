@@ -1,6 +1,6 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { getYearAndMonth, organizeFormattedData } from "./excel_data";
+import { organizeFormattedData } from "./excel_data";
 
 // 条件に一致する行のデータを置き換える関数
 export const handleReplaceRowsWithFormattedData = async () => {
@@ -89,15 +89,18 @@ export const handleReplaceRowsWithFormattedData = async () => {
 const replaceRowWithArray = (
   worksheet: ExcelJS.Worksheet,
   rowIndex: number,
-  values: (string | number | boolean | Date | null | undefined)[]
+  values: (
+    | string
+    | number
+    | boolean
+    | Date
+    | null
+    | undefined
+    | { formula: string }
+  )[]
 ) => {
   // 指定した行を取得
   const rowToReplace = worksheet.getRow(rowIndex);
-
-  // 指定した行のセル結合状態を保持
-  const mergedCells = worksheet.model.merges.filter((merge) =>
-    merge.includes(`${rowIndex}`)
-  );
 
   // 配列の値を指定した行に書き込む（スタイルを保持）
   values.forEach((value, colIndex) => {
@@ -149,10 +152,60 @@ const fillHolidays = (worksheet: ExcelJS.Worksheet, holiday: number) => {
 };
 
 export const replaceAllData = async (
-  formattedData: any[], // フォーマットされたデータ
+  formattedData: (
+    | string
+    | number
+    | { formula: string; ref?: string | undefined }
+    | null
+  )[][], // フォーマットされたデータ
   yearMonthArray: (string | number | boolean | Date | null | undefined)[], // 年月配列
-  userDataArrays: any, // ユーザーデータ配列
-  teacherDataArrays: any[], // 教員データ配列
+  userDataArrays: {
+    kanadata46: (
+      | string
+      | number
+      | boolean
+      | Date
+      | null
+      | undefined
+      | { formula: string }
+    )[]; // ユーザーデータ46行目
+    namedata47: (
+      | string
+      | number
+      | boolean
+      | Date
+      | null
+      | undefined
+      | { formula: string }
+    )[]; // ユーザーデータ47行目
+    iddata48: (
+      | string
+      | number
+      | boolean
+      | Date
+      | null
+      | undefined
+      | { formula: string }
+    )[]; // ユーザーデータ48行目
+    gradadata49: (
+      | string
+      | number
+      | boolean
+      | Date
+      | null
+      | undefined
+      | { formula: string }
+    )[]; // ユーザーデータ49行目
+  }, // ユーザーデータ配列
+  teacherDataArrays: (
+    | string
+    | number
+    | boolean
+    | Date
+    | null
+    | undefined
+    | { formula: string }
+  )[], // 教員データ配列
   year: number,
   holidays: number[] // 祝日データ
 ) => {
@@ -184,7 +237,12 @@ export const replaceAllData = async (
 
     // 2. handleReplaceRowsWithFormattedData の処理
     const shiftData = formattedData;
-    const usedShiftData = [[]];
+    const usedShiftData: (
+      | string
+      | number
+      | { formula: string; ref?: string }
+      | null
+    )[][] = [];
 
     worksheet.eachRow({ includeEmpty: true }, (row, rowIndex) => {
       if (rowIndex > 55) return; // 55行目まで処理
@@ -206,20 +264,9 @@ export const replaceAllData = async (
         //  return; // すでに使用済みのデータの場合はスキップ
         //}
         usedShiftData.push(matchingData); // 使用済みデータとして追加
-        const firstformula = {
-          formula: `CEILING(ROUND(((TIME(J${rowIndex},L${rowIndex},0)-TIME(F${rowIndex},H${rowIndex},0))*24-N${rowIndex}/60),3),0.5)`,
-          result: 2,
-          ref: `M${rowIndex}`,
-        };
-
-        const secondformula = {
-          formula: `CEILING(ROUND(((TIME(X${rowIndex},Z${rowIndex},0)-TIME(T${rowIndex},V${rowIndex},0))*24-AB${rowIndex}/60),3),0.5)`,
-          ref: `AA${rowIndex}`,
-        };
 
         matchingData[12] = {
           formula: `CEILING(ROUND(((TIME(J${rowIndex},L${rowIndex},0)-TIME(F${rowIndex},H${rowIndex},0))*24-N${rowIndex}/60),3),0.5)`,
-          result: 2,
           ref: `M${rowIndex}`,
         }; // M列の数式
 
@@ -228,7 +275,7 @@ export const replaceAllData = async (
           ref: `AA${rowIndex}`,
         }; // AA列の数式
 
-        console.log("matchingData", matchingData); // デバッグ用
+        //console.log("matchingData", matchingData); // デバッグ用
 
         // 条件に一致する場合、データを置き換える
         matchingData.forEach(
@@ -261,7 +308,6 @@ export const replaceAllData = async (
     });
 
     for (let i = 0; i < holidays.length; i++) {
-      console.log(holidays[i]); // デバッグ用
       fillHolidays(worksheet, holidays[i]); // 祝日を塗りつぶす
     }
 

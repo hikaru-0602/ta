@@ -2,6 +2,7 @@
 
 "use client";
 import ExcelJS from "exceljs";
+import { Shift } from "../types";
 
 //和暦と年月を取得し、配列を作成する関数
 export const getYearAndMonth = (year: number, month: number) => {
@@ -197,7 +198,7 @@ export const getteacherData = (teacherData: {
 }) => {
   try {
     if (!teacherData) {
-      console.error("ユーザデータが存在しません。");
+      console.error("教員名が存在しません。");
       //alert("ユーザデータが正しく読み込まれていません。");
       return;
     }
@@ -221,16 +222,16 @@ export const getteacherData = (teacherData: {
       null,
       null,
       null,
-      "伊藤　恵",
-      "伊藤　恵",
-      "伊藤　恵",
-      "伊藤　恵",
-      "伊藤　恵",
-      "伊藤　恵",
-      "伊藤　恵",
-      "伊藤　恵",
-      "伊藤　恵",
-      "伊藤　恵",
+      teacherData.name,
+      teacherData.name,
+      teacherData.name,
+      teacherData.name,
+      teacherData.name,
+      teacherData.name,
+      teacherData.name,
+      teacherData.name,
+      teacherData.name,
+      teacherData.name,
       null,
     ];
     //console.log("フォーマットされたユーザデータ:", formattedUserData);
@@ -243,7 +244,7 @@ export const getteacherData = (teacherData: {
 };
 
 //シフトデータを指定された形式の配列に変換する関数
-export const formatShiftDataForExcel = (shiftData: any[]) => {
+export const formatShiftDataForExcel = (shiftData: Shift[]) => {
   try {
     if (!shiftData || !Array.isArray(shiftData)) {
       console.error("shiftData is not defined or not an array.");
@@ -282,7 +283,6 @@ export const formatShiftDataForExcel = (shiftData: any[]) => {
 
     // 必要に応じてこの配列をExcelに書き込む処理を追加
     //alert("シフトデータのフォーマットが完了しました。");
-    console.log(organizeFormattedData(formattedShifts)); // フォーマットされたデータを整理
     return organizeFormattedData(formattedShifts); // 整理されたデータを返す
   } catch (error) {
     console.error("シフトデータのフォーマット中にエラーが発生しました:", error);
@@ -308,7 +308,8 @@ export const checkRowsAndOutput = async (file: File) => {
       return;
     }
 
-    const outputData: Array<{ firstCell: any; fifteenthCell: any }> = []; // 出力データを格納する配列
+    const outputData: Array<{ firstCell: unknown; fifteenthCell: unknown }> =
+      []; // 出力データを格納する配列
 
     worksheet.eachRow((row, rowIndex) => {
       if (rowIndex > 50) return; // 50行目まで処理
@@ -338,7 +339,14 @@ export const checkRowsAndOutput = async (file: File) => {
 };
 
 //1つ目の要素を基準に配列を整理する関数
-export const organizeFormattedData = (formattedData: any[]) => {
+export const organizeFormattedData = (
+  formattedData: (
+    | string
+    | number
+    | null
+    | { formula: string; ref?: string }
+  )[][]
+) => {
   // 数字の対応表
   const mapping = {
     1: 17,
@@ -402,7 +410,12 @@ export const organizeFormattedData = (formattedData: any[]) => {
   const nullArray = Array(14).fill(null); // nullで埋めた配列
 
   // 結果を格納する配列
-  const result: any[] = [];
+  const result: (
+    | string
+    | number
+    | null
+    | { formula: string; ref?: string }
+  )[][] = [];
 
   // フォーマットされた配列を順に処理
   formattedData.forEach((currentArray, currentIndex) => {
@@ -410,9 +423,6 @@ export const organizeFormattedData = (formattedData: any[]) => {
 
     const firstElement = Number(currentArray[0]); // 1つ目の要素を半角数字に変換
     const correspondingNumber = mapping[firstElement as keyof typeof mapping]; // 対応する数字を取得
-    console.log(
-      `1つ目の要素: ${firstElement}, 対応する数字: ${correspondingNumber}`
-    ); // デバッグ用
 
     if (correspondingNumber === null) {
       // 16の場合は無条件で後ろにnullArrayを追加

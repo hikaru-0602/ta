@@ -1,10 +1,11 @@
 import React from "react";
+import { Shift } from "../types"; //業務データの型をインポート
 
 //編集対象のシフトを設定し、編集ダイアログを開く関数
 export const handleEditShift = (
-  shift: any, //編集対象のシフトデータ
-  setEditingShift: Function, //編集対象のシフトを設定する関数
-  setIsEditDialogOpen: Function //編集ダイアログを開く関数
+  shift: Shift, //編集対象のシフトデータ
+  setEditingShift: (shift: Shift) => void, //編集対象のシフトを設定する関数
+  setIsEditDialogOpen: (isOpen: boolean) => void //編集ダイアログを開く関数
 ) => {
   setEditingShift(shift); //編集対象のシフトを設定
   setIsEditDialogOpen(true); //編集ダイアログを開く
@@ -12,36 +13,56 @@ export const handleEditShift = (
 
 //編集されたシフトを保存する関数
 export const handleSaveEditedShift = (
-  editingShift: any, //編集されたシフトデータ
-  shiftData: any[], //既存のシフトデータ
-  setShiftData: Function, //シフトデータを更新する関数
-  saveShiftsToLocalStorage: Function, //シフトデータをlocalStorageに保存する関数
-  setIsEditDialogOpen: Function //編集ダイアログを閉じる関数
+  editingShift: Shift, //編集されたシフトデータ
+  shiftData: Shift[], //既存のシフトデータ
+  setShiftData: (shift: Shift[]) => void, //シフトデータを更新する関数
+  saveShiftsToLocalStorage: (shift: Shift[]) => void, //シフトデータをlocalStorageに保存する関数
+  setIsEditDialogOpen: (isOpen: boolean) => void //編集ダイアログを閉じる関数
 ) => {
+  console.log("handleSaveEditedShift called"); //関数が呼び出されたことを確認するためのログ
   if (!editingShift) return; //編集対象がない場合は処理を終了
 
   // 日付と科目名が一致するシフトデータのみ更新
+  console.log("Editing Shift:", editingShift); //編集対象のシフトデータをログに出力
   const updatedShifts = shiftData.map((shift) =>
-    shift.day === editingShift.day && shift.classname === editingShift.classname
+    shift.day === editingShift.day && shift.id === editingShift.id
       ? { ...shift, ...editingShift } // 編集内容を反映
       : shift
   );
 
   setShiftData(updatedShifts); //状態を更新
+  console.log("Updated Shifts:", updatedShifts); //更新後のシフトデータをログに出力
   saveShiftsToLocalStorage(updatedShifts); //localStorageに保存
   setIsEditDialogOpen(false); //編集ダイアログを閉じる
 };
 
+interface EditShiftDialogProps {
+  isEditDialogOpen: boolean; // 編集ダイアログが開いているかどうかの状態
+  editingShift: Shift | null; // 編集対象のシフトデータ
+  setEditingShift: (shift: Shift) => void; // 編集対象のシフトを設定する関数
+  handleSaveEditedShift: (
+    editingShift: Shift,
+    shiftData: Shift[],
+    setShiftData: (shifts: Shift[]) => void,
+    saveShiftsToLocalStorage: (shifts: Shift[]) => void,
+    setIsEditDialogOpen: (isOpen: boolean) => void
+  ) => void; // 編集されたシフトを保存する関数
+  setIsEditDialogOpen: (isOpen: boolean) => void; // 編集ダイアログを閉じる関数
+  shiftData: Shift[]; // 既存のシフトデータ
+  setShiftData: (shifts: Shift[]) => void; // シフトデータを更新する関数
+  saveShiftsToLocalStorage: (shifts: Shift[]) => void; // シフトデータをlocalStorageに保存する関数
+}
+
 export default function EditShiftDialog({
-  isEditDialogOpen, //編集ダイアログが開いているかどうかの状態
-  editingShift, //編集対象のシフトデータ
-  setEditingShift, //編集対象のシフトを設定する関数
-  handleSaveEditedShift, //編集されたシフトを保存する関数
-  setIsEditDialogOpen, //編集ダイアログを閉じる関数
-  shiftData, //既存のシフトデータ
-  setShiftData, //シフトデータを更新する関数
-  saveShiftsToLocalStorage, //シフトデータをlocalStorageに保存する関数
-}: any) {
+  isEditDialogOpen,
+  editingShift,
+  setEditingShift,
+  handleSaveEditedShift,
+  setIsEditDialogOpen,
+  shiftData,
+  setShiftData,
+  saveShiftsToLocalStorage,
+}: EditShiftDialogProps) {
   //休憩時間を10分刻みに丸める関数
   const roundToNearestTen = (value: number) => {
     return Math.max(0, Math.round(value / 10) * 10); //10分刻みに丸める
@@ -49,6 +70,7 @@ export default function EditShiftDialog({
 
   //休憩時間を増減させる関数
   const adjustBreakTime = (adjustment: number) => {
+    if (!editingShift) return;
     const currentBreakTime = Number(editingShift.breaktime) || 0; //現在の休憩時間を取得
     const newBreakTime = Math.max(0, currentBreakTime + adjustment); //0未満にならないように調整
     setEditingShift({
@@ -58,7 +80,7 @@ export default function EditShiftDialog({
   };
 
   return (
-    isEditDialogOpen && //編集ダイアログが開いている場合のみ表示
+    isEditDialogOpen &&
     editingShift && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
         <div className="bg-white dark:bg-gray-800 p-6 rounded shadow-lg max-w-md w-full">
@@ -123,7 +145,9 @@ export default function EditShiftDialog({
               />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">休憩時間(分)</label>
+              <label className="block text-sm font-medium mb-1">
+                休憩時間(分)
+              </label>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -132,7 +156,9 @@ export default function EditShiftDialog({
                 >
                   -10分
                 </button>
-                <span className="text-lg">{editingShift.breaktime || 0} 分</span>
+                <span className="text-lg">
+                  {editingShift.breaktime || 0} 分
+                </span>
                 <button
                   type="button"
                   onClick={() => adjustBreakTime(10)} //10分増やす

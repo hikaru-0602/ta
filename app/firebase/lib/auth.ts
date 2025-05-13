@@ -1,7 +1,6 @@
 import {
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithRedirect,
   UserCredential,
   signOut,
 } from 'firebase/auth';

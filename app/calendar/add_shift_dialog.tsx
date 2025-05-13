@@ -1,4 +1,5 @@
 import React from "react";
+import { WorkData, Shift } from "../types"; //業務データの型をインポート
 
 //時間をDateオブジェクトに変換する関数
 export const parseTime = (time: string): Date => {
@@ -10,16 +11,16 @@ export const parseTime = (time: string): Date => {
 
 //シフトを追加する関数
 export const handleAddShift = (
-  work: any, //追加するシフトデータ
+  work: WorkData, //追加するシフトデータ
   selectedDate: Date | null, //選択された日付
-  shiftData: any[], //既存のシフトデータ
-  setShiftData: Function, //シフトデータを更新する関数
-  saveShiftsToLocalStorage: Function //シフトデータをlocalStorageに保存する関数
+  shiftData: Shift[], //既存のシフトデータ
+  setShiftData: (shifts: Shift[]) => void, //シフトデータを更新する関数
+  saveShiftsToLocalStorage: (shifts: Shift[]) => void //シフトデータをlocalStorageに保存する関数
 ) => {
   if (!selectedDate) return; //日付が選択されていない場合は処理を終了
 
   //選択された日付のシフトを取得
-  const shiftsForDate = shiftData.filter(
+  const shiftsForDate: Shift[] = shiftData.filter(
     (shift) =>
       shift.month === selectedDate.getMonth() + 1 &&
       shift.day === selectedDate.getDate()
@@ -53,10 +54,18 @@ export const handleAddShift = (
   }
 
   //新しいシフトデータを作成
-  const newShift = {
-    ...work, //既存のデータをコピー
+  const newShift: Shift = {
+    id: work.id, // 必須プロパティを明示的に設定
     month: selectedDate.getMonth() + 1, //月を設定
     day: selectedDate.getDate(), //日を設定
+    label: work.label, //ラベル名を設定
+    classname: work.classname,
+    category: work.category,
+    starttime: work.starttime,
+    endtime: work.endtime,
+    breaktime: work.breaktime,
+    teacher: work.teacher,
+    filter: () => [], // 型定義に合わせてダミー関数を追加
   };
 
   //シフトデータを更新
@@ -67,12 +76,12 @@ export const handleAddShift = (
 
 //シフトを削除する関数
 export const handleRemoveShift = (
-  id: string, //削除するシフトのID
+  id: number, //削除するシフトのID
   month: number, //削除するシフトの月
   day: number, //削除するシフトの日
-  shiftData: any[], //既存のシフトデータ
-  setShiftData: Function, //シフトデータを更新する関数
-  saveShiftsToLocalStorage: Function //シフトデータをlocalStorageに保存する関数
+  shiftData: Shift[], //既存のシフトデータ
+  setShiftData: (shifts: Shift[]) => void, //シフトデータを更新する関数
+  saveShiftsToLocalStorage: (shifts: Shift[]) => void //シフトデータをlocalStorageに保存する関数
 ) => {
   //指定されたシフトを除外した新しいシフトデータを作成
   const updatedShifts = shiftData.filter(
@@ -83,23 +92,54 @@ export const handleRemoveShift = (
   saveShiftsToLocalStorage(updatedShifts); //localStorageに保存
 };
 
-//AddShiftDialogコンポーネント
+interface AddShiftDialogProps {
+  isDialogOpen: boolean;
+  selectedDate: Date | null;
+  shiftData: Shift[];
+  filteredWorkData: WorkData[];
+  handleAddShift: (
+    work: WorkData,
+    selectedDate: Date | null,
+    shiftData: Shift[],
+    setShiftData: (shifts: Shift[]) => void,
+    saveShiftsToLocalStorage: (shifts: Shift[]) => void
+  ) => void;
+  handleEditShift: (
+    shift: Shift,
+    setEditingShift: (shift: Shift) => void,
+    setIsEditDialogOpen: (isOpen: boolean) => void
+  ) => void;
+  handleRemoveShift: (
+    id: number,
+    month: number,
+    day: number,
+    shiftData: Shift[],
+    setShiftData: (shifts: Shift[]) => void,
+    saveShiftsToLocalStorage: (shifts: Shift[]) => void
+  ) => void;
+  closeDialog: () => void;
+  setShiftData: (shifts: Shift[]) => void;
+  saveShiftsToLocalStorage: (shifts: Shift[]) => void;
+  setEditingShift: (shift: Shift) => void;
+  setIsEditDialogOpen: (isOpen: boolean) => void;
+}
+
 export default function AddShiftDialog({
-  isDialogOpen, //ダイアログが開いているかどうかの状態
-  selectedDate, //選択された日付
-  shiftData, //既存のシフトデータ
-  filteredWorkData, //フィルタリングされた業務データ
-  handleAddShift, //シフトを追加する関数
-  handleEditShift, //シフトを編集する関数
-  handleRemoveShift, //シフトを削除する関数
-  closeDialog, //ダイアログを閉じる関数
-  setShiftData, //シフトデータを更新する関数
-  saveShiftsToLocalStorage, //シフトデータをlocalStorageに保存する関数
-  setEditingShift, //編集対象のシフトを設定する関数
-  setIsEditDialogOpen, //編集ダイアログを開く関数
-}: any) {
+  isDialogOpen,
+  selectedDate,
+  shiftData,
+  filteredWorkData,
+  handleAddShift,
+  handleEditShift,
+  handleRemoveShift,
+  closeDialog,
+  setShiftData,
+  saveShiftsToLocalStorage,
+  setEditingShift,
+  setIsEditDialogOpen,
+}: AddShiftDialogProps) {
   return (
-    isDialogOpen && ( //ダイアログが開いている場合のみ表示
+    isDialogOpen && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
         <div className="bg-white dark:bg-gray-800 p-6 rounded shadow-lg max-w-md w-full">
           <h2 className="text-xl font-bold mb-4">仕事リスト</h2>
@@ -107,97 +147,79 @@ export default function AddShiftDialog({
           <ul>
             {shiftData
               .filter(
-                (shift: { month: any; day: any }) =>
+                (shift) =>
                   selectedDate &&
                   shift.month === selectedDate.getMonth() + 1 &&
                   shift.day === selectedDate.getDate()
               )
-              .map(
-                (
-                  shift: {
-                    starttime: string;
-                    endtime: string;
-                    label: string;
-                    id: any;
-                    month: any;
-                    day: any;
-                  },
-                  index: React.Key | null | undefined
-                ) => (
-                  <li key={index} className="mb-2 flex justify-between">
-                    {shift.starttime}~{shift.endtime} {shift.label}
-                    <button
-                      onClick={() => handleEditShift(shift, setEditingShift, setIsEditDialogOpen)}
-                      className="ml-2 px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                    >
-                      編集
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleRemoveShift(
-                          shift.id,
-                          shift.month,
-                          shift.day,
-                          shiftData,
-                          setShiftData,
-                          saveShiftsToLocalStorage
-                        )
-                      }
-                      className="ml-2 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                    >
-                      削除
-                    </button>
-                  </li>
-                )
-              )}
+              .map((shift, index) => (
+                <li key={index} className="mb-2 flex justify-between">
+                  {shift.starttime}~{shift.endtime} {shift.label}
+                  <button
+                    onClick={() =>
+                      handleEditShift(
+                        shift,
+                        setEditingShift,
+                        setIsEditDialogOpen
+                      )
+                    }
+                    className="ml-2 px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                  >
+                    編集
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleRemoveShift(
+                        shift.id,
+                        shift.month,
+                        shift.day,
+                        shiftData,
+                        setShiftData,
+                        saveShiftsToLocalStorage
+                      )
+                    }
+                    className="ml-2 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                  >
+                    削除
+                  </button>
+                </li>
+              ))}
           </ul>
           <h3 className="text-lg font-semibold mt-4 mb-2">-- 一覧 --</h3>
           <ul>
             {filteredWorkData
               .filter(
-                (work: { classname: any; starttime: any; endtime: any; dayofweek: any }) =>
+                (work) =>
                   !shiftData.some(
-                    (shift: {
-                      classname: any;
-                      starttime: any;
-                      endtime: any;
-                      dayofweek: any;
-                      month: any;
-                      day: any;
-                    }) =>
+                    (shift) =>
                       shift.classname === work.classname &&
                       shift.starttime === work.starttime &&
                       shift.endtime === work.endtime &&
-                      shift.dayofweek === work.dayofweek &&
+                      shift.label === work.label &&
                       selectedDate &&
                       shift.month === selectedDate.getMonth() + 1 &&
-                      shift.day === selectedDate?.getDate()
+                      shift.day === selectedDate.getDate()
                   )
               )
-              .map(
-                (
-                  work: { starttime: string; endtime: string; label: string },
-                  index: React.Key | null | undefined
-                ) => (
-                  <li key={index} className="mb-2 flex justify-between">
-                    {work.starttime}~{work.endtime} {work.label}
-                    <button
-                      onClick={() =>
-                        handleAddShift(
-                          work,
-                          selectedDate,
-                          shiftData,
-                          setShiftData,
-                          saveShiftsToLocalStorage
-                        )
-                      }
-                      className="ml-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    >
-                      追加
-                    </button>
-                  </li>
-                )
-              )}
+              .map((work, index) => (
+                <li key={index} className="mb-2 flex justify-between">
+                  {work.starttime}~{work.endtime} {work.label}
+                  <button
+                    onClick={() =>
+                      handleAddShift(
+                        work,
+                        selectedDate,
+                        shiftData,
+                        setShiftData,
+                        saveShiftsToLocalStorage
+                      )
+                    }
+                    className="ml-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    追加
+                  </button>
+                </li>
+              ))}
           </ul>
           <button
             onClick={closeDialog}
