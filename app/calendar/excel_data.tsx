@@ -273,7 +273,6 @@ export const formatShiftDataForExcel = (shiftData: any[]) => {
             "CEILING(ROUND(((TIME(J13,L13,0)-TIME(F13,H13,0))*24-N13/60),3),0.5)",
           result: 2,
           ref: "M13",
-          shareType: "shared",
         },
         shift.breaktime, // 休憩時間
       ];
@@ -358,6 +357,21 @@ export const organizeFormattedData = (formattedData: any[]) => {
     14: 30,
     15: 31,
     16: null,
+    17: 1,
+    18: 2,
+    19: 3,
+    20: 4,
+    21: 5,
+    22: 6,
+    23: 7,
+    24: 8,
+    25: 9,
+    26: 10,
+    27: 11,
+    28: 12,
+    29: 13,
+    30: 14,
+    31: 15,
   } as const;
 
   // 処理済みの配列を追跡するためのセット
@@ -381,7 +395,6 @@ export const organizeFormattedData = (formattedData: any[]) => {
       formula:
         "CEILING(ROUND(((TIME(X13,Z13,0)-TIME(T13,V13,0))*24-AB13/60),3),0.5)",
       ref: "AA13",
-      shareType: "shared",
     },
     null,
   ];
@@ -397,6 +410,9 @@ export const organizeFormattedData = (formattedData: any[]) => {
 
     const firstElement = Number(currentArray[0]); // 1つ目の要素を半角数字に変換
     const correspondingNumber = mapping[firstElement as keyof typeof mapping]; // 対応する数字を取得
+    console.log(
+      `1つ目の要素: ${firstElement}, 対応する数字: ${correspondingNumber}`
+    ); // デバッグ用
 
     if (correspondingNumber === null) {
       // 16の場合は無条件で後ろにnullArrayを追加
