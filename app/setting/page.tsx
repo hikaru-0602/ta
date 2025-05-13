@@ -50,7 +50,12 @@ export default function Work() {
     loadUserInfoFromLocalStorage();
     loadWorkDataFromLocalStorage();
     initworkInfo();
+    setIsDialogOpen(false);
   }, []);
+
+  useEffect(() => {
+    console.log(isDialogOpen);
+  }, [isDialogOpen]);
 
   const signIn = () => {
     login();

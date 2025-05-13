@@ -82,6 +82,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
   initworkInfo,
 }) => {
   const checkWorkIdExists = useCallback(() => {
+    if (!isDialogOpen) return; // ダイアログが開いていない場合は早期リターン
     const exists = workData.some((work) => work.id === workid);
     return exists;
   }, [workid, workData]);
@@ -142,6 +143,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
     setEditingIndex,
   ]);
 
+  if (!isDialogOpen) return null;
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
