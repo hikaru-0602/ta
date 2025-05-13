@@ -175,6 +175,7 @@ export const replaceAllData = async (
 
     // replaceRowWithArray を使用して11行目を置き換え
     replaceRowWithArray(worksheet, 11, yearMonthArray);
+    replaceRowWithArray(worksheet, 65, yearMonthArray);
     replaceRowWithArray(worksheet, 46, userDataArrays.kanadata46);
     replaceRowWithArray(worksheet, 47, userDataArrays.namedata47);
     replaceRowWithArray(worksheet, 48, userDataArrays.iddata48);

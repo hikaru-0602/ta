@@ -16,7 +16,7 @@ import ExportDialog, {
 } from "./export_dialog";
 import { useAuth } from "../firebase/context/auth";
 
-export default function Calendar(year?: number, month?: number) {
+export default function Calendar() {
   const router = useRouter(); // ルーターを初期化
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -50,7 +50,15 @@ export default function Calendar(year?: number, month?: number) {
   );
 
   const isHoliday = (date: Date): boolean => {
-    const formattedDate = date.toISOString().split("T")[0]; // YYYY-MM-DD 形式に変換
+    // ローカルタイムゾーンの日付を YYYY-MM-DD 形式に変換
+    const formattedDate = date
+      .toLocaleDateString("ja-JP", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+      .replace(/\//g, "-"); // "YYYY/MM/DD" を "YYYY-MM-DD" に変換
+
     return holidays.hasOwnProperty(formattedDate);
   };
 
