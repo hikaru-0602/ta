@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useCallback } from "react";
 
 interface WorkDialogProps {
   isDialogOpen: boolean;
@@ -82,10 +83,10 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
 }) => {
   if (!isDialogOpen) return null;
 
-  const checkWorkIdExists = () => {
+  const checkWorkIdExists = useCallback(() => {
     const exists = workData.some((work) => work.id === workid);
     return exists ? true : false; // workidが存在する場合はtrueを返す
-  };
+  }, [workid, workData]);
 
   const adjustTime = (time: string, adjustment: number): string => {
     const [hour, minute] = time.split(":").map(Number);
@@ -102,35 +103,23 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
 
   // workInfoを更新するuseEffect
   useEffect(() => {
-    if (!isDialogOpen) return; // ダイアログが開いていない場合は処理を終了
+    if (!isDialogOpen) return; // ダイアログが開いていない場合は早期リターン
 
     if (checkWorkIdExists()) {
       const existingWork = workData.find((work) => work.id === workid);
       if (existingWork) {
-        setEditingIndex(workid); // 編集中のインデックスを設定
+        setEditingIndex(workid);
         handleWorkChange({
-          target: {
-            name: "label",
-            value: existingWork.label,
-          },
+          target: { name: "label", value: existingWork.label },
         } as React.ChangeEvent<HTMLInputElement>);
         handleWorkChange({
-          target: {
-            name: "subject",
-            value: existingWork.classname,
-          },
+          target: { name: "subject", value: existingWork.classname },
         } as React.ChangeEvent<HTMLInputElement>);
         handleWorkChange({
-          target: {
-            name: "category",
-            value: existingWork.category,
-          },
+          target: { name: "category", value: existingWork.category },
         } as React.ChangeEvent<HTMLSelectElement>);
         handleWorkChange({
-          target: {
-            name: "teacher",
-            value: existingWork.teacher,
-          },
+          target: { name: "teacher", value: existingWork.teacher },
         } as React.ChangeEvent<HTMLInputElement>);
         handleScheduleChange(0, "day", existingWork.dayofweek, false);
         handleScheduleChange(
@@ -246,7 +235,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                               type="checkbox"
                               value={period}
                               checked={schedule.periods.includes(period)}
-                              onChange={(e) => {
+                              onChange={() => {
                                 const selectedPeriods =
                                   schedule.periods.includes(period)
                                     ? schedule.periods.filter(

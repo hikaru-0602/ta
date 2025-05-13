@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { formatUserDataForExcel, getUserData } from "../calendar/excel_data";
 
 export const useUserInfo = () => {
   //ユーザー情報を管理するための状態を定義
@@ -62,20 +61,6 @@ export const useUserInfo = () => {
   //ユーザー情報を登録する関数
   const handleUserRegister = () => {
     saveUserInfoToLocalStorage();
-
-    const userData = {
-
-      name: userInfo.name,
-      name_kana: userInfo.name_kana,
-      id: userInfo.id,
-      grade: userInfo.grade,
-    };
-
-    const userDataForExcel = getUserData(userData);
-    //console.log(userDataForExcel);
-    const formattedUserData = formatUserDataForExcel(userData);
-
-
 
     //alert(`ユーザ情報を登録しました！\n時給: ${userInfo.hourlyWage}円`);
   };

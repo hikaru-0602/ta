@@ -9,11 +9,20 @@ import { replaceAllData } from "./export_to_excel";
 import { Shift } from "../types"; //業務データの型をインポート
 
 interface ExportDialogProps {
-  isExportDialogOpen: boolean; // エクスポートダイアログが開いているかどうかの状態
+  isExportDialogOpen: boolean; // ダイアログの開閉状態
   subjectNames: string[]; // 科目名のリスト
   currentDate: Date; // 現在の日付
   shiftData: Shift[]; // シフトデータ
   setIsExportDialogOpen: (isOpen: boolean) => void; // ダイアログを閉じる関数
+  handleExportSubject: (
+    selectedSubject: string,
+    currentDate: Date,
+    shiftData: Shift[],
+    setIsExportDialogOpen: (isOpen: boolean) => void
+  ) => void; // 科目をエクスポートする関数
+  handleCloseExportDialog: (
+    setIsExportDialogOpen: (isOpen: boolean) => void
+  ) => void; // ダイアログを閉じる関数
 }
 
 export const getHolidaysInMonth = async (
@@ -91,7 +100,7 @@ export const handleExportSubject = (
 
   //JSON形式で出力
   const jsonOutput = JSON.stringify(filteredShifts, null, 2); //シフトデータをJSON形式に変換
-  console.log(jsonOutput); //JSONデータをコンソールに出力
+  //console.log(jsonOutput); //JSONデータをコンソールに出力
   alert(`選択された科目名のシフトデータ:\n${jsonOutput}`); //JSONデータをアラートで表示
 
   setIsExportDialogOpen(false); //ダイアログを閉じる
@@ -207,17 +216,14 @@ export const exportData = async (
 
   // シフトデータをフォーマット
   const formattedData = formatShiftDataForExcel(unifiedShifts);
-  console.log("フォーマット済みデータ:", formattedData); // デバッグ用
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
   const holidays = getHolidaysInMonth(year, month); // 祝日を取得
-  console.log("祝日:", holidays); // デバッグ用
   const yearMonthArray = getYearAndMonth(year, month); // 和暦と月を含む配列を取得
 
   const userDataArrays = getUserData(userInfo); // ユーザデータを取得
 
   const teacherDataArrays = getteacherData({ name: teacher }); // 教員データを取得
-  console.log("教員データ:", teacherDataArrays); // デバッグ用
 
   // 必要に応じてExcelに書き込む処理を追加
   //console.log("Excel用フォーマット済みデータ:", formattedData);
@@ -255,7 +261,7 @@ export default function ExportDialog({
   currentDate, // 現在の日付
   shiftData, // シフトデータ
   setIsExportDialogOpen, // ダイアログを閉じる関数
-}: any) {
+}: ExportDialogProps) {
   return (
     isExportDialogOpen && ( // ダイアログが開いている場合のみ表示
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

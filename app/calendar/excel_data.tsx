@@ -283,7 +283,6 @@ export const formatShiftDataForExcel = (shiftData: Shift[]) => {
 
     // 必要に応じてこの配列をExcelに書き込む処理を追加
     //alert("シフトデータのフォーマットが完了しました。");
-    console.log(organizeFormattedData(formattedShifts)); // フォーマットされたデータを整理
     return organizeFormattedData(formattedShifts); // 整理されたデータを返す
   } catch (error) {
     console.error("シフトデータのフォーマット中にエラーが発生しました:", error);
@@ -424,9 +423,6 @@ export const organizeFormattedData = (
 
     const firstElement = Number(currentArray[0]); // 1つ目の要素を半角数字に変換
     const correspondingNumber = mapping[firstElement as keyof typeof mapping]; // 対応する数字を取得
-    console.log(
-      `1つ目の要素: ${firstElement}, 対応する数字: ${correspondingNumber}`
-    ); // デバッグ用
 
     if (correspondingNumber === null) {
       // 16の場合は無条件で後ろにnullArrayを追加
