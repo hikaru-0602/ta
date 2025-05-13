@@ -1,6 +1,7 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { getYearAndMonth, organizeFormattedData } from "./excel_data";
+import { organizeFormattedData } from "./excel_data";
+import { Shift } from "../types"; //業務データの型をインポート
 
 // 条件に一致する行のデータを置き換える関数
 export const handleReplaceRowsWithFormattedData = async () => {
@@ -93,11 +94,6 @@ const replaceRowWithArray = (
 ) => {
   // 指定した行を取得
   const rowToReplace = worksheet.getRow(rowIndex);
-
-  // 指定した行のセル結合状態を保持
-  const mergedCells = worksheet.model.merges.filter((merge) =>
-    merge.includes(`${rowIndex}`)
-  );
 
   // 配列の値を指定した行に書き込む（スタイルを保持）
   values.forEach((value, colIndex) => {
@@ -206,16 +202,6 @@ export const replaceAllData = async (
         //  return; // すでに使用済みのデータの場合はスキップ
         //}
         usedShiftData.push(matchingData); // 使用済みデータとして追加
-        const firstformula = {
-          formula: `CEILING(ROUND(((TIME(J${rowIndex},L${rowIndex},0)-TIME(F${rowIndex},H${rowIndex},0))*24-N${rowIndex}/60),3),0.5)`,
-          result: 2,
-          ref: `M${rowIndex}`,
-        };
-
-        const secondformula = {
-          formula: `CEILING(ROUND(((TIME(X${rowIndex},Z${rowIndex},0)-TIME(T${rowIndex},V${rowIndex},0))*24-AB${rowIndex}/60),3),0.5)`,
-          ref: `AA${rowIndex}`,
-        };
 
         matchingData[12] = {
           formula: `CEILING(ROUND(((TIME(J${rowIndex},L${rowIndex},0)-TIME(F${rowIndex},H${rowIndex},0))*24-N${rowIndex}/60),3),0.5)`,

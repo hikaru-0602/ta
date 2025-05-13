@@ -1,4 +1,5 @@
 import React from "react";
+import { WorkData, Shift } from "../types"; //業務データの型をインポート
 
 //時間をDateオブジェクトに変換する関数
 export const parseTime = (time: string): Date => {
@@ -10,16 +11,16 @@ export const parseTime = (time: string): Date => {
 
 //シフトを追加する関数
 export const handleAddShift = (
-  work: any, //追加するシフトデータ
+  work: WorkData, //追加するシフトデータ
   selectedDate: Date | null, //選択された日付
-  shiftData: any[], //既存のシフトデータ
-  setShiftData: Function, //シフトデータを更新する関数
-  saveShiftsToLocalStorage: Function //シフトデータをlocalStorageに保存する関数
+  shiftData: Shift[], //既存のシフトデータ
+  setShiftData: (shifts: Shift[]) => void, //シフトデータを更新する関数
+  saveShiftsToLocalStorage: (shifts: Shift[]) => void //シフトデータをlocalStorageに保存する関数
 ) => {
   if (!selectedDate) return; //日付が選択されていない場合は処理を終了
 
   //選択された日付のシフトを取得
-  const shiftsForDate = shiftData.filter(
+  const shiftsForDate: Shift[] = shiftData.filter(
     (shift) =>
       shift.month === selectedDate.getMonth() + 1 &&
       shift.day === selectedDate.getDate()
@@ -53,10 +54,16 @@ export const handleAddShift = (
   }
 
   //新しいシフトデータを作成
-  const newShift = {
-    ...work, //既存のデータをコピー
+  const newShift: Shift = {
+    id: work.id, // 必須プロパティを明示的に設定
     month: selectedDate.getMonth() + 1, //月を設定
     day: selectedDate.getDate(), //日を設定
+    classname: work.classname,
+    category: work.category,
+    starttime: work.starttime,
+    endtime: work.endtime,
+    breaktime: work.breaktime,
+    filter: () => [], // 型定義に合わせてダミー関数を追加
   };
 
   //シフトデータを更新
@@ -67,12 +74,12 @@ export const handleAddShift = (
 
 //シフトを削除する関数
 export const handleRemoveShift = (
-  id: string, //削除するシフトのID
+  id: number, //削除するシフトのID
   month: number, //削除するシフトの月
   day: number, //削除するシフトの日
-  shiftData: any[], //既存のシフトデータ
-  setShiftData: Function, //シフトデータを更新する関数
-  saveShiftsToLocalStorage: Function //シフトデータをlocalStorageに保存する関数
+  shiftData: Shift[], //既存のシフトデータ
+  setShiftData: (shifts: Shift[]) => void, //シフトデータを更新する関数
+  saveShiftsToLocalStorage: (shifts: Shift[]) => void //シフトデータをlocalStorageに保存する関数
 ) => {
   //指定されたシフトを除外した新しいシフトデータを作成
   const updatedShifts = shiftData.filter(
@@ -107,7 +114,7 @@ export default function AddShiftDialog({
           <ul>
             {shiftData
               .filter(
-                (shift: { month: any; day: any }) =>
+                (shift: { month: number; day: number }) =>
                   selectedDate &&
                   shift.month === selectedDate.getMonth() + 1 &&
                   shift.day === selectedDate.getDate()
@@ -118,16 +125,22 @@ export default function AddShiftDialog({
                     starttime: string;
                     endtime: string;
                     label: string;
-                    id: any;
-                    month: any;
-                    day: any;
+                    id: string;
+                    month: number;
+                    day: number;
                   },
                   index: React.Key | null | undefined
                 ) => (
                   <li key={index} className="mb-2 flex justify-between">
                     {shift.starttime}~{shift.endtime} {shift.label}
                     <button
-                      onClick={() => handleEditShift(shift, setEditingShift, setIsEditDialogOpen)}
+                      onClick={() =>
+                        handleEditShift(
+                          shift,
+                          setEditingShift,
+                          setIsEditDialogOpen
+                        )
+                      }
                       className="ml-2 px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
                     >
                       編集
@@ -155,15 +168,20 @@ export default function AddShiftDialog({
           <ul>
             {filteredWorkData
               .filter(
-                (work: { classname: any; starttime: any; endtime: any; dayofweek: any }) =>
+                (work: {
+                  classname: string;
+                  starttime: string;
+                  endtime: string;
+                  dayofweek: string;
+                }) =>
                   !shiftData.some(
                     (shift: {
-                      classname: any;
-                      starttime: any;
-                      endtime: any;
-                      dayofweek: any;
-                      month: any;
-                      day: any;
+                      classname: string;
+                      starttime: string;
+                      endtime: string;
+                      dayofweek: string;
+                      month: number;
+                      day: number;
                     }) =>
                       shift.classname === work.classname &&
                       shift.starttime === work.starttime &&

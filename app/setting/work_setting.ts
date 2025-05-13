@@ -190,7 +190,7 @@ export const useWorkInfo = () => {
     const updatedWorkData = workData.map((work) => {
       if (work.id === workid) {
         // 更新時の時間計算
-        const { startTime, endTime, breakTime } = calculateStartEndTimes(workInfo.schedules[0].periods);
+        const { startTime, endTime } = calculateStartEndTimes(workInfo.schedules[0].periods);
         const finalStartTime = workInfo.schedules[0].startTime || startTime;
         const finalEndTime = workInfo.schedules[0].endTime || endTime;
         const finalBreakTime = Number(workInfo.schedules[0].breakTime);

@@ -7,7 +7,6 @@ import { useWorkInfo } from "./work_setting";
 import WorkDialog from "./work_dialog";
 import { useAuth } from "../firebase/context/auth";
 import { login, logout } from "../firebase/lib/auth";
-import { title } from "process";
 
 export default function Work() {
   //ユーザ情報のカスタムフックを使用
@@ -54,10 +53,7 @@ export default function Work() {
   }, []);
 
   const signIn = () => {
-    login()
-      .then((userCredential) => {})
-      .catch((error) => {})
-      .finally(() => {});
+    login();
   };
 
   return (

@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   formatShiftDataForExcel,
-  checkRowsAndOutput,
   getYearAndMonth,
   getUserData,
   getteacherData,
 } from "./excel_data";
 import { replaceAllData } from "./export_to_excel";
+import { Shift } from "../types"; //業務データの型をインポート
 
 export const getHolidaysInMonth = async (
   year: number,
@@ -32,7 +32,15 @@ export const getHolidaysInMonth = async (
 
   while (date.getMonth() === month - 1) {
     const dayOfWeek = date.getDay(); // 0: 日曜日, 6: 土曜日
-    const formattedDate = date.toISOString().split("T")[0]; // YYYY-MM-DD形式
+
+    // ローカルタイムゾーンの日付を YYYY-MM-DD 形式に変換
+    const formattedDate = date
+      .toLocaleDateString("ja-JP", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+      .replace(/\//g, "-"); // "YYYY/MM/DD" を "YYYY-MM-DD" に変換
 
     // 土日または祝日を判定
     if (dayOfWeek === 0 || dayOfWeek === 6 || holidayData[formattedDate]) {
@@ -48,8 +56,8 @@ export const getHolidaysInMonth = async (
 export const handleExportSubject = (
   selectedSubject: string, //選択された科目名
   currentDate: Date, //現在の日付
-  shiftData: any[], //シフトデータ
-  setIsExportDialogOpen: Function //ダイアログを閉じる関数
+  shiftData: Shift[], //シフトデータ
+  setIsExportDialogOpen: (isOpen: boolean) => void //ダイアログを閉じる関数
 ) => {
   if (!currentDate || !(currentDate instanceof Date)) {
     console.error("currentDate is not defined or not a valid Date object."); //エラーをコンソールに出力
@@ -85,8 +93,8 @@ export const handleExportSubject = (
 export const exportData = async (
   selectedSubject: string, // 選択された科目名
   currentDate: Date, // 現在の日付
-  shiftData: any[], // シフトデータ
-  setIsExportDialogOpen: Function // ダイアログを閉じる関数
+  shiftData: Shift[], // シフトデータ
+  setIsExportDialogOpen: (isOpen: boolean) => void // ダイアログを閉じる関数
 ) => {
   if (!currentDate || !(currentDate instanceof Date)) {
     console.error("currentDate is not defined or not a valid Date object.");
@@ -119,7 +127,7 @@ export const exportData = async (
   );
 
   // 日付ごとにシフトをグループ化
-  const groupedShifts: { [date: string]: any[] } = {};
+  const groupedShifts: { [date: string]: Shift[] } = {};
   filteredShifts.forEach((shift) => {
     const dateKey = shift.day; // シフトの日付をキーにする
     if (!groupedShifts[dateKey]) {
@@ -131,10 +139,9 @@ export const exportData = async (
   });
 
   // シフトを統一
-  const unifiedShifts: any[] = [];
+  const unifiedShifts: Shift[] = [];
   Object.keys(groupedShifts).forEach((dateKey) => {
     const shifts = groupedShifts[dateKey];
-    const teacher = shifts[0].teacher; // 教員名を取得（最初のシフトから取得）
     if (shifts.length === 1) {
       unifiedShifts.push(shifts[0]); // シフトが1つだけの場合はそのまま追加
     } else {
@@ -192,9 +199,6 @@ export const exportData = async (
   const yearMonthArray = getYearAndMonth(year, month); // 和暦と月を含む配列を取得
 
   const userDataArrays = getUserData(userInfo); // ユーザデータを取得
-  if (userDataArrays) {
-    const { kanadata46, namedata47, iddata48, gradadata49 } = userDataArrays;
-  }
 
   const teacherDataArrays = getteacherData({ name: teacher }); // 教員データを取得
   console.log("教員データ:", teacherDataArrays); // デバッグ用
@@ -222,7 +226,9 @@ export const exportData = async (
 };
 
 //エクスポートダイアログを閉じる関数
-export const handleCloseExportDialog = (setIsExportDialogOpen: Function) => {
+export const handleCloseExportDialog = (
+  setIsExportDialogOpen: (isOpen: boolean) => void
+) => {
   setIsExportDialogOpen(false); //ダイアログを閉じる
 };
 

@@ -2,6 +2,7 @@
 
 "use client";
 import ExcelJS from "exceljs";
+import { Shift } from "../types";
 
 //和暦と年月を取得し、配列を作成する関数
 export const getYearAndMonth = (year: number, month: number) => {
@@ -243,7 +244,7 @@ export const getteacherData = (teacherData: {
 };
 
 //シフトデータを指定された形式の配列に変換する関数
-export const formatShiftDataForExcel = (shiftData: any[]) => {
+export const formatShiftDataForExcel = (shiftData: Shift[]) => {
   try {
     if (!shiftData || !Array.isArray(shiftData)) {
       console.error("shiftData is not defined or not an array.");
@@ -308,7 +309,8 @@ export const checkRowsAndOutput = async (file: File) => {
       return;
     }
 
-    const outputData: Array<{ firstCell: any; fifteenthCell: any }> = []; // 出力データを格納する配列
+    const outputData: Array<{ firstCell: unknown; fifteenthCell: unknown }> =
+      []; // 出力データを格納する配列
 
     worksheet.eachRow((row, rowIndex) => {
       if (rowIndex > 50) return; // 50行目まで処理

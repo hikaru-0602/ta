@@ -1,10 +1,11 @@
 import React from "react";
+import { Shift } from "../types"; //業務データの型をインポート
 
 //編集対象のシフトを設定し、編集ダイアログを開く関数
 export const handleEditShift = (
-  shift: any, //編集対象のシフトデータ
-  setEditingShift: Function, //編集対象のシフトを設定する関数
-  setIsEditDialogOpen: Function //編集ダイアログを開く関数
+  shift: Shift, //編集対象のシフトデータ
+  setEditingShift: (shift: Shift) => void, //編集対象のシフトを設定する関数
+  setIsEditDialogOpen: (isOpen: boolean) => void //編集ダイアログを開く関数
 ) => {
   setEditingShift(shift); //編集対象のシフトを設定
   setIsEditDialogOpen(true); //編集ダイアログを開く
@@ -12,11 +13,11 @@ export const handleEditShift = (
 
 //編集されたシフトを保存する関数
 export const handleSaveEditedShift = (
-  editingShift: any, //編集されたシフトデータ
-  shiftData: any[], //既存のシフトデータ
-  setShiftData: Function, //シフトデータを更新する関数
-  saveShiftsToLocalStorage: Function, //シフトデータをlocalStorageに保存する関数
-  setIsEditDialogOpen: Function //編集ダイアログを閉じる関数
+  editingShift: Shift, //編集されたシフトデータ
+  shiftData: Shift[], //既存のシフトデータ
+  setShiftData: (shift: Shift[]) => void, //シフトデータを更新する関数
+  saveShiftsToLocalStorage: (shift: Shift[]) => void, //シフトデータをlocalStorageに保存する関数
+  setIsEditDialogOpen: (isOpen: boolean) => void //編集ダイアログを閉じる関数
 ) => {
   if (!editingShift) return; //編集対象がない場合は処理を終了
 
@@ -123,7 +124,9 @@ export default function EditShiftDialog({
               />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">休憩時間(分)</label>
+              <label className="block text-sm font-medium mb-1">
+                休憩時間(分)
+              </label>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -132,7 +135,9 @@ export default function EditShiftDialog({
                 >
                   -10分
                 </button>
-                <span className="text-lg">{editingShift.breaktime || 0} 分</span>
+                <span className="text-lg">
+                  {editingShift.breaktime || 0} 分
+                </span>
                 <button
                   type="button"
                   onClick={() => adjustBreakTime(10)} //10分増やす
