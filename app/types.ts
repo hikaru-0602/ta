@@ -3,6 +3,8 @@ export type Shift = {
   id: number;
   month: number;
   day: number;
+  label: string;
+  teacher: string;
   classname: string;
   category: string;
   starttime: string;

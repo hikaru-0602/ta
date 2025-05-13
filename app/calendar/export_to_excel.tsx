@@ -1,7 +1,6 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { organizeFormattedData } from "./excel_data";
-import { Shift } from "../types"; //業務データの型をインポート
 
 // 条件に一致する行のデータを置き換える関数
 export const handleReplaceRowsWithFormattedData = async () => {

@@ -23,14 +23,14 @@ export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null); // 選択された日付を管理
   const [workData, setWorkData] = useState<WorkData[]>([]);
-  const [filteredWorkData, setFilteredWorkData] = useState<unknown[]>([]); // フィルタリングされたデータ
+  const [filteredWorkData, setFilteredWorkData] = useState<WorkData[]>([]); // フィルタリングされたデータ
   const [shiftData, setShiftData] = useState<Shift[]>([]); // 初期値を空配列に設定
   const [isDialogOpen, setIsDialogOpen] = useState(false); // ダイアログの状態
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null); // ユーザ情報を管理
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false); // ダイアログの状態
   const [subjectNames, setSubjectNames] = useState<string[]>([]); // 科目名リスト
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // 編集ダイアログの状態
-  const [editingShift, setEditingShift] = useState<unknown>(null); // 編集対象のシフト
+  const [editingShift, setEditingShift] = useState<Shift | null>(null); // 編集対象のシフト
   const [holidays, setHolidays] = useState<{ [date: string]: string }>({});
   const user = useAuth();
 
@@ -96,7 +96,7 @@ export default function Calendar() {
     fetchHolidays();
   }, []);
 
-  const saveShiftsToLocalStorage = (shifts: Shift) => {
+  const saveShiftsToLocalStorage = (shifts: Shift[]) => {
     localStorage.setItem("shiftData", JSON.stringify(shifts));
   };
 

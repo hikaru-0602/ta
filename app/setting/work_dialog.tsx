@@ -102,10 +102,11 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
 
   // workInfoを更新するuseEffect
   useEffect(() => {
+    if (!isDialogOpen) return; // ダイアログが開いていない場合は処理を終了
+
     if (checkWorkIdExists()) {
       const existingWork = workData.find((work) => work.id === workid);
       if (existingWork) {
-        // workInfoを更新
         setEditingIndex(workid); // 編集中のインデックスを設定
         handleWorkChange({
           target: {
@@ -143,7 +144,16 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
         handleScheduleTimeEdit(0, "breakTime", String(existingWork.breaktime));
       }
     }
-  }, [workid, workData, isDialogOpen]); // workid, workData, isDialogOpenが変更されたときに実行
+  }, [
+    isDialogOpen,
+    workid,
+    workData,
+    checkWorkIdExists,
+    handleWorkChange,
+    handleScheduleChange,
+    handleScheduleTimeEdit,
+    setEditingIndex,
+  ]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -236,7 +246,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                               type="checkbox"
                               value={period}
                               checked={schedule.periods.includes(period)}
-                              onChange={() => {
+                              onChange={(e) => {
                                 const selectedPeriods =
                                   schedule.periods.includes(period)
                                     ? schedule.periods.filter(

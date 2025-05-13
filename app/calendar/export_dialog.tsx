@@ -8,6 +8,14 @@ import {
 import { replaceAllData } from "./export_to_excel";
 import { Shift } from "../types"; //業務データの型をインポート
 
+interface ExportDialogProps {
+  isExportDialogOpen: boolean; // エクスポートダイアログが開いているかどうかの状態
+  subjectNames: string[]; // 科目名のリスト
+  currentDate: Date; // 現在の日付
+  shiftData: Shift[]; // シフトデータ
+  setIsExportDialogOpen: (isOpen: boolean) => void; // ダイアログを閉じる関数
+}
+
 export const getHolidaysInMonth = async (
   year: number,
   month: number
@@ -107,7 +115,6 @@ export const exportData = async (
     alert("シフトデータが正しく読み込まれていません。");
     return;
   }
-  const teacher = ""; // 教員名を取得（最初のシフトから取得）
 
   const savedUserInfo = localStorage.getItem("userInfo");
   const userInfo = savedUserInfo ? JSON.parse(savedUserInfo) : null;
@@ -125,6 +132,15 @@ export const exportData = async (
   const filteredShifts = currentMonthShifts.filter(
     (shift) => shift.classname === selectedSubject
   );
+
+  let teacher = "";
+  for (const shift of filteredShifts) {
+    if (shift.teacher) {
+      teacher = shift.teacher;
+      break;
+    }
+  }
+  console.log("teacher:", teacher); // デバッグ用
 
   // 日付ごとにシフトをグループ化
   const groupedShifts: { [date: string]: Shift[] } = {};

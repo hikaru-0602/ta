@@ -71,6 +71,11 @@ export const useUserInfo = () => {
       grade: userInfo.grade,
     };
 
+    const userDataForExcel = getUserData(userData);
+    //console.log(userDataForExcel);
+    const formattedUserData = formatUserDataForExcel(userData);
+
+
 
     //alert(`ユーザ情報を登録しました！\n時給: ${userInfo.hourlyWage}円`);
   };

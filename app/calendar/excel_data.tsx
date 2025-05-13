@@ -198,7 +198,7 @@ export const getteacherData = (teacherData: {
 }) => {
   try {
     if (!teacherData) {
-      console.error("ユーザデータが存在しません。");
+      console.error("教員名が存在しません。");
       //alert("ユーザデータが正しく読み込まれていません。");
       return;
     }
@@ -222,16 +222,16 @@ export const getteacherData = (teacherData: {
       null,
       null,
       null,
-      "伊藤　恵",
-      "伊藤　恵",
-      "伊藤　恵",
-      "伊藤　恵",
-      "伊藤　恵",
-      "伊藤　恵",
-      "伊藤　恵",
-      "伊藤　恵",
-      "伊藤　恵",
-      "伊藤　恵",
+      teacherData.name,
+      teacherData.name,
+      teacherData.name,
+      teacherData.name,
+      teacherData.name,
+      teacherData.name,
+      teacherData.name,
+      teacherData.name,
+      teacherData.name,
+      teacherData.name,
       null,
     ];
     //console.log("フォーマットされたユーザデータ:", formattedUserData);
@@ -340,7 +340,14 @@ export const checkRowsAndOutput = async (file: File) => {
 };
 
 //1つ目の要素を基準に配列を整理する関数
-export const organizeFormattedData = (formattedData: any[]) => {
+export const organizeFormattedData = (
+  formattedData: (
+    | string
+    | number
+    | null
+    | { formula: string; ref?: string }
+  )[][]
+) => {
   // 数字の対応表
   const mapping = {
     1: 17,
@@ -404,7 +411,12 @@ export const organizeFormattedData = (formattedData: any[]) => {
   const nullArray = Array(14).fill(null); // nullで埋めた配列
 
   // 結果を格納する配列
-  const result: any[] = [];
+  const result: (
+    | string
+    | number
+    | null
+    | { formula: string; ref?: string }
+  )[][] = [];
 
   // フォーマットされた配列を順に処理
   formattedData.forEach((currentArray, currentIndex) => {
