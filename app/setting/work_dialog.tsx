@@ -81,11 +81,9 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
   setEditingIndex,
   initworkInfo,
 }) => {
-  if (!isDialogOpen) return null;
-
   const checkWorkIdExists = useCallback(() => {
     const exists = workData.some((work) => work.id === workid);
-    return exists ? true : false; // workidが存在する場合はtrueを返す
+    return exists;
   }, [workid, workData]);
 
   const adjustTime = (time: string, adjustment: number): string => {
