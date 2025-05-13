@@ -109,16 +109,56 @@ const replaceRowWithArray = (
   rowToReplace.commit(); // 変更を確定
 };
 
+const fillHolidays = (worksheet: ExcelJS.Worksheet, holiday: number) => {
+  worksheet.eachRow((row, rowIndex) => {
+    if (rowIndex > 55) return;
+    const firstCellValue = row.getCell(1).value; // 1つ目のセルの値を取得
+    const fifteenthCellValue = row.getCell(15).value; // 15個目のセルの値を取得
+
+    // 指定した半角数字と一致するか確認
+    if (firstCellValue === holiday || fifteenthCellValue === holiday) {
+      const firstCell = holiday === firstCellValue ? 1 : 15; // 1つ目のセルまたは15個目のセルを取得
+      // 一致した場合、右に14セルを塗りつぶす
+      for (let colIndex = 0; colIndex < 14; colIndex++) {
+        const cell = row.getCell(colIndex + firstCell); // 列番号は1から始まる
+        const originalStyle = { ...cell.style }; // 元のスタイルを保持
+        //console.log(cell.address); // スタイルをデバッグ出力
+        //console.log(cell.style); // スタイルをデバッグ出力
+        const originalFill = cell.style.fill; // 元の塗りつぶしを保持
+        const originalBgColor =
+          cell.style.fill?.type === "pattern"
+            ? cell.style.fill.fgColor
+            : undefined; // 前景色を保持
+        //console.log(originalBgColor); // 背景色をデバッグ出力
+        //console.log(cell.style.fill); // 塗りつぶしの色をデバッグ出力
+        //console.log(originalFill?.type); // 塗りつぶしの色をデバッグ出力
+        worksheet.getCell(cell.address).style = {
+          ...originalStyle,
+        }; // 元のスタイルを再適用
+        worksheet.getCell(cell.address).fill = {
+          ...originalFill,
+          type: "pattern",
+          pattern: "lightGray",
+          fgColor: { argb: "595959" }, // 塗りつぶしの色をグレーに設定
+          bgColor: originalBgColor,
+        };
+      }
+      row.commit(); // 変更を確定
+    }
+  });
+};
+
 export const replaceAllData = async (
   formattedData: any[], // フォーマットされたデータ
   yearMonthArray: (string | number | boolean | Date | null | undefined)[], // 年月配列
   userDataArrays: any, // ユーザーデータ配列
   teacherDataArrays: any[], // 教員データ配列
-  year: number
+  year: number,
+  holidays: number[] // 祝日データ
 ) => {
   try {
     // public ディレクトリに配置されたExcelファイルを取得
-    const response = await fetch("/R7_5月分実施報告書.xlsx");
+    const response = await fetch("/R7_実施報告書.xlsx");
     if (!response.ok) {
       throw new Error("Excelファイルの取得に失敗しました。");
     }
@@ -169,13 +209,11 @@ export const replaceAllData = async (
           formula: `CEILING(ROUND(((TIME(J${rowIndex},L${rowIndex},0)-TIME(F${rowIndex},H${rowIndex},0))*24-N${rowIndex}/60),3),0.5)`,
           result: 2,
           ref: `M${rowIndex}`,
-          shareType: "shared",
         };
 
         const secondformula = {
           formula: `CEILING(ROUND(((TIME(X${rowIndex},Z${rowIndex},0)-TIME(T${rowIndex},V${rowIndex},0))*24-AB${rowIndex}/60),3),0.5)`,
           ref: `AA${rowIndex}`,
-          shareType: "shared",
         };
 
         matchingData[12] = {
@@ -228,6 +266,11 @@ export const replaceAllData = async (
         row.commit(); // 変更を確定
       }
     });
+
+    for (let i = 0; i < holidays.length; i++) {
+      console.log(holidays[i]); // デバッグ用
+      fillHolidays(worksheet, holidays[i]); // 祝日を塗りつぶす
+    }
 
     // 3. Excel ファイルを保存
     const newWorkbookBuffer = await workbook.xlsx.writeBuffer();

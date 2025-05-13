@@ -8,6 +8,42 @@ import {
 } from "./excel_data";
 import { replaceAllData } from "./export_to_excel";
 
+export const getHolidaysInMonth = async (
+  year: number,
+  month: number
+): Promise<number[]> => {
+  const holidays: number[] = [];
+  const date = new Date(year, month - 1, 1); // 月は0から始まるため、-1する
+
+  // 祝日データを取得
+  let holidayData: { [date: string]: string } = {};
+  try {
+    const response = await fetch(
+      "https://holidays-jp.github.io/api/v1/date.json"
+    );
+    if (response.ok) {
+      holidayData = await response.json();
+    } else {
+      console.error("祝日データの取得に失敗しました");
+    }
+  } catch (error) {
+    console.error("祝日データの取得中にエラーが発生しました:", error);
+  }
+
+  while (date.getMonth() === month - 1) {
+    const dayOfWeek = date.getDay(); // 0: 日曜日, 6: 土曜日
+    const formattedDate = date.toISOString().split("T")[0]; // YYYY-MM-DD形式
+
+    // 土日または祝日を判定
+    if (dayOfWeek === 0 || dayOfWeek === 6 || holidayData[formattedDate]) {
+      holidays.push(date.getDate());
+    }
+    date.setDate(date.getDate() + 1); // 次の日に進む
+  }
+
+  return holidays;
+};
+
 //選択された科目名のシフトデータをエクスポートする関数
 export const handleExportSubject = (
   selectedSubject: string, //選択された科目名
@@ -46,7 +82,7 @@ export const handleExportSubject = (
 };
 
 //選択された科目名のシフトデータを統一してエクスポートする関数
-export const exportData = (
+export const exportData = async (
   selectedSubject: string, // 選択された科目名
   currentDate: Date, // 現在の日付
   shiftData: any[], // シフトデータ
@@ -151,6 +187,8 @@ export const exportData = (
   console.log("フォーマット済みデータ:", formattedData); // デバッグ用
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
+  const holidays = getHolidaysInMonth(year, month); // 祝日を取得
+  console.log("祝日:", holidays); // デバッグ用
   const yearMonthArray = getYearAndMonth(year, month); // 和暦と月を含む配列を取得
 
   const userDataArrays = getUserData(userInfo); // ユーザデータを取得
@@ -175,7 +213,8 @@ export const exportData = (
       yearMonthArray,
       userDataArrays,
       teacherDataArrays,
-      currentDate.getFullYear()
+      currentDate.getFullYear(),
+      await holidays
     );
   }
 
