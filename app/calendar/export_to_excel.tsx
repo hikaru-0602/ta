@@ -217,21 +217,13 @@ export const replaceAllData = async (
         };
 
         matchingData[12] = {
-          formula: `CEILING(ROUND(((TIME(J${rowIndex - 1},L${
-            rowIndex - 1
-          },0)-TIME(F${rowIndex - 1},H${rowIndex - 1},0))*24-N${
-            rowIndex - 1
-          }/60),3),0.5)`,
+          formula: `CEILING(ROUND(((TIME(J${rowIndex},L${rowIndex},0)-TIME(F${rowIndex},H${rowIndex},0))*24-N${rowIndex}/60),3),0.5)`,
           result: 2,
-          ref: `M${rowIndex - 1}`,
+          ref: `M${rowIndex}`,
         }; // M列の数式
 
         matchingData[26] = {
-          formula: `CEILING(ROUND(((TIME(X${rowIndex - 1},Z${
-            rowIndex - 1
-          },0)-TIME(T${rowIndex - 1},V${rowIndex - 1},0))*24-AB${
-            rowIndex - 1
-          }/60),3),0.5)`,
+          formula: `CEILING(ROUND(((TIME(X${rowIndex},Z${rowIndex},0)-TIME(T${rowIndex},V${rowIndex},0))*24-AB${rowIndex}/60),3),0.5)`,
           ref: `AA${rowIndex}`,
         }; // AA列の数式
 
