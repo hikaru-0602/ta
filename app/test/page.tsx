@@ -8,8 +8,12 @@ const ExportPage = () => {
   const [rows, setRows] = useState<Array<Array<any>>>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null); // ファイル入力の参照
 
-  const handleFileChange = async (event?: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event ? event.target.files?.[0] : fileInputRef.current?.files?.[0];
+  const handleFileChange = async (
+    event?: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event
+      ? event.target.files?.[0]
+      : fileInputRef.current?.files?.[0];
     if (!file) {
       alert("ファイルが選択されていません。");
       return;
@@ -21,8 +25,14 @@ const ExportPage = () => {
       await workbook.xlsx.load(arrayBuffer);
 
       // シート名をデバッグ用に出力
-      console.log("シート一覧:", workbook.worksheets.map(sheet => sheet.name));
-      alert("シート一覧: " + workbook.worksheets.map(sheet => sheet.name).join(", "));
+      console.log(
+        "シート一覧:",
+        workbook.worksheets.map((sheet) => sheet.name)
+      );
+      alert(
+        "シート一覧: " +
+          workbook.worksheets.map((sheet) => sheet.name).join(", ")
+      );
 
       const worksheet = workbook.getWorksheet("実施報告書"); // シート名で取得
       if (!worksheet) {
@@ -86,7 +96,13 @@ const ExportPage = () => {
         15,
         ":",
         20,
-        { formula: 'CEILING(ROUND(((TIME(J13,L13,0)-TIME(F13,H13,0))*24-N13/60),3),0.5)', result: 2, ref: 'M13', shareType: 'shared' },
+        {
+          formula:
+            "CEILING(ROUND(((TIME(J13,L13,0)-TIME(F13,H13,0))*24-N13/60),3),0.5)",
+          result: 2,
+          ref: "M13",
+          shareType: "shared",
+        },
         10,
         17,
         "アルゴリズムとデータ構造",
@@ -100,7 +116,13 @@ const ExportPage = () => {
         11,
         ":",
         5,
-        { formula: 'CEILING(ROUND(((TIME(X13,Z13,0)-TIME(T13,V13,0))*24-AB13/60),3),0.5)', result: 5, ref: 'AA13', shareType: 'shared' },
+        {
+          formula:
+            "CEILING(ROUND(((TIME(X13,Z13,0)-TIME(T13,V13,0))*24-AB13/60),3),0.5)",
+          result: 5,
+          ref: "AA13",
+          shareType: "shared",
+        },
         10,
       ];
 
@@ -111,7 +133,9 @@ const ExportPage = () => {
 
       // 新しいExcelファイルとして保存
       const newWorkbookBuffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([newWorkbookBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const blob = new Blob([newWorkbookBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       saveAs(blob, "modified_excel.xlsx");
 
       alert("10番目の行を置き換えたExcelファイルを保存しました。");
@@ -160,7 +184,13 @@ const ExportPage = () => {
             15,
             ":",
             20,
-            { formula: 'CEILING(ROUND(((TIME(J13,L13,0)-TIME(F13,H13,0))*24-N13/60),3),0.5)', result: 2, ref: 'M13', shareType: 'shared' },
+            {
+              formula:
+                "CEILING(ROUND(((TIME(J13,L13,0)-TIME(F13,H13,0))*24-N13/60),3),0.5)",
+              result: 2,
+              ref: "M13",
+              shareType: "shared",
+            },
             10,
             17,
             "アルゴリズムとデータ構造",
@@ -174,7 +204,13 @@ const ExportPage = () => {
             11,
             ":",
             5,
-            { formula: 'CEILING(ROUND(((TIME(X13,Z13,0)-TIME(T13,V13,0))*24-AB13/60),3),0.5)', result: 5, ref: 'AA13', shareType: 'shared' },
+            {
+              formula:
+                "CEILING(ROUND(((TIME(X13,Z13,0)-TIME(T13,V13,0))*24-AB13/60),3),0.5)",
+              result: 5,
+              ref: "AA13",
+              shareType: "shared",
+            },
             10,
           ];
 
@@ -198,7 +234,9 @@ const ExportPage = () => {
 
       // 新しいExcelファイルとして保存
       const newWorkbookBuffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([newWorkbookBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const blob = new Blob([newWorkbookBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       saveAs(blob, "modified_excel.xlsx");
 
       alert("最初のセルが '1' の行を置き換えたExcelファイルを保存しました。");
@@ -241,7 +279,9 @@ const ExportPage = () => {
       });
       // 新しいExcelファイルとして保存
       const newWorkbookBuffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([newWorkbookBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const blob = new Blob([newWorkbookBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       saveAs(blob, "cell_fill_changed.xlsx");
 
       alert("セルの塗りつぶしパターンを変更したExcelファイルを保存しました。");
@@ -283,7 +323,13 @@ const ExportPage = () => {
         15,
         ":",
         20,
-        { formula: 'CEILING(ROUND(((TIME(J13,L13,0)-TIME(F13,H13,0))*24-N13/60),3),0.5)', result: 2, ref: 'M13', shareType: 'shared' },
+        {
+          formula:
+            "CEILING(ROUND(((TIME(J13,L13,0)-TIME(F13,H13,0))*24-N13/60),3),0.5)",
+          result: 2,
+          ref: "M13",
+          shareType: "shared",
+        },
         10,
         17,
         "アルゴリズムとデータ構造",
@@ -297,20 +343,45 @@ const ExportPage = () => {
         11,
         ":",
         5,
-        { formula: 'CEILING(ROUND(((TIME(X13,Z13,0)-TIME(T13,V13,0))*24-AB13/60),3),0.5)', result: 5, ref: 'AA13', shareType: 'shared' },
+        {
+          formula:
+            "CEILING(ROUND(((TIME(X13,Z13,0)-TIME(T13,V13,0))*24-AB13/60),3),0.5)",
+          result: 5,
+          ref: "AA13",
+          shareType: "shared",
+        },
         10,
       ];
 
       const kanadata46 = [
-        "ふりがな", "ふりがな", "あああ", "あああ", "あああ", "あああ", "あああ", "あああ", "あああ", "あああ", "あああ", "あああ", "あああ", "あああ", "実働時間", "実働時間", "実働時間", "実働時間", "合計",
-        { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
-        { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
-        { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
-        { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
-        { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
-        { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
-        { formula: 'SUM(M13:M44)+SUM(AA13:AA42)' },
-        "時間", null,
+        "ふりがな",
+        "ふりがな",
+        "あああ",
+        "あああ",
+        "あああ",
+        "あああ",
+        "あああ",
+        "あああ",
+        "あああ",
+        "あああ",
+        "あああ",
+        "あああ",
+        "あああ",
+        "あああ",
+        "実働時間",
+        "実働時間",
+        "実働時間",
+        "実働時間",
+        "合計",
+        { formula: "SUM(M13:M44)+SUM(AA13:AA42)" },
+        { formula: "SUM(M13:M44)+SUM(AA13:AA42)" },
+        { formula: "SUM(M13:M44)+SUM(AA13:AA42)" },
+        { formula: "SUM(M13:M44)+SUM(AA13:AA42)" },
+        { formula: "SUM(M13:M44)+SUM(AA13:AA42)" },
+        { formula: "SUM(M13:M44)+SUM(AA13:AA42)" },
+        { formula: "SUM(M13:M44)+SUM(AA13:AA42)" },
+        "時間",
+        null,
       ];
 
       const dateArray = [
@@ -359,7 +430,9 @@ const ExportPage = () => {
 
       // 新しいExcelファイルとして保存
       const newWorkbookBuffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([newWorkbookBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const blob = new Blob([newWorkbookBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       saveAs(blob, "modified_excel_with_style.xlsx");
 
       //alert(`${rowNumber}行目を置き換え、スタイルを保持したExcelファイルを保存しました。`);
@@ -402,7 +475,13 @@ const ExportPage = () => {
         15,
         ":",
         20,
-        { formula: 'CEILING(ROUND(((TIME(J13,L13,0)-TIME(F13,H13,0))*24-N13/60),3),0.5)', result: 2, ref: 'M13', shareType: 'shared' },
+        {
+          formula:
+            "CEILING(ROUND(((TIME(J13,L13,0)-TIME(F13,H13,0))*24-N13/60),3),0.5)",
+          result: 2,
+          ref: "M13",
+          shareType: "shared",
+        },
         10,
         17,
         "アルゴリズムとデータ構造",
@@ -416,7 +495,13 @@ const ExportPage = () => {
         11,
         ":",
         5,
-        { formula: 'CEILING(ROUND(((TIME(X13,Z13,0)-TIME(T13,V13,0))*24-AB13/60),3),0.5)', result: 5, ref: 'AA13', shareType: 'shared' },
+        {
+          formula:
+            "CEILING(ROUND(((TIME(X13,Z13,0)-TIME(T13,V13,0))*24-AB13/60),3),0.5)",
+          result: 5,
+          ref: "AA13",
+          shareType: "shared",
+        },
         10,
       ];
 
@@ -433,7 +518,13 @@ const ExportPage = () => {
         15,
         ":",
         20,
-        { formula: 'CEILING(ROUND(((TIME(J13,L13,0)-TIME(F13,H13,0))*24-N13/60),3),0.5)', result: 2, ref: 'M13', shareType: 'shared' },
+        {
+          formula:
+            "CEILING(ROUND(((TIME(J13,L13,0)-TIME(F13,H13,0))*24-N13/60),3),0.5)",
+          result: 2,
+          ref: "M13",
+          shareType: "shared",
+        },
         10,
         17,
         "アルゴリズム",
@@ -447,7 +538,13 @@ const ExportPage = () => {
         11,
         ":",
         5,
-        { formula: 'CEILING(ROUND(((TIME(X13,Z13,0)-TIME(T13,V13,0))*24-AB13/60),3),0.5)', result: 5, ref: 'AA13', shareType: 'shared' },
+        {
+          formula:
+            "CEILING(ROUND(((TIME(X13,Z13,0)-TIME(T13,V13,0))*24-AB13/60),3),0.5)",
+          result: 5,
+          ref: "AA13",
+          shareType: "shared",
+        },
         10,
       ];
 
@@ -475,7 +572,9 @@ const ExportPage = () => {
 
       // 新しいExcelファイルとして保存
       const newWorkbookBuffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([newWorkbookBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const blob = new Blob([newWorkbookBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       saveAs(blob, "modified_excel_with_two_datasets.xlsx");
 
       alert("条件に一致する行を置き換えたExcelファイルを保存しました。");
@@ -486,7 +585,9 @@ const ExportPage = () => {
   };
 
   // 条件に一致する行をデータセットで置き換える関数
-  const handleReplaceRowsWithMatchingData = async (dataSets: Array<Array<any>>) => {
+  const handleReplaceRowsWithMatchingData = async (
+    dataSets: Array<Array<any>>
+  ) => {
     try {
       const file = fileInputRef.current?.files?.[0];
       if (!file) {
@@ -544,6 +645,76 @@ const ExportPage = () => {
     }
   };
 
+  const handleFillCellsByCondition = async (targetNumber: number) => {
+    try {
+      const file = fileInputRef.current?.files?.[0];
+      if (!file) {
+        alert("ファイルが選択されていません。");
+        return;
+      }
+
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+
+      const worksheet = workbook.getWorksheet("実施報告書"); // シート名で取得
+      if (!worksheet) {
+        alert("指定されたシートが見つかりません。");
+        return;
+      }
+
+      // 行ごとに処理
+      worksheet.eachRow((row, rowIndex) => {
+        const firstCellValue = row.getCell(1).value; // 1つ目のセルの値を取得
+        const fifteenthCellValue = row.getCell(15).value; // 15個目のセルの値を取得
+
+        // 指定した半角数字と一致するか確認
+        if (
+          firstCellValue === targetNumber ||
+          fifteenthCellValue === targetNumber
+        ) {
+          // 一致した場合、右に14セルを塗りつぶす
+          for (let colIndex = 1; colIndex < 15; colIndex++) {
+            const cell = row.getCell(colIndex);
+            const originalStyle = { ...cell.style }; // 元のスタイルを保持
+            console.log(cell.address); // スタイルをデバッグ出力
+            console.log(cell.style); // スタイルをデバッグ出力
+            const originalFill = cell.style.fill; // 元の塗りつぶしを保持
+            const originalBgColor =
+              cell.style.fill?.type === "pattern"
+                ? cell.style.fill.fgColor
+                : undefined; // 前景色を保持
+            console.log(originalBgColor); // 背景色をデバッグ出力
+            console.log(cell.style.fill); // 塗りつぶしの色をデバッグ出力
+            console.log(originalFill?.type); // 塗りつぶしの色をデバッグ出力
+            worksheet.getCell(cell.address).style = {
+              ...originalStyle,
+            }; // 元のスタイルを再適用
+            worksheet.getCell(cell.address).fill = {
+              ...originalFill,
+              type: "pattern",
+              pattern: "lightGray",
+              fgColor: { argb: "595959" }, // 塗りつぶしの色をグレーに設定
+              bgColor: originalBgColor,
+            };
+          }
+        }
+      });
+
+      // 新しいExcelファイルとして保存
+      const newWorkbookBuffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([newWorkbookBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      saveAs(blob, "filled_cells_with_style.xlsx");
+
+      alert("条件に一致するセルを塗りつぶしたExcelファイルを保存しました。");
+    } catch (error) {
+      console.error("セルの塗りつぶし処理に失敗しました:", error);
+      alert("セルの塗りつぶし処理に失敗しました。");
+    }
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       <h1>Excel データ表示</h1>
@@ -554,28 +725,56 @@ const ExportPage = () => {
         onChange={handleFileChange}
         style={{ marginBottom: "16px" }}
       />
-      <button onClick={() => handleFileChange()} style={{ marginBottom: "16px" }}>
+      <button
+        onClick={() => handleFileChange()}
+        style={{ marginBottom: "16px" }}
+      >
         再処理を実行
       </button>
-      <button onClick={handleReplaceFirstRowWithOne} style={{ marginBottom: "16px" }}>
+      <button
+        onClick={handleReplaceFirstRowWithOne}
+        style={{ marginBottom: "16px" }}
+      >
         最初のセルが '1' の行を置き換えてExcelを保存
       </button>
       <button onClick={handleChangeCellFill} style={{ marginBottom: "16px" }}>
         セルの塗りつぶしパターンを変更
       </button>
 
+      <button
+        onClick={handleReplaceRowWithStyle}
+        style={{
+          padding: "8px 16px",
+          backgroundColor: "#4CAF50",
+          color: "white",
+          border: "none",
+          borderRadius: "4px",
+          marginTop: "16px",
+        }}
+      >
+        11行目を置き換え（スタイル保持）
+      </button>
 
-<button
-  onClick={handleReplaceRowWithStyle}
-  style={{ padding: "8px 16px", backgroundColor: "#4CAF50", color: "white", border: "none", borderRadius: "4px", marginTop: "16px" }}
->
-  11行目を置き換え（スタイル保持）
-</button>
+      <button
+        onClick={handleReplaceRowsWithTwoDatasets}
+        style={{ marginBottom: "16px" }}
+      >
+        条件に一致する行を2つのデータセットで置き換え
+      </button>
 
-<button onClick={handleReplaceRowsWithTwoDatasets} style={{ marginBottom: "16px" }}>
-  条件に一致する行を2つのデータセットで置き換え
-</button>
-
+      <button
+        onClick={() => handleFillCellsByCondition(1)} // 1を指定
+        style={{
+          padding: "8px 16px",
+          backgroundColor: "#4CAF50",
+          color: "white",
+          border: "none",
+          borderRadius: "4px",
+          marginTop: "16px",
+        }}
+      >
+        条件に一致するセルを塗りつぶし
+      </button>
     </div>
   );
 };

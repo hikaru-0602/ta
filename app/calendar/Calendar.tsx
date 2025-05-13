@@ -16,7 +16,7 @@ import ExportDialog, {
 } from "./export_dialog";
 import { useAuth } from "../firebase/context/auth";
 
-export default function Calendar() {
+export default function Calendar(year?: number, month?: number) {
   const router = useRouter(); // ルーターを初期化
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(new Date());
