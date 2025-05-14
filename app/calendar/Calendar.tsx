@@ -172,26 +172,26 @@ export default function Calendar() {
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center p-4">
-      <div className="flex justify-between items-center mb-4 w-full max-w-[1200px]">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4 w-full max-w-[1200px]">
         <button
           onClick={handlePrevMonth}
-          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+          className="px-2 py-1 sm:px-4 sm:py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 text-xs sm:text-sm"
         >
           前の月
         </button>
-        <h2 className="text-2xl font-bold">
+        <h2 className="text-lg sm:text-xl font-bold mt-2 sm:mt-0">
           {currentDate.getFullYear()}年 {currentDate.getMonth() + 1}月
         </h2>
         <button
           onClick={handleNextMonth}
-          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+          className="px-2 py-1 sm:px-4 sm:py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 text-xs sm:text-sm"
         >
           次の月
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-4 text-center w-full max-w-[1200px]">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2 md:gap-4 text-center">
         {["日", "月", "火", "水", "木", "金", "土"].map((day) => (
-          <div key={day} className="font-bold text-lg">
+          <div key={day} className="font-bold text-xs sm:text-sm md:text-lg">
             {day}
           </div>
         ))}
@@ -199,12 +199,11 @@ export default function Calendar() {
           <div key={`empty-${i}`} />
         ))}
         {daysInMonth.map((date) => {
-          const isSunday = date.getDay() === 0; // 日曜日
-          const isSaturday = date.getDay() === 6; // 土曜日
-          const isToday = date.toDateString() === today.toDateString(); // 今日の日付
-          const holiday = isHoliday(date); // 休日判定
+          const isSunday = date.getDay() === 0;
+          const isSaturday = date.getDay() === 6;
+          const isToday = date.toDateString() === today.toDateString();
+          const holiday = isHoliday(date);
 
-          // その日に追加されたシフトの数を計算
           const shiftCount = shiftData.filter(
             (shift) =>
               shift.month === date.getMonth() + 1 &&
@@ -214,23 +213,23 @@ export default function Calendar() {
           return (
             <div
               key={date.toISOString()}
-              onClick={() => handleDateClick(date)} // 日付クリック時の処理
-              className={`p-6 rounded text-lg cursor-pointer relative ${
+              onClick={() => handleDateClick(date)}
+              className={`p-2 sm:p-4 md:p-6 rounded text-xs sm:text-sm md:text-lg cursor-pointer relative ${
                 selectedDate?.toDateString() === date.toDateString()
-                  ? "bg-green-500 text-white" // 選択された日付のスタイル
+                  ? "bg-green-500 text-white"
                   : isToday
                   ? "border-2 border-blue-500" +
                     (isSunday || isSaturday || holiday
                       ? " bg-red-100 dark:bg-red-200"
-                      : "") // 今日の日付のスタイル（枠線と土日の背景色）
+                      : "")
                   : isSunday || isSaturday || holiday
-                  ? "bg-red-100 dark:bg-red-200" // 土日または休日のスタイル（薄い赤色）
+                  ? "bg-red-100 dark:bg-red-200"
                   : "bg-gray-100 dark:bg-gray-700"
               }`}
             >
               {date.getDate()}
               {shiftCount > 0 && user !== null && (
-                <div className="absolute top-1 right-1 bg-blue-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 bg-blue-500 text-white text-[8px] sm:text-[10px] w-3 h-3 sm:w-4 sm:h-4 flex items-center justify-center rounded-full shadow-sm">
                   {shiftCount}
                 </div>
               )}
@@ -241,10 +240,8 @@ export default function Calendar() {
 
       {/* シフト出力ボタン */}
       <button
-        onClick={() => {
-          handleOpenExportDialog();
-        }}
-        className="mt-4 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+        onClick={handleOpenExportDialog}
+        className="mt-2 sm:mt-4 px-2 py-1 sm:px-4 sm:py-2 bg-purple-500 text-white rounded hover:bg-purple-600 text-[10px] sm:text-sm"
       >
         Excel出力
       </button>

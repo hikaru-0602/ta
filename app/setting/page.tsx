@@ -70,7 +70,7 @@ export default function Work() {
           {user === null && (
             <button
               onClick={signIn}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-500 text-white text-sm sm:text-base rounded hover:bg-blue-600 transition"
             >
               学内アカウントログイン
             </button>
@@ -88,8 +88,8 @@ export default function Work() {
         </div>
 
         {/* 中央揃えのタイトル */}
-        <div className="w-full max-w-2xl text-center">
-          <h1 className="text-3xl font-extrabold mb-6 text-gray-800 tracking-wide mt-16">
+        <div className="w-full max-w-2xl text-center mt-24">
+          <h1 className="text-3xl font-extrabold mb-6 text-gray-800 tracking-wide">
             仕事情報入力
           </h1>
         </div>
