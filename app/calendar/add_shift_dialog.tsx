@@ -141,7 +141,7 @@ export default function AddShiftDialog({
   return (
     isDialogOpen && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded shadow-lg max-w-md w-full">
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded shadow-lg w-full max-w-xs sm:max-w-md">
           <h2 className="text-xl font-bold mb-4">仕事リスト</h2>
           <h3 className="text-lg font-semibold mb-2">-- 追加 --</h3>
           <ul>

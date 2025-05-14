@@ -84,7 +84,7 @@ export default function EditShiftDialog({
     editingShift && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
         <div className="bg-white dark:bg-gray-800 p-6 rounded shadow-lg max-w-md w-full">
-          <h2 className="text-xl font-bold mb-4">シフトを編集</h2>
+          <h2 className="text-lg sm:text-xl font-bold mb-4">シフトを編集</h2>
           <form>
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">科目名</label>
@@ -200,7 +200,7 @@ export default function EditShiftDialog({
                   setIsEditDialogOpen
                 )
               } //編集内容を保存
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="px-4 py-2 text-sm sm:text-base bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               保存
             </button>
