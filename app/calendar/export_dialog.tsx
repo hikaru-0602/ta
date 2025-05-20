@@ -178,7 +178,7 @@ export const exportData = async (
       const earliestStart = shifts.reduce(
         (earliest, shift) =>
           shift.starttime < earliest ? shift.starttime : earliest,
-        shifts[0].endtime
+        shifts[0].starttime
       );
 
       const latestEnd = shifts.reduce(
@@ -186,25 +186,31 @@ export const exportData = async (
         shifts[0].endtime
       );
 
-      const totalBreakTime = shifts.reduce((total, shift) => {
-        const earliestEnd = shifts.reduce(
-          (earliest, shift) =>
-            shift.endtime < earliest ? shift.endtime : earliest,
-          shifts[0].endtime
-        ); // 早い方のシフトの終了時間
+      const totalBreakTimes = shifts.reduce(
+        (total, shift) => total + shift.breaktime,
+        0
+      );
 
-        const latestStart = shifts.reduce(
-          (latest, shift) =>
-            shift.starttime > latest ? shift.starttime : latest,
-          shifts[0].starttime
-        ); // 遅い方のシフトの開始時間
+      const earliestEnd = shifts.reduce(
+        (earliest, shift) =>
+          shift.endtime < earliest ? shift.endtime : earliest,
+        shifts[0].endtime
+      );
 
-        const start = new Date(`1970-01-01T${latestStart}:00`);
-        const end = new Date(`1970-01-01T${earliestEnd}:00`);
-        const duration = (start.getTime() - end.getTime()) / (1000 * 60); // 休憩時間（分）
+      const latestStart = shifts.reduce(
+        (latest, shift) =>
+          shift.starttime > latest ? shift.starttime : latest,
+        shifts[0].starttime
+      );
 
-        return total + Math.max(0, duration) + shift.breaktime; // 負の値を防ぐために Math.max を使用
-      }, 0);
+      const start = new Date(`1970-01-01T${earliestEnd}:00`);
+      const end = new Date(`1970-01-01T${latestStart}:00`);
+      const overlappingDuration = Math.max(
+        0,
+        (end.getTime() - start.getTime()) / (1000 * 60) // 分単位
+      );
+
+      const finalBreakTime = totalBreakTimes + overlappingDuration; // 合計休憩時間
 
       // 統一されたデータをそれぞれのシフトに適用
       shifts.forEach((shift) => {
@@ -212,7 +218,7 @@ export const exportData = async (
           ...shift,
           starttime: earliestStart,
           endtime: latestEnd,
-          breaktime: totalBreakTime,
+          breaktime: finalBreakTime,
         });
       });
     }

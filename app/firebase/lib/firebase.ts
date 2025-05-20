@@ -21,4 +21,5 @@ if (!getApps()?.length) {
 }
 
 export const auth = getAuth();
+console.log("Firebase Auth initialized", auth);
 export const db = getFirestore();

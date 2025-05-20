@@ -250,32 +250,35 @@ export const replaceAllData = async (
       const firstCellValue = row.getCell(1).value; // 行の1つ目のセルの値を取得
       if (typeof firstCellValue !== "number") return; // 半角数字でない場合はスキップ
 
+      let rownumber: number;
+      rownumber = rowIndex;
+
       // 配列の1番目の要素と一致するデータを探す
-      const matchingData = shiftData.find(
-        (data) =>
-          Number(data[0]) === firstCellValue &&
-          !usedShiftData.some(
-            (usedData) => JSON.stringify(usedData) === JSON.stringify(data)
-          )
-      );
+      const matchingData = shiftData.find((data) => {
+        const isSameRow = Number(data[0]) === firstCellValue;
+        const isAlreadyUsed = usedShiftData.some(
+          (usedData) => JSON.stringify(usedData) === JSON.stringify(data)
+        );
+        if (isAlreadyUsed && isSameRow) {
+          rownumber = rowIndex - 1;
+        }
+        return isSameRow && !isAlreadyUsed;
+      });
 
       if (matchingData) {
-        //if (usedShiftData.some((usedData) => JSON.stringify(usedData) === JSON.stringify(matchingData))) {
-        //  return; // すでに使用済みのデータの場合はスキップ
-        //}
         usedShiftData.push(matchingData); // 使用済みデータとして追加
 
         matchingData[12] = {
-          formula: `CEILING(ROUND(((TIME(J${rowIndex},L${rowIndex},0)-TIME(F${rowIndex},H${rowIndex},0))*24-N${rowIndex}/60),3),0.5)`,
-          ref: `M${rowIndex}`,
+          formula: `CEILING(ROUND(((TIME(J${rownumber},L${rownumber},0)-TIME(F${rownumber},H${rownumber},0))*24-N${rownumber}/60),3),0.5)`,
+          ref: `M${rownumber}`,
         }; // M列の数式
 
         matchingData[26] = {
-          formula: `CEILING(ROUND(((TIME(X${rowIndex},Z${rowIndex},0)-TIME(T${rowIndex},V${rowIndex},0))*24-AB${rowIndex}/60),3),0.5)`,
-          ref: `AA${rowIndex}`,
+          formula: `CEILING(ROUND(((TIME(X${rownumber},Z${rownumber},0)-TIME(T${rownumber},V${rownumber},0))*24-AB${rownumber}/60),3),0.5)`,
+          ref: `AA${rownumber}`,
         }; // AA列の数式
 
-        console.log("matchingData", matchingData); // デバッグ用
+        //console.log("matchingData", matchingData); // デバッグ用
 
         //console.log("matchingData", matchingData); // デバッグ用
 
