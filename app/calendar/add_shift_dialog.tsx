@@ -192,6 +192,12 @@ export default function AddShiftDialog({
                 (work) =>
                   !shiftData.some(
                     (shift) =>
+                      shift.label === work.label &&
+                      shift.id === work.id &&
+                      selectedDate &&
+                      shift.month === selectedDate.getMonth() + 1 &&
+                      shift.day === selectedDate.getDate()
+                    /*
                       shift.classname === work.classname &&
                       shift.starttime === work.starttime &&
                       shift.endtime === work.endtime &&
@@ -199,6 +205,7 @@ export default function AddShiftDialog({
                       selectedDate &&
                       shift.month === selectedDate.getMonth() + 1 &&
                       shift.day === selectedDate.getDate()
+                    */
                   )
               )
               .map((work, index) => (

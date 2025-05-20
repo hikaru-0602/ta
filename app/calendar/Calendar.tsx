@@ -130,6 +130,9 @@ export default function Calendar() {
       return; // 処理を終了
     }
 
+    const savedWorkData = localStorage.getItem("workData");
+    const parsedWorkData = savedWorkData ? JSON.parse(savedWorkData) : [];
+    setWorkData(parsedWorkData);
     setSelectedDate(date); // クリックされた日付を選択
     setFilteredWorkData(workData); // フィルタリングされたデータを保存
     setIsDialogOpen(true); // ダイアログを開く
@@ -171,27 +174,27 @@ export default function Calendar() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center p-4">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-4 w-full max-w-[1200px]">
+    <div className="w-full h-full flex flex-col items-center justify-center">
+      <div className="flex justify-between items-center mb-4 w-full max-w-[1200px]">
         <button
           onClick={handlePrevMonth}
-          className="px-2 py-1 sm:px-4 sm:py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 text-xs sm:text-sm"
+          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
         >
           前の月
         </button>
-        <h2 className="text-lg sm:text-xl font-bold mt-2 sm:mt-0">
+        <h2 className="text-2xl font-bold">
           {currentDate.getFullYear()}年 {currentDate.getMonth() + 1}月
         </h2>
         <button
           onClick={handleNextMonth}
-          className="px-2 py-1 sm:px-4 sm:py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 text-xs sm:text-sm"
+          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
         >
           次の月
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-1 sm:gap-2 md:gap-4 text-center">
+      <div className="grid grid-cols-7 gap-1 text-center">
         {["日", "月", "火", "水", "木", "金", "土"].map((day) => (
-          <div key={day} className="font-bold text-xs sm:text-sm md:text-lg">
+          <div key={day} className="font-bold text-lg">
             {day}
           </div>
         ))}
@@ -214,7 +217,7 @@ export default function Calendar() {
             <div
               key={date.toISOString()}
               onClick={() => handleDateClick(date)}
-              className={`p-2 sm:p-4 md:p-6 rounded text-xs sm:text-sm md:text-lg cursor-pointer relative ${
+              className={`p-6 rounded text-lg cursor-pointer relative ${
                 selectedDate?.toDateString() === date.toDateString()
                   ? "bg-green-500 text-white"
                   : isToday
@@ -229,7 +232,7 @@ export default function Calendar() {
             >
               {date.getDate()}
               {shiftCount > 0 && user !== null && (
-                <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 bg-blue-500 text-white text-[8px] sm:text-[10px] w-3 h-3 sm:w-4 sm:h-4 flex items-center justify-center rounded-full shadow-sm">
+                <div className="absolute top-1 right-1 bg-blue-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
                   {shiftCount}
                 </div>
               )}
@@ -241,7 +244,7 @@ export default function Calendar() {
       {/* シフト出力ボタン */}
       <button
         onClick={handleOpenExportDialog}
-        className="mt-2 sm:mt-4 px-2 py-1 sm:px-4 sm:py-2 bg-purple-500 text-white rounded hover:bg-purple-600 text-[10px] sm:text-sm"
+        className="mt-4 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
       >
         Excel出力
       </button>

@@ -1,14 +1,15 @@
 "use client";
 
 import Header from "./components/Header";
-import Page from "./calendar/page";
+import Calendar from "./calendar/page";
+import Setting from "./setting/page";
 
 export default function Home() {
   return (
     <>
-      <Header />
-      <div className="flex flex-col items-center justify-center min-h-screen p-8 mt-16">
-        <Page />
+      <div className="flex flex-col lg:flex-row items-start justify-center min-h-screen p-8 gap-8">
+        <Calendar />
+        <Setting />
       </div>
     </>
   );

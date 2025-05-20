@@ -16,3 +16,27 @@ header nav a {
   background-color: #2563eb;
   color: white;
 }
+
+.container {
+  @apply flex flex-col items-center justify-center min-h-screen p-8 bg-gradient-to-br from-gray-100 to-gray-300;
+}
+
+.card {
+  @apply w-full max-w-2xl bg-white p-8 rounded-lg shadow-xl border border-gray-200;
+}
+
+.card-title {
+  @apply text-2xl font-semibold text-gray-800 border-b pb-4;
+}
+
+.input {
+  @apply w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition;
+}
+
+.button {
+  @apply px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition;
+}
+
+.button-secondary {
+  @apply px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition;
+}

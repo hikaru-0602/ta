@@ -6,7 +6,7 @@ import { organizeFormattedData } from "./excel_data";
 export const handleReplaceRowsWithFormattedData = async () => {
   try {
     // public ディレクトリに配置されたExcelファイルを取得
-    const response = await fetch("/R7_5月分実施報告書 (1).xlsx");
+    const response = await fetch("/R7_実施報告書.xlsx");
     if (!response.ok) {
       throw new Error("Excelファイルの取得に失敗しました。");
     }
