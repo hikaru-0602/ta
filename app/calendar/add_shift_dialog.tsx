@@ -148,9 +148,17 @@ export default function AddShiftDialog({
   setEditingShift,
   setIsEditDialogOpen,
 }: AddShiftDialogProps) {
+  const backDialog = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      closeDialog();
+    }
+  };
   return (
     isDialogOpen && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center"
+        onClick={backDialog}
+      >
         <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded shadow-lg w-full max-w-xs sm:max-w-md">
           <h2 className="text-xl font-bold mb-4">仕事リスト</h2>
           <h3 className="text-lg font-semibold mb-2">-- 追加 --</h3>

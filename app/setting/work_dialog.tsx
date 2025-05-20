@@ -135,8 +135,17 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
   }, [isDialogOpen, workid, workData, setEditingIndex]);
 
   if (!isDialogOpen) return null;
+  const backDialog = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      setIsDialogOpen(false);
+      initworkInfo();
+    }
+  };
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div
+      className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center"
+      onClick={backDialog}
+    >
       <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
         <h2 className="text-xl font-bold mb-4 text-center">
           {checkWorkIdExists() ? "編集" : "仕事を追加"}

@@ -79,10 +79,19 @@ export default function EditShiftDialog({
     });
   };
 
+  const backDialog = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      setIsEditDialogOpen(false); //ダイアログを閉じる
+    }
+  };
+
   return (
     isEditDialogOpen &&
     editingShift && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center"
+        onClick={backDialog} //ダイアログの外側をクリックしたら閉じる
+      >
         <div className="bg-white dark:bg-gray-800 p-6 rounded shadow-lg max-w-md w-full">
           <h2 className="text-lg sm:text-xl font-bold mb-4">シフトを編集</h2>
           <form>

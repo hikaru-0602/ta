@@ -266,9 +266,18 @@ export default function ExportDialog({
   shiftData, // シフトデータ
   setIsExportDialogOpen, // ダイアログを閉じる関数
 }: ExportDialogProps) {
+  const backDialog = (e: React.MouseEvent<HTMLDivElement>) => {
+    // ダイアログの外側をクリックした場合のみ閉じる
+    if (e.target === e.currentTarget) {
+      setIsExportDialogOpen(false);
+    }
+  };
   return (
     isExportDialogOpen && ( // ダイアログが開いている場合のみ表示
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div
+        className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
+        onClick={backDialog} // 背景クリックで閉じる
+      >
         <div className="bg-white p-6 rounded shadow-lg w-96 max-h-[80vh] overflow-y-auto">
           <h2 className="text-lg font-bold mb-4">出力する科目を選択</h2>
           <ul>
