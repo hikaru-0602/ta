@@ -100,9 +100,8 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
     ).padStart(2, "0")}`;
   };
 
-  // workInfoを更新するuseEffect
   useEffect(() => {
-    if (!isDialogOpen) return; // ダイアログが開いていない場合は早期リターン
+    if (!isDialogOpen) return;
 
     const existingWork = workData.find((work) => work.id === workid);
     if (!existingWork) return;
@@ -135,63 +134,76 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
   }, [isDialogOpen, workid, workData, setEditingIndex]);
 
   if (!isDialogOpen) return null;
+
   const backDialog = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       setIsDialogOpen(false);
       initworkInfo();
     }
   };
+
   return (
     <div
       className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center"
       onClick={backDialog}
     >
-      <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4 text-center">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded shadow-lg w-full max-w-md">
+        <h2 className="text-xl font-bold mb-4 text-center text-gray-800 dark:text-gray-200">
           {checkWorkIdExists() ? "編集" : "仕事を追加"}
         </h2>
         <div>
-          <label className="block mb-1 font-medium">ラベル名</label>
+          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
+            ラベル名
+          </label>
           <input
             type="text"
             name="label"
+            maxLength={12}
             value={workInfo.label || ""}
             onChange={handleWorkChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
           />
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block mb-1 font-medium">科目名</label>
+            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
+              科目名
+            </label>
             <input
               type="text"
               name="subject"
               value={workInfo.subject}
               onChange={handleWorkChange}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
             />
           </div>
-          <div>
-            <label className="block mb-1 font-medium">業務内容</label>
-            <select
-              name="category"
-              value={workInfo.category}
-              onChange={handleWorkChange}
-              className="w-full p-2 border rounded"
-            >
-              <option value="(準備等)">(準備等)</option>
-              <option value="(授業)">(授業)</option>
-            </select>
-          </div>
-          <div>
-            <label className="block mb-1 font-medium">教員名</label>
-            <input
-              type="text"
-              name="teacher"
-              value={workInfo.teacher}
-              onChange={handleWorkChange}
-              className="w-full p-2 border rounded"
-            />
+          <div className="flex space-x-4 items-end">
+            <div className="flex-1 max-w-[140px]">
+              <label className="block mb-1 text-gray-700 dark:text-gray-300">
+                業務内容
+              </label>
+              <select
+                name="category"
+                value={workInfo.category}
+                onChange={handleWorkChange}
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+              >
+                <option value="(準備等)">(準備等)</option>
+                <option value="(授業)">(授業)</option>
+              </select>
+            </div>
+            <div className="flex-1 max-w-[180px]">
+              <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
+                教員名
+              </label>
+              <input
+                type="text"
+                name="teacher"
+                value={workInfo.teacher}
+                onChange={handleWorkChange}
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+              />
+            </div>
           </div>
           {workInfo.schedules.map((schedule, index) => {
             const { startTime, endTime, breakTime } = calculateStartEndTimes(
@@ -266,8 +278,10 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                   </button>
                 </div>
                 <div className="text-sm text-gray-600">
-                  <div className="flex items-center space-x-2">
-                    <p>開始時間:</p>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <p className="text-gray-800 dark:text-gray-200">
+                      開始時間:
+                    </p>
                     <div className="flex items-center space-x-1">
                       <input
                         type="text"
@@ -296,9 +310,11 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           }`;
                           handleScheduleTimeEdit(index, "startTime", newTime);
                         }}
-                        className="w-12 p-1 border rounded text-center"
+                        className="w-12 p-1 border border-gray-300 dark:border-gray-600 rounded text-center bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                       />
-                      <span>:</span>
+                      <span className="text-gray-800 dark:text-gray-200">
+                        :
+                      </span>
                       <input
                         type="text"
                         maxLength={2}
@@ -325,7 +341,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           }:${formattedMinute}`;
                           handleScheduleTimeEdit(index, "startTime", newTime);
                         }}
-                        className="w-12 p-1 border rounded text-center"
+                        className="w-12 p-1 border border-gray-300 dark:border-gray-600 rounded text-center bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                       />
                     </div>
                     <button
@@ -336,7 +352,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           adjustTime(schedule.startTime || startTime, -10)
                         );
                       }}
-                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                      className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-500"
                     >
                       -10分
                     </button>
@@ -348,13 +364,15 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           adjustTime(schedule.startTime || startTime, 10)
                         )
                       }
-                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                      className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-500"
                     >
                       +10分
                     </button>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <p>終了時間:</p>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <p className="text-gray-800 dark:text-gray-200">
+                      終了時間:
+                    </p>
                     <div className="flex items-center space-x-1">
                       <input
                         type="text"
@@ -379,9 +397,11 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           }`;
                           handleScheduleTimeEdit(index, "endTime", newTime);
                         }}
-                        className="w-12 p-1 border rounded text-center"
+                        className="w-12 p-1 border border-gray-300 dark:border-gray-600 rounded text-center bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                       />
-                      <span>:</span>
+                      <span className="text-gray-800 dark:text-gray-200">
+                        :
+                      </span>
                       <input
                         type="text"
                         maxLength={2}
@@ -408,7 +428,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           }:${formattedMinute}`;
                           handleScheduleTimeEdit(index, "endTime", newTime);
                         }}
-                        className="w-12 p-1 border rounded text-center"
+                        className="w-12 p-1 border border-gray-300 dark:border-gray-600 rounded text-center bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                       />
                     </div>
                     <button
@@ -419,7 +439,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           adjustTime(schedule.endTime || endTime, -10)
                         )
                       }
-                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                      className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-500"
                     >
                       -10分
                     </button>
@@ -431,13 +451,15 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           adjustTime(schedule.endTime || endTime, 10)
                         )
                       }
-                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                      className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-500"
                     >
                       +10分
                     </button>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <p>休憩時間:</p>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <p className="text-gray-800 dark:text-gray-200">
+                      休憩時間:
+                    </p>
                     <div className="flex items-center space-x-1">
                       <input
                         type="text"
@@ -465,9 +487,11 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                             formattedBreakTime
                           );
                         }}
-                        className="w-12 p-1 border rounded text-center"
+                        className="w-12 p-1 border border-gray-300 dark:border-gray-600 rounded text-center bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                       />
-                      <span>分</span>
+                      <span className="text-gray-800 dark:text-gray-200">
+                        分
+                      </span>
                     </div>
                     <button
                       onClick={() => {
@@ -479,7 +503,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           )
                         );
                       }}
-                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 ml-10.5"
+                      className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-500 ml-10.5"
                     >
                       -10分
                     </button>
@@ -491,12 +515,12 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           String(Number(schedule.breakTime || 0) + 10)
                         )
                       }
-                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                      className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-500"
                     >
                       +10分
                     </button>
                   </div>
-                  <p>
+                  <p className="text-gray-800 dark:text-gray-200">
                     実働時間: {hours}時間{minutes}分
                   </p>
                 </div>
@@ -518,13 +542,13 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
               setIsDialogOpen(false);
               initworkInfo();
             }}
-            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+            className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-400 dark:hover:bg-gray-500"
           >
             キャンセル
           </button>
           <button
             onClick={() => addWork(workid)}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700"
           >
             {checkWorkIdExists() ? "更新" : "登録"}
           </button>

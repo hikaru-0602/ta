@@ -93,7 +93,9 @@ export default function EditShiftDialog({
         onClick={backDialog} //ダイアログの外側をクリックしたら閉じる
       >
         <div className="bg-white dark:bg-gray-800 p-6 rounded shadow-lg max-w-md w-full">
-          <h2 className="text-lg sm:text-xl font-bold mb-4">シフトを編集</h2>
+          <h2 className="text-lg sm:text-xl font-bold mb-4">
+            {editingShift.label}シフトを編集
+          </h2>
           <form>
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">科目名</label>
@@ -109,87 +111,211 @@ export default function EditShiftDialog({
                 className="w-full p-2 border rounded"
               />
             </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">業務内容</label>
-              <select
-                value={editingShift.category} //現在の業務内容を表示
-                onChange={(e) =>
-                  setEditingShift({
-                    ...editingShift,
-                    category: e.target.value, //業務内容を更新
-                  })
-                }
-                className="w-full p-2 border rounded"
-              >
-                <option value="(授業)">(授業)</option>
-                <option value="(準備等)">(準備等)</option>
-              </select>
+            <div className="flex space-x-4 items-end">
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">
+                  業務内容
+                </label>
+                <select
+                  value={editingShift.category}
+                  onChange={(e) =>
+                    setEditingShift({
+                      ...editingShift,
+                      category: e.target.value,
+                    })
+                  }
+                  className="w-full p-2 border rounded h-[40px]" // 高さを指定
+                >
+                  <option value="(授業)">(授業)</option>
+                  <option value="(準備等)">(準備等)</option>
+                </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">
+                  担当教員
+                </label>
+                <input
+                  type="text"
+                  value={editingShift.teacher}
+                  onChange={(e) =>
+                    setEditingShift({
+                      ...editingShift,
+                      teacher: e.target.value,
+                    })
+                  }
+                  className="w-full p-2 border rounded h-[40px]" // 高さを指定
+                />
+              </div>
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">開始時間</label>
-              <input
-                type="time"
-                value={editingShift.starttime} //現在の開始時間を表示
-                onChange={(e) =>
-                  setEditingShift({
-                    ...editingShift,
-                    starttime: e.target.value, //開始時間を更新
-                  })
-                }
-                className="w-full p-2 border rounded"
-              />
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  maxLength={2}
+                  value={editingShift.starttime.split(":")[0]} // 時
+                  onChange={(e) => {
+                    const newHour = e.target.value
+                      .replace(/[^\d０-９]/g, "") // 数字以外を除去
+                      .replace(/[０-９]/g, (s) =>
+                        String.fromCharCode(s.charCodeAt(0) - 65248)
+                      ) // 全角を半角に変換
+                      .slice(0, 2); // 最大2桁に制限
+                    const newTime = `${newHour}:${
+                      editingShift.starttime.split(":")[1]
+                    }`;
+                    setEditingShift({ ...editingShift, starttime: newTime });
+                  }}
+                  onBlur={(e) => {
+                    const formattedHour = e.target.value.padStart(2, "0");
+                    const newTime = `${formattedHour}:${
+                      editingShift.starttime.split(":")[1]
+                    }`;
+                    setEditingShift({ ...editingShift, starttime: newTime });
+                  }}
+                  className="w-12 p-1 border rounded text-center"
+                />
+                <span>:</span>
+                <input
+                  type="text"
+                  maxLength={2}
+                  value={editingShift.starttime.split(":")[1]} // 分
+                  onChange={(e) => {
+                    const newMinute = e.target.value
+                      .replace(/[^\d０-９]/g, "") // 数字以外を除去
+                      .replace(/[０-９]/g, (s) =>
+                        String.fromCharCode(s.charCodeAt(0) - 65248)
+                      ) // 全角を半角に変換
+                      .slice(0, 2); // 最大2桁に制限
+                    const newTime = `${
+                      editingShift.starttime.split(":")[0]
+                    }:${newMinute}`;
+                    setEditingShift({ ...editingShift, starttime: newTime });
+                  }}
+                  onBlur={(e) => {
+                    const formattedMinute = e.target.value.padStart(2, "0");
+                    const newTime = `${
+                      editingShift.starttime.split(":")[0]
+                    }:${formattedMinute}`;
+                    setEditingShift({ ...editingShift, starttime: newTime });
+                  }}
+                  className="w-12 p-1 border rounded text-center"
+                />
+              </div>
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">終了時間</label>
-              <input
-                type="time"
-                value={editingShift.endtime} //現在の終了時間を表示
-                onChange={(e) =>
-                  setEditingShift({
-                    ...editingShift,
-                    endtime: e.target.value, //終了時間を更新
-                  })
-                }
-                className="w-full p-2 border rounded"
-              />
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  maxLength={2}
+                  value={editingShift.endtime.split(":")[0]} // 時
+                  onChange={(e) => {
+                    const newHour = e.target.value
+                      .replace(/[^\d０-９]/g, "")
+                      .replace(/[０-９]/g, (s) =>
+                        String.fromCharCode(s.charCodeAt(0) - 65248)
+                      )
+                      .slice(0, 2);
+                    const newTime = `${newHour}:${
+                      editingShift.endtime.split(":")[1]
+                    }`;
+                    setEditingShift({ ...editingShift, endtime: newTime });
+                  }}
+                  onBlur={(e) => {
+                    const formattedHour = e.target.value.padStart(2, "0");
+                    const newTime = `${formattedHour}:${
+                      editingShift.endtime.split(":")[1]
+                    }`;
+                    setEditingShift({ ...editingShift, endtime: newTime });
+                  }}
+                  className="w-12 p-1 border rounded text-center"
+                />
+                <span>:</span>
+                <input
+                  type="text"
+                  maxLength={2}
+                  value={editingShift.endtime.split(":")[1]} // 分
+                  onChange={(e) => {
+                    const newMinute = e.target.value
+                      .replace(/[^\d０-９]/g, "")
+                      .replace(/[０-９]/g, (s) =>
+                        String.fromCharCode(s.charCodeAt(0) - 65248)
+                      )
+                      .slice(0, 2);
+                    const newTime = `${
+                      editingShift.endtime.split(":")[0]
+                    }:${newMinute}`;
+                    setEditingShift({ ...editingShift, endtime: newTime });
+                  }}
+                  onBlur={(e) => {
+                    const formattedMinute = e.target.value.padStart(2, "0");
+                    const newTime = `${
+                      editingShift.endtime.split(":")[0]
+                    }:${formattedMinute}`;
+                    setEditingShift({ ...editingShift, endtime: newTime });
+                  }}
+                  className="w-12 p-1 border rounded text-center"
+                />
+              </div>
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">
                 休憩時間(分)
               </label>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center space-x-2">
                 <button
                   type="button"
-                  onClick={() => adjustBreakTime(-10)} //10分減らす
+                  onClick={() =>
+                    setEditingShift({
+                      ...editingShift,
+                      breaktime: Math.max(
+                        0,
+                        Number(editingShift.breaktime || 0) - 10
+                      ),
+                    })
+                  }
                   className="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400"
                 >
                   -10分
                 </button>
-                <span className="text-lg">
-                  {editingShift.breaktime || 0} 分
-                </span>
+                <input
+                  type="text"
+                  value={editingShift.breaktime || "0"}
+                  onChange={(e) => {
+                    const newBreakTime = e.target.value
+                      .replace(/[^\d０-９]/g, "")
+                      .replace(/[０-９]/g, (s) =>
+                        String.fromCharCode(s.charCodeAt(0) - 65248)
+                      )
+                      .slice(0, 3);
+                    setEditingShift({
+                      ...editingShift,
+                      breaktime: Number(newBreakTime),
+                    });
+                  }}
+                  onBlur={(e) => {
+                    const formattedBreakTime = e.target.value || "0";
+                    setEditingShift({
+                      ...editingShift,
+                      breaktime: Number(formattedBreakTime),
+                    });
+                  }}
+                  className="w-12 p-1 border rounded text-center"
+                />
                 <button
                   type="button"
-                  onClick={() => adjustBreakTime(10)} //10分増やす
+                  onClick={() =>
+                    setEditingShift({
+                      ...editingShift,
+                      breaktime: Number(editingShift.breaktime || 0) + 10,
+                    })
+                  }
                   className="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400"
                 >
                   +10分
                 </button>
               </div>
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">担当教員</label>
-              <input
-                type="text"
-                value={editingShift.teacher} //現在の担当教員を表示
-                onChange={(e) =>
-                  setEditingShift({
-                    ...editingShift,
-                    teacher: e.target.value, //担当教員を更新
-                  })
-                }
-                className="w-full p-2 border rounded"
-              />
             </div>
           </form>
           <div className="flex justify-end">

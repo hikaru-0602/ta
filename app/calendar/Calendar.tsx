@@ -177,14 +177,14 @@ export default function Calendar() {
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center">
-      <div className="flex justify-between items-center mb-4 w-full max-w-[1200px]">
+      <div className="flex items-center justify-center mb-4 w-full max-w-[1200px] space-x-4">
         <button
           onClick={handlePrevMonth}
           className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
         >
           前の月
         </button>
-        <h2 className="text-2xl font-bold text-2xl">
+        <h2 className="text-2xl font-bold">
           {currentDate.getFullYear()}年 {currentDate.getMonth() + 1}月
         </h2>
         <button
@@ -229,7 +229,7 @@ export default function Calendar() {
                       ? " bg-red-100 dark:bg-red-200"
                       : "")
                   : isSunday || isSaturday || holiday
-                  ? "bg-red-100 dark:bg-red-200"
+                  ? "bg-red-100 dark:bg-red-200 text-black"
                   : "bg-gray-100 dark:bg-gray-700"
               }`}
             >
@@ -247,7 +247,7 @@ export default function Calendar() {
       {/* シフト出力ボタン */}
       <button
         onClick={handleOpenExportDialog}
-        className="mt-4 px-4 py-2 hover:bg-blue-600 bg-white rounded-lg border border-gray-400 font-bold"
+        className="mt-4 px-4 py-2 hover:bg-blue-600 bg-white rounded-lg border border-gray-400 font-bold dark:bg-gray-700 dark:text-white dark:border-gray-600 transition duration-300 ease-in-out"
       >
         Excel出力
       </button>
