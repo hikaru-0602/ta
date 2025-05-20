@@ -241,21 +241,29 @@ export default function Work() {
                         <p className="text-sm text-gray-600">
                           教員名: {work.teacher}
                         </p>
-                        <p className="text-sm text-gray-600">
-                          曜日: {work.dayofweek}曜日
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          時限: {work.schedule.join(", ")}限
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          時間: {work.starttime} - {work.endtime}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          休憩: {work.breaktime}分
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          実働: {work.worktime}
-                        </p>
+                        <div className="flex space-x-4">
+                          <p className="text-sm text-gray-600">
+                            曜日:{" "}
+                            {work.dayofweek === "" ? "なし" : work.dayofweek}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            時限:{" "}
+                            {work.schedule && work.schedule.length > 0
+                              ? work.schedule.join(", ") + "限"
+                              : "なし"}
+                          </p>
+                        </div>
+                        <div className="flex space-x-4">
+                          <p className="text-sm text-gray-600">
+                            時刻: {work.starttime}~{work.endtime}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            休憩: {work.breaktime}分
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            実働: {work.worktime}
+                          </p>
+                        </div>
                       </div>
                       <button
                         onClick={(e) => {

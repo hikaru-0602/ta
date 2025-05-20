@@ -22,6 +22,7 @@ export const handleAddShift = (
   //選択された日付のシフトを取得
   const shiftsForDate: Shift[] = shiftData.filter(
     (shift) =>
+      shift.year === selectedDate.getFullYear() &&
       shift.month === selectedDate.getMonth() + 1 &&
       shift.day === selectedDate.getDate()
   );
@@ -56,6 +57,7 @@ export const handleAddShift = (
   //新しいシフトデータを作成
   const newShift: Shift = {
     id: work.id, // 必須プロパティを明示的に設定
+    year: selectedDate.getFullYear(), //年を設定
     month: selectedDate.getMonth() + 1, //月を設定
     day: selectedDate.getDate(), //日を設定
     label: work.label, //ラベル名を設定
@@ -77,6 +79,7 @@ export const handleAddShift = (
 //シフトを削除する関数
 export const handleRemoveShift = (
   id: number, //削除するシフトのID
+  year: number, //削除するシフトの年
   month: number, //削除するシフトの月
   day: number, //削除するシフトの日
   shiftData: Shift[], //既存のシフトデータ
@@ -85,7 +88,13 @@ export const handleRemoveShift = (
 ) => {
   //指定されたシフトを除外した新しいシフトデータを作成
   const updatedShifts = shiftData.filter(
-    (shift) => !(shift.id === id && shift.month === month && shift.day === day)
+    (shift) =>
+      !(
+        shift.id === id &&
+        shift.year === year &&
+        shift.month === month &&
+        shift.day === day
+      )
   );
 
   setShiftData(updatedShifts); //状態を更新
@@ -111,6 +120,7 @@ interface AddShiftDialogProps {
   ) => void;
   handleRemoveShift: (
     id: number,
+    year: number,
     month: number,
     day: number,
     shiftData: Shift[],
@@ -149,6 +159,7 @@ export default function AddShiftDialog({
               .filter(
                 (shift) =>
                   selectedDate &&
+                  shift.year === selectedDate.getFullYear() &&
                   shift.month === selectedDate.getMonth() + 1 &&
                   shift.day === selectedDate.getDate()
               )
@@ -171,6 +182,7 @@ export default function AddShiftDialog({
                     onClick={() =>
                       handleRemoveShift(
                         shift.id,
+                        shift.year,
                         shift.month,
                         shift.day,
                         shiftData,
@@ -195,6 +207,7 @@ export default function AddShiftDialog({
                       shift.label === work.label &&
                       shift.id === work.id &&
                       selectedDate &&
+                      shift.year === selectedDate.getFullYear() &&
                       shift.month === selectedDate.getMonth() + 1 &&
                       shift.day === selectedDate.getDate()
                     /*

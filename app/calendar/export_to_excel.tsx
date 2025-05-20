@@ -318,9 +318,16 @@ export const replaceAllData = async (
     });
     saveAs(
       blob,
-      `R${year - 2018}_${yearMonthArray[4]}月分実施報告書_${
-        formattedData[0][1]
-      }.xlsx`
+      typeof formattedData[0][1] !== "undefined" && formattedData[0][1] !== null
+        ? `R${year - 2018}_${yearMonthArray[4]}月分実施報告書_${
+            formattedData[0][1]
+          }.xlsx`
+        : typeof formattedData[0][15] !== "undefined" &&
+          formattedData[0][15] !== null
+        ? `R${year - 2018}_${yearMonthArray[4]}月分実施報告書_${
+            formattedData[0][15]
+          }.xlsx`
+        : `R${year - 2018}_${yearMonthArray[4]}月分実施報告書_.xlsx`
     );
 
     //alert("すべての処理が完了したExcelファイルを保存しました。");

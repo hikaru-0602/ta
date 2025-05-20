@@ -9,7 +9,7 @@ export const useWorkInfo = () => {
     category: "(準備等)", //業務内容
     schedules: [
       {
-        day: "月", //曜日
+        day: "", //曜日
         periods: ["1限"], //時限
         startTime: "", //開始時刻
         endTime: "", //終了時刻
@@ -149,7 +149,7 @@ export const useWorkInfo = () => {
       ...prev,
       schedules: [
         ...prev.schedules,
-        { day: "月曜日", periods: ["1限"], startTime: "", endTime: "", breakTime: "" },
+        { day: "", periods: ["1限"], startTime: "", endTime: "", breakTime: "" },
       ],
     }));
   };
@@ -162,7 +162,13 @@ export const useWorkInfo = () => {
 
   //時限から開始時刻、終了時刻、休憩時間を計算する関数
   const calculateStartEndTimes = (periods: string[]) => {
-    if (periods.length === 0) return { startTime: "", endTime: "", breakTime: 0 };
+    if (periods.length === 0) {
+      return {
+        startTime: "09:00", // デフォルト開始時間
+        endTime: "10:00", // デフォルト終了時間
+        breakTime: 0, // デフォルト休憩時間
+      };
+    }
 
     const startTime = periodTimes[periods[0] as "1限" | "2限" | "3限" | "4限" | "5限" | "6限"].start;
     const endTime = periodTimes[periods[periods.length - 1] as "1限" | "2限" | "3限" | "4限" | "5限" | "6限"].end;
@@ -287,7 +293,7 @@ export const useWorkInfo = () => {
       label: "",
       subject: "",
       category: "(準備等)", // 初期値をリセット
-      schedules: [{ day: "月曜日", periods: ["1限"], startTime: "", endTime: "", breakTime: "" }],
+      schedules: [{ day: "", periods: ["1限"], startTime: "", endTime: "", breakTime: "" }],
       startTime: "",
       endTime: "",
       breakTime: "",

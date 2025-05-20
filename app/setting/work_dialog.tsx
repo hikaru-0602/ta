@@ -206,11 +206,12 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                       }
                       className="w-full p-2 border rounded"
                     >
-                      <option value="月">月曜日</option>
-                      <option value="火">火曜日</option>
-                      <option value="水">水曜日</option>
-                      <option value="木">木曜日</option>
-                      <option value="金">金曜日</option>
+                      <option value="">なし</option>
+                      <option value="月曜日">月曜日</option>
+                      <option value="火曜日">火曜日</option>
+                      <option value="水曜日">水曜日</option>
+                      <option value="木曜日">木曜日</option>
+                      <option value="金曜日">金曜日</option>
                     </select>
                   </div>
                   <div className="flex-1">
@@ -257,15 +258,75 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                 </div>
                 <div className="text-sm text-gray-600">
                   <div className="flex items-center space-x-2">
-                    <p>開始時間: {schedule.startTime || startTime}</p>
+                    <p>開始時間:</p>
+                    <div className="flex items-center space-x-1">
+                      <input
+                        type="text"
+                        maxLength={2}
+                        value={(schedule.startTime || startTime).split(":")[0]} // 時
+                        onChange={(e) => {
+                          const newHour = e.target.value
+                            .replace(/[^\d０-９]/g, "")
+                            .replace(
+                              /[０-９]/g,
+                              (s) =>
+                                String.fromCharCode(
+                                  s.charCodeAt(0) - 65248
+                                ).slice(0, 2) // 2桁に制限
+                            );
+                          const newTime = `${newHour}:${
+                            (schedule.startTime || startTime).split(":")[1]
+                          }`;
+                          handleScheduleTimeEdit(index, "startTime", newTime);
+                        }}
+                        onBlur={(e) => {
+                          // フォーカスが外れたタイミングで2桁に整形
+                          const formattedHour = e.target.value.padStart(2, "0");
+                          const newTime = `${formattedHour}:${
+                            (schedule.startTime || startTime).split(":")[1]
+                          }`;
+                          handleScheduleTimeEdit(index, "startTime", newTime);
+                        }}
+                        className="w-12 p-1 border rounded text-center"
+                      />
+                      <span>:</span>
+                      <input
+                        type="text"
+                        maxLength={2}
+                        value={(schedule.startTime || startTime).split(":")[1]} // 分
+                        onChange={(e) => {
+                          const newMinute = e.target.value
+                            .replace(/[^\d０-９]/g, "")
+                            .replace(/[０-９]/g, (s) =>
+                              String.fromCharCode(s.charCodeAt(0) - 65248)
+                            );
+                          const newTime = `${
+                            (schedule.startTime || startTime).split(":")[0]
+                          }:${newMinute}`;
+                          handleScheduleTimeEdit(index, "startTime", newTime);
+                        }}
+                        onBlur={(e) => {
+                          // フォーカスが外れたタイミングで2桁に整形
+                          const formattedMinute = e.target.value.padStart(
+                            2,
+                            "0"
+                          );
+                          const newTime = `${
+                            (schedule.startTime || startTime).split(":")[0]
+                          }:${formattedMinute}`;
+                          handleScheduleTimeEdit(index, "startTime", newTime);
+                        }}
+                        className="w-12 p-1 border rounded text-center"
+                      />
+                    </div>
                     <button
-                      onClick={() =>
+                      onClick={() => {
                         handleScheduleTimeEdit(
                           index,
                           "startTime",
                           adjustTime(schedule.startTime || startTime, -10)
-                        )
-                      }
+                        );
+                      }}
                       className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
                     >
                       -10分
@@ -284,7 +345,63 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                     </button>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <p>終了時間: {schedule.endTime || endTime}</p>
+                    <p>終了時間:</p>
+                    <div className="flex items-center space-x-1">
+                      <input
+                        type="text"
+                        maxLength={2}
+                        value={(schedule.endTime || endTime).split(":")[0]} // 時
+                        onChange={(e) => {
+                          const newHour = e.target.value
+                            .replace(/[^\d０-９]/g, "")
+                            .replace(/[０-９]/g, (s) =>
+                              String.fromCharCode(s.charCodeAt(0) - 65248)
+                            );
+                          const newTime = `${newHour}:${
+                            (schedule.endTime || endTime).split(":")[1]
+                          }`;
+                          handleScheduleTimeEdit(index, "endTime", newTime);
+                        }}
+                        onBlur={(e) => {
+                          // フォーカスが外れたタイミングで2桁に整形
+                          const formattedHour = e.target.value.padStart(2, "0");
+                          const newTime = `${formattedHour}:${
+                            (schedule.endTime || endTime).split(":")[1]
+                          }`;
+                          handleScheduleTimeEdit(index, "endTime", newTime);
+                        }}
+                        className="w-12 p-1 border rounded text-center"
+                      />
+                      <span>:</span>
+                      <input
+                        type="text"
+                        maxLength={2}
+                        value={(schedule.endTime || endTime).split(":")[1]} // 分
+                        onChange={(e) => {
+                          const newMinute = e.target.value
+                            .replace(/[^\d０-９]/g, "")
+                            .replace(/[０-９]/g, (s) =>
+                              String.fromCharCode(s.charCodeAt(0) - 65248)
+                            );
+                          const newTime = `${
+                            (schedule.endTime || endTime).split(":")[0]
+                          }:${newMinute}`;
+                          handleScheduleTimeEdit(index, "endTime", newTime);
+                        }}
+                        onBlur={(e) => {
+                          // フォーカスが外れたタイミングで2桁に整形
+                          const formattedMinute = e.target.value.padStart(
+                            2,
+                            "0"
+                          );
+                          const newTime = `${
+                            (schedule.endTime || endTime).split(":")[0]
+                          }:${formattedMinute}`;
+                          handleScheduleTimeEdit(index, "endTime", newTime);
+                        }}
+                        className="w-12 p-1 border rounded text-center"
+                      />
+                    </div>
                     <button
                       onClick={() =>
                         handleScheduleTimeEdit(
@@ -311,21 +428,49 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                     </button>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <p>休憩時間: {schedule.breakTime || 0}分</p>
+                    <p>休憩時間:</p>
+                    <div className="flex items-center space-x-1">
+                      <input
+                        type="text"
+                        value={schedule.breakTime || "0"} // 初期値を0に設定
+                        onChange={(e) => {
+                          // 全角数字を半角に変換し、数字以外を除去、最大3桁に制限
+                          const newBreakTime = e.target.value
+                            .replace(/[^\d０-９]/g, "") // 数字以外を除去
+                            .replace(/[０-９]/g, (s) =>
+                              String.fromCharCode(s.charCodeAt(0) - 65248)
+                            ) // 全角を半角に変換
+                            .slice(0, 3); // 最大3桁に制限
+                          handleScheduleTimeEdit(
+                            index,
+                            "breakTime",
+                            newBreakTime
+                          );
+                        }}
+                        onBlur={(e) => {
+                          // フォーカスが外れたタイミングで数値を整形（必要なら0を補完）
+                          const formattedBreakTime = e.target.value || "0";
+                          handleScheduleTimeEdit(
+                            index,
+                            "breakTime",
+                            formattedBreakTime
+                          );
+                        }}
+                        className="w-12 p-1 border rounded text-center"
+                      />
+                      <span>分</span>
+                    </div>
                     <button
                       onClick={() => {
                         handleScheduleTimeEdit(
                           index,
                           "breakTime",
                           String(
-                            Math.max(
-                              0,
-                              Number(schedule.breakTime || breakTime) - 10
-                            )
+                            Math.max(0, Number(schedule.breakTime || 0) - 10)
                           )
                         );
                       }}
-                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 ml-10.5"
                     >
                       -10分
                     </button>
@@ -334,7 +479,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                         handleScheduleTimeEdit(
                           index,
                           "breakTime",
-                          `${Number(schedule.breakTime || breakTime) + 10}`
+                          String(Number(schedule.breakTime || 0) + 10)
                         )
                       }
                       className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"

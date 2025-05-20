@@ -1,6 +1,7 @@
 export type Shift = {
   filter(arg0: (shift: unknown) => boolean): unknown;
   id: number;
+  year: number;
   month: number;
   day: number;
   label: string;

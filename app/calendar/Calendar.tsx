@@ -161,7 +161,9 @@ export default function Calendar() {
 
     // 現在の月のシフトデータを取得
     const currentMonthShifts = shiftData.filter(
-      (shift) => shift.month === currentDate.getMonth() + 1
+      (shift) =>
+        shift.year === currentDate.getFullYear() &&
+        shift.month === currentDate.getMonth() + 1
     );
 
     // 科目名のリストを取得（重複を排除）
@@ -182,7 +184,7 @@ export default function Calendar() {
         >
           前の月
         </button>
-        <h2 className="text-2xl font-bold">
+        <h2 className="text-2xl font-bold text-2xl">
           {currentDate.getFullYear()}年 {currentDate.getMonth() + 1}月
         </h2>
         <button
@@ -194,7 +196,7 @@ export default function Calendar() {
       </div>
       <div className="grid grid-cols-7 gap-1 text-center">
         {["日", "月", "火", "水", "木", "金", "土"].map((day) => (
-          <div key={day} className="font-bold text-lg">
+          <div key={day} className="font-bold text-2xl">
             {day}
           </div>
         ))}
@@ -209,6 +211,7 @@ export default function Calendar() {
 
           const shiftCount = shiftData.filter(
             (shift) =>
+              shift.year === date.getFullYear() &&
               shift.month === date.getMonth() + 1 &&
               shift.day === date.getDate()
           ).length;
@@ -217,7 +220,7 @@ export default function Calendar() {
             <div
               key={date.toISOString()}
               onClick={() => handleDateClick(date)}
-              className={`p-6 rounded text-lg cursor-pointer relative ${
+              className={`p-6 rounded text-xl cursor-pointer relative ${
                 selectedDate?.toDateString() === date.toDateString()
                   ? "bg-green-500 text-white"
                   : isToday
@@ -244,7 +247,7 @@ export default function Calendar() {
       {/* シフト出力ボタン */}
       <button
         onClick={handleOpenExportDialog}
-        className="mt-4 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+        className="mt-4 px-4 py-2 hover:bg-blue-600 bg-white rounded-lg border border-gray-400 font-bold"
       >
         Excel出力
       </button>

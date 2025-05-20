@@ -90,7 +90,9 @@ export const handleExportSubject = (
 
   //現在の月のシフトデータを取得
   const currentMonthShifts = shiftData.filter(
-    (shift) => shift.month === currentDate.getMonth() + 1
+    (shift) =>
+      shift.year === currentDate.getFullYear() &&
+      shift.month === currentDate.getMonth() + 1
   );
 
   //選択された科目名に一致するシフトをフィルタリング
@@ -134,7 +136,9 @@ export const exportData = async (
 
   // 現在の月のシフトデータを取得
   const currentMonthShifts = shiftData.filter(
-    (shift) => shift.month === currentDate.getMonth() + 1
+    (shift) =>
+      shift.year === currentDate.getFullYear() &&
+      shift.month === currentDate.getMonth() + 1
   );
 
   // 選択された科目名に一致するシフトをフィルタリング
@@ -149,7 +153,7 @@ export const exportData = async (
       break;
     }
   }
-  console.log("teacher:", teacher); // デバッグ用
+  //console.log("teacher:", teacher); / / デバッグ用;
 
   // 日付ごとにシフトをグループ化
   const groupedShifts: { [date: string]: Shift[] } = {};
