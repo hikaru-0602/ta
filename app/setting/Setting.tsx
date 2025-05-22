@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useUserInfo } from "./user_setting";
 import { useWorkInfo } from "./work_setting";
 import WorkDialog from "./work_dialog";
 import { useAuth } from "../firebase/context/auth";
+import { useLoginContext } from "../firebase/context/LoginContext";
+import { getAuthEmail } from "../firebase/lib/auth";
 
 export default function Work() {
   //ユーザ情報のカスタムフックを使用
@@ -13,7 +15,9 @@ export default function Work() {
     handleUserChange,
     handleGradeChange,
     loadUserInfoFromLocalStorage,
+    saveUserInfoToLocalStorage,
     handleUserRegister,
+    setUserInfo,
   } = useUserInfo();
 
   //仕事情報のカスタムフックを使用
@@ -42,6 +46,7 @@ export default function Work() {
   const [id, setId] = useState<number>(100);
   const user = useAuth(); //認証情報を取得
   const [isUserInfoOpen, setIsUserInfoOpen] = useState(true); // 折りたたみ状態を管理
+  const { isLoginTriggered } = useLoginContext(); //ログイン状態を取得
 
   //初期化時にローカルストレージからデータを読み込む
   useEffect(() => {
@@ -52,12 +57,20 @@ export default function Work() {
   }, []);
 
   useEffect(() => {
-    console.log(isDialogOpen);
-  }, [isDialogOpen]);
+    if (user !== null && isLoginTriggered) {
+      const auth = getAuthEmail();
+      setUserInfo((prev) => ({
+        ...prev,
+        id: auth ?? "",
+      }));
+      saveUserInfoToLocalStorage();
+      loadUserInfoFromLocalStorage;
+    }
+  }, [isLoginTriggered, user]);
 
   return (
     <>
-      <div className="w-full h-full flex flex-col items-center justify-start">
+      <div className="w-full h-full flex flex-col items-center justify-start max-w-[1200px]">
         {/* 中央揃えのタイトル */}
         <div className="w-full max-w-2xl text-center">
           <h1 className="text-3xl font-extrabold mb-6 text-gray-800 tracking-wide dark:text-white">

@@ -272,7 +272,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                   </div>
                   <button
                     onClick={() => removeSchedule(index)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-red-500 hover:text-red-700 text-decoration: underline"
                   >
                     削除
                   </button>

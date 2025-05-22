@@ -117,7 +117,6 @@ export default function Calendar() {
   const handleDateClick = (date: Date) => {
     if (user === null) {
       alert("ログインしてください。");
-      router.push("/setting"); // 仕事ページにリダイレクト
       return;
     }
 
@@ -155,7 +154,6 @@ export default function Calendar() {
       ) {
         alert("ユーザ情報を登録してください");
       }
-      router.push("/setting"); // 仕事ページにリダイレクト
       return;
     }
 
@@ -176,7 +174,7 @@ export default function Calendar() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center">
+    <div className="w-full h-full flex flex-col items-center justify-center padding ml-20 mr-20">
       <div className="flex items-center justify-center mb-4 w-full max-w-[1200px] space-x-4">
         <button
           onClick={handlePrevMonth}
@@ -194,12 +192,14 @@ export default function Calendar() {
           次の月
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-1 text-center">
+      <div className="grid grid-cols-7 gap-1 text-center w-full max-w-[1200px]">
         {["日", "月", "火", "水", "木", "金", "土"].map((day) => (
           <div key={day} className="font-bold text-2xl">
             {day}
           </div>
         ))}
+      </div>
+      <div className="grid grid-cols-7 gap-1 text-center w-full max-w-[1200px] mt-4">
         {Array.from({ length: startOfMonth.getDay() }).map((_, i) => (
           <div key={`empty-${i}`} />
         ))}
@@ -220,7 +220,7 @@ export default function Calendar() {
             <div
               key={date.toISOString()}
               onClick={() => handleDateClick(date)}
-              className={`p-6 rounded text-xl cursor-pointer relative ${
+              className={`p-6 rounded text-xl cursor-pointer relative hover:bg-gray-300 dark:bg-gray-600 ${
                 selectedDate?.toDateString() === date.toDateString()
                   ? "bg-green-500 text-white"
                   : isToday
@@ -247,7 +247,7 @@ export default function Calendar() {
       {/* シフト出力ボタン */}
       <button
         onClick={handleOpenExportDialog}
-        className="mt-4 px-4 py-2 hover:bg-blue-600 bg-white rounded-lg border border-gray-400 font-bold dark:bg-gray-700 dark:text-white dark:border-gray-600 transition duration-300 ease-in-out"
+        className="mt-6 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition rounded-lg border border-gray-400 font-bold"
       >
         Excel出力
       </button>
