@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useUserInfo } from "./user_setting";
 import { useWorkInfo } from "./work_setting";
 import WorkDialog from "./work_dialog";
@@ -64,7 +64,7 @@ export default function Work() {
         id: auth ?? "",
       }));
       saveUserInfoToLocalStorage();
-      loadUserInfoFromLocalStorage;
+      loadUserInfoFromLocalStorage();
     }
   }, [isLoginTriggered, user]);
 

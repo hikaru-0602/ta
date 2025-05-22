@@ -28,8 +28,5 @@ export async function loginAndGetAuth() {
   // ログイン処理を呼び出す
   await login();
 
-  // ログイン後に Firebase Auth インスタンスを取得
-  const email = getAuthEmail();
-
   return auth;
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import Header from "../components/Header";
 import Setting from "./Setting";
 
 export default function Home() {

@@ -1,6 +1,5 @@
 "use client";
 
-import Header from "../components/Header";
 import Calendar from "./Calendar";
 
 export default function Home() {

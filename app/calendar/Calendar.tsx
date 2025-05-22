@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; // Next.jsのルーターをインポート
 import AddShiftDialog, {
   handleAddShift,
   handleRemoveShift,
@@ -18,7 +17,6 @@ import { useAuth } from "../firebase/context/auth";
 import { Shift, UserInfo, WorkData } from "../types"; // Shift型をインポート
 
 export default function Calendar() {
-  const router = useRouter(); // ルーターを初期化
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null); // 選択された日付を管理

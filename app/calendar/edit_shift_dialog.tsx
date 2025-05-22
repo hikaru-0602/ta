@@ -64,20 +64,8 @@ export default function EditShiftDialog({
   saveShiftsToLocalStorage,
 }: EditShiftDialogProps) {
   //休憩時間を10分刻みに丸める関数
-  const roundToNearestTen = (value: number) => {
-    return Math.max(0, Math.round(value / 10) * 10); //10分刻みに丸める
-  };
 
   //休憩時間を増減させる関数
-  const adjustBreakTime = (adjustment: number) => {
-    if (!editingShift) return;
-    const currentBreakTime = Number(editingShift.breaktime) || 0; //現在の休憩時間を取得
-    const newBreakTime = Math.max(0, currentBreakTime + adjustment); //0未満にならないように調整
-    setEditingShift({
-      ...editingShift,
-      breaktime: roundToNearestTen(newBreakTime), //丸めて設定
-    });
-  };
 
   const backDialog = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {

@@ -206,7 +206,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
             </div>
           </div>
           {workInfo.schedules.map((schedule, index) => {
-            const { startTime, endTime, breakTime } = calculateStartEndTimes(
+            const { startTime, endTime } = calculateStartEndTimes(
               schedule.periods
             );
             const { hours, minutes } = calculateWorkingTime(
