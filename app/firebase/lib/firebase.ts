@@ -1,7 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { initializeAppCheck, ReCaptchaV3Provider, getToken } from 'firebase/app-check'
+//import { initializeAppCheck, ReCaptchaV3Provider, getToken } from 'firebase/app-check'
 
 
 //怖いから".env"に入れといた
@@ -25,6 +25,7 @@ export const auth = getAuth();
 console.log("Firebase Auth initialized", auth);
 export const db = getFirestore();
 
+/*
 export const firebase = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
 
 // FIREBASE_APPCHECK_DEBUG_TOKEN の定義(TypeScript用)
@@ -54,3 +55,4 @@ if (typeof document !== 'undefined') {
       console.log(error.message)
     })
 }
+    */
