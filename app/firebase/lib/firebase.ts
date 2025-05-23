@@ -1,6 +1,7 @@
-import { initializeApp, getApps } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { initializeAppCheck, ReCaptchaV3Provider, getToken } from "firebase/app-check";
 //import { initializeAppCheck, ReCaptchaV3Provider, getToken } from 'firebase/app-check'
 
 
@@ -18,28 +19,22 @@ const firebaseConfig = {
 
 if (!getApps()?.length) {
   initializeApp(firebaseConfig);
-  console.log("Firebase initialized");
 }
 
 export const auth = getAuth();
-console.log("Firebase Auth initialized", auth);
 export const db = getFirestore();
 
-/*
 export const firebase = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
 
-// FIREBASE_APPCHECK_DEBUG_TOKEN の定義(TypeScript用)
 declare global {
-  interface Window {
-    FIREBASE_APPCHECK_DEBUG_TOKEN?: boolean | string;
-  }
+  var FIREBASE_APPCHECK_DEBUG_TOKEN: boolean | string | undefined
 }
 
 // AppCheck 初期化処理
 if (typeof document !== 'undefined') {
   // 1.デバック環境用設定
   if (process.env.NODE_ENV === 'development') {
-    window.self.FIREBASE_APPCHECK_DEBUG_TOKEN = true // デバッグ用文字列の生成
+    window.self.FIREBASE_APPCHECK_DEBUG_TOKEN = false
   }
   // 2.AppCheck 初期化
   const appCheck = initializeAppCheck(firebase, {
@@ -55,4 +50,3 @@ if (typeof document !== 'undefined') {
       console.log(error.message)
     })
 }
-    */
