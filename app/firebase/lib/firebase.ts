@@ -5,7 +5,6 @@ import { initializeAppCheck, ReCaptchaV3Provider, getToken } from "firebase/app-
 //import { initializeAppCheck, ReCaptchaV3Provider, getToken } from 'firebase/app-check'
 
 
-//怖いから".env"に入れといた
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN,
@@ -21,8 +20,6 @@ if (!getApps()?.length) {
   initializeApp(firebaseConfig);
 }
 
-export const auth = getAuth();
-export const db = getFirestore();
 
 export const firebase = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
 
@@ -36,7 +33,7 @@ declare global {
 if (typeof document !== 'undefined') {
   // 1.デバック環境用設定
   if (process.env.NODE_ENV === 'development') {
-    window.self.FIREBASE_APPCHECK_DEBUG_TOKEN = false
+    window.self.FIREBASE_APPCHECK_DEBUG_TOKEN = false;
   }
   // 2.AppCheck 初期化
   const appCheck = initializeAppCheck(firebase, {
@@ -52,3 +49,7 @@ if (typeof document !== 'undefined') {
       console.log(error.message)
     })
 }
+
+
+export const auth = getAuth();
+export const db = getFirestore();
