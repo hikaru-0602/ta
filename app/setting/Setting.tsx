@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useUserInfo } from "./user_setting";
 import { useWorkInfo } from "./work_setting";
 import WorkDialog from "./work_dialog";
@@ -51,7 +51,7 @@ export default function Work() {
   //初期化時にローカルストレージからデータを読み込む
   useEffect(() => {
     loadUserInfoFromLocalStorage();
-    loadWorkDataFromLocalStorage();
+    loadWorkDataFromLocalStorage;
     initworkInfo();
     setIsDialogOpen(false);
   }, []);
@@ -63,10 +63,12 @@ export default function Work() {
         ...prev,
         id: auth ?? "",
       }));
-      saveUserInfoToLocalStorage();
-      loadUserInfoFromLocalStorage();
     }
   }, [isLoginTriggered, user]);
+
+  useEffect(() => {
+    saveUserInfoToLocalStorage();
+  }, [setUserInfo]);
 
   return (
     <>
