@@ -27,7 +27,9 @@ export const db = getFirestore();
 export const firebase = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
 
 declare global {
-  var FIREBASE_APPCHECK_DEBUG_TOKEN: boolean | string | undefined
+  interface Window {
+    FIREBASE_APPCHECK_DEBUG_TOKEN?: boolean | string;
+  }
 }
 
 // AppCheck 初期化処理
