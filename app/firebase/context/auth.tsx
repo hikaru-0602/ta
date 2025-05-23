@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (firebaseUser) {
         const ref = doc(db, `users/${firebaseUser.uid}`);
         const snap = await getDoc(ref);
-
+        //console.log("firebaseUser", firebaseUser);
         if (snap.exists()) {
           const appUser = (await getDoc(ref)).data() as User;
           setUser(appUser);
@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const appUser: User = {
             id: firebaseUser.uid,
             name: firebaseUser.displayName!,
+            email: firebaseUser.email!,
           };
 
           setDoc(ref, appUser).then(() => {
