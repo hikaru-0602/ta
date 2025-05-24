@@ -14,13 +14,13 @@ export default function Home() {
     <>
       <div className="relative">
         <div className="absolute top-4 right-4">
-          {user === null ? (
+          {!user ? (
             <button
               onClick={() => {
                 login();
                 setIsLoginTriggered(true);
               }}
-              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-500 text-white text-sm sm:text-base rounded hover:bg-blue-600 transition"
+              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-500 text-white text-sm text-size-sm sm:text-base rounded hover:bg-blue-600 transition"
             >
               学内アカウントログイン
             </button>
@@ -30,7 +30,7 @@ export default function Home() {
                 logout();
                 setIsLoginTriggered(false);
               }}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition text-size-sm"
             >
               ログアウト
             </button>

@@ -4,7 +4,7 @@ export function middleware(request: NextRequest) {
   const ua = request.headers.get('user-agent') || '';
 
   // スマホ・タブレットのUA判定（必要に応じて追加・調整）
-  const isMobile = /iPhone|iPad|iPod|Android|Mobile|Windows Phone|webOS|BlackBerry|Opera Mini|IEMobile/i.test(ua);
+  const isMobile = /iPhone|Android|Mobile|Windows Phone|webOS|BlackBerry|Opera Mini|IEMobile/i.test(ua);
 
   if (isMobile) {
     // 例: /mobile-only ページにリダイレクト

@@ -57,7 +57,7 @@ export default function Work() {
   }, []);
 
   useEffect(() => {
-    if (user !== null && isLoginTriggered) {
+    if (user && isLoginTriggered) {
       const auth = getAuthEmail();
       setUserInfo((prev) => ({
         ...prev,
@@ -108,11 +108,11 @@ export default function Work() {
                     <input
                       type="text"
                       name="name"
-                      value={user === null ? "" : userInfo.name}
+                      value={!user ? "" : userInfo.name}
                       onChange={handleUserChange}
                       placeholder="例: 山田 太郎"
                       onFocus={(e) => {
-                        if (user === null) {
+                        if (!user) {
                           alert("ログインしてください。");
                           e.target.blur();
                         }
@@ -127,11 +127,11 @@ export default function Work() {
                     <input
                       type="text"
                       name="name_kana"
-                      value={user === null ? "" : userInfo.name_kana}
+                      value={!user ? "" : userInfo.name_kana}
                       onChange={handleUserChange}
                       placeholder="例: やまだ たろう"
                       onFocus={(e) => {
-                        if (user === null) {
+                        if (!user) {
                           alert("ログインしてください。");
                           e.target.blur();
                         }
@@ -148,10 +148,10 @@ export default function Work() {
                     </label>
                     <select
                       name="grade"
-                      value={user === null ? "" : userInfo.value}
+                      value={!user ? "" : userInfo.value}
                       onChange={handleGradeChange}
                       onMouseDown={(e) => {
-                        if (user === null) {
+                        if (!user) {
                           e.preventDefault(); // デフォルトのフォーカスを防ぐ
                           alert("ログインしてください。");
                         }
@@ -176,11 +176,11 @@ export default function Work() {
                     <input
                       type="text"
                       name="id"
-                      value={user === null ? "" : userInfo.id}
+                      value={!user ? "" : userInfo.id}
                       onChange={handleUserChange}
                       placeholder="例: 1234567"
                       onFocus={(e) => {
-                        if (user === null) {
+                        if (!user) {
                           alert("ログインしてください。");
                           e.target.blur();
                         }
@@ -195,13 +195,13 @@ export default function Work() {
                     時給
                   </label>
                   <p className="text-lg font-bold text-gray-800 dark:text-gray-200">
-                    {user === null ? "    円" : `${userInfo.hourlyWage}円`}
+                    {!user ? "    円" : `${userInfo.hourlyWage}円`}
                   </p>
                 </div>
                 <div className="flex justify-end mt-4">
                   <button
                     onClick={() => {
-                      if (user === null) {
+                      if (!user) {
                         alert("ログインしてください。");
                         return;
                       } else if (
@@ -234,7 +234,7 @@ export default function Work() {
               <button
                 onClick={(e) => {
                   e.preventDefault();
-                  if (user === null) {
+                  if (!user) {
                     alert("ログインしてください。");
                     return;
                   }
@@ -247,7 +247,7 @@ export default function Work() {
                 追加
               </button>
             </div>
-            {user !== null && (
+            {user && (
               <ul className="space-y-4">
                 {workData.map((work, index) => (
                   <li
@@ -326,7 +326,7 @@ export default function Work() {
                 ))}
               </ul>
             )}
-            {user === null && (
+            {!user && (
               <p className="text-gray-500 dark:text-gray-400">
                 ログインしてください
               </p>

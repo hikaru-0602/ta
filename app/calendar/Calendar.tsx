@@ -113,7 +113,7 @@ export default function Calendar() {
   };
 
   const handleDateClick = (date: Date) => {
-    if (user === null) {
+    if (!user) {
       alert("ログインしてください。");
       return;
     }
@@ -141,8 +141,7 @@ export default function Calendar() {
 
   // シフト出力ボタンのクリックハンドラー
   const handleOpenExportDialog = () => {
-    if (user === null) {
-      alert("ログインしてください。");
+    if (!user) {
       if (
         !userInfo || // userInfoがnullの場合をチェック
         userInfo.id === "" ||
@@ -232,7 +231,7 @@ export default function Calendar() {
               }`}
             >
               {date.getDate()}
-              {shiftCount > 0 && user !== null && (
+              {shiftCount > 0 && user && (
                 <div className="absolute top-1 right-1 bg-blue-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
                   {shiftCount}
                 </div>

@@ -33,7 +33,7 @@ declare global {
 if (typeof document !== 'undefined') {
   // 1.デバック環境用設定
   if (process.env.NODE_ENV === 'development') {
-    window.self.FIREBASE_APPCHECK_DEBUG_TOKEN = false;
+    window.self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
   }
   // 2.AppCheck 初期化
   const appCheck = initializeAppCheck(firebase, {
