@@ -32,13 +32,7 @@ export default function Calendar() {
   const [holidays, setHolidays] = useState<{ [date: string]: string }>({});
   const user = useAuth();
 
-  const {
-    userInfo,
-    setUserInfo,
-    loadUserInfoFromLocalStorage,
-    fetchUserInfoFromFirestore,
-    saveUserInfoToLocalStorage,
-  } = useUserInfo();
+  const { loadUserInfoFromLocalStorage } = useUserInfo();
 
   const startOfMonth = new Date(
     currentDate.getFullYear(),
@@ -161,8 +155,8 @@ export default function Calendar() {
       !parsedUserInfo.name_kana
     ) {
       alert("ユーザ情報を登録してください");
+      return;
     }
-    return;
 
     // 現在の月のシフトデータを取得
     const currentMonthShifts = shiftData.filter(

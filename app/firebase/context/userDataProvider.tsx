@@ -10,7 +10,7 @@ import { db } from "../lib/firebase";
 import { doc, getDoc } from "@firebase/firestore";
 import { onAuthStateChanged, getAuth, User } from "firebase/auth";
 
-type FirestoreUserData = Record<string, any> | null | undefined;
+type FirestoreUserData = Record<string, unknown> | null | undefined;
 
 const UserDataContext = createContext<FirestoreUserData>(undefined);
 
@@ -45,4 +45,4 @@ export const UserDataProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const getUser = () => useContext(UserDataContext);
+export const useUserData = () => useContext(UserDataContext);

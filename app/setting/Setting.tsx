@@ -18,7 +18,6 @@ export default function Work() {
     handleGradeChange,
     //loadUserInfoFromLocalStorage,
     fetchUserInfoFromFirestore,
-    saveUserInfoToLocalStorage,
     handleUserRegister,
     setUserInfo,
   } = useUserInfo();
