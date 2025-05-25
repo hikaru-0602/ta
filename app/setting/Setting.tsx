@@ -221,14 +221,6 @@ export default function Work() {
                   >
                     登録
                   </button>
-                  <button
-                    onClick={() => {
-                      alert(JSON.stringify(userInfo));
-                    }}
-                    className="ml-2 px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition"
-                  >
-                    デバッグ
-                  </button>
                 </div>
               </div>
             )}
