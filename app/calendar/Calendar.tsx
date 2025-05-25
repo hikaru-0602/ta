@@ -175,7 +175,7 @@ export default function Calendar() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center padding ml-20 mr-20">
+    <div className="w-full h-full flex flex-col items-center justify-center padding">
       <div className="flex items-center justify-center mb-4 w-full max-w-[1200px] space-x-4">
         <button
           onClick={handlePrevMonth}
