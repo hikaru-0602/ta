@@ -2,20 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const ua = request.headers.get('user-agent') || '';
+  const isMobile = /iPhone|Android.*Mobile|Windows Phone|webOS|BlackBerry|Opera Mini|IEMobile/i.test(ua);
 
-  // スマホ・タブレットのUA判定（必要に応じて追加・調整）
-  const isMobile = /iPhone|Android|Mobile|Windows Phone|webOS|BlackBerry|Opera Mini|IEMobile/i.test(ua);
-
-  if (isMobile) {
-    // 例: /mobile-only ページにリダイレクト
+  // すでに /mobile-only にいる場合はリダイレクトしない
+  if (isMobile && !request.nextUrl.pathname.startsWith('/mobile-only')) {
     return NextResponse.redirect(new URL('/mobile-only', request.url));
   }
 
-  // PCの場合はそのまま
   return NextResponse.next();
 }
 
-// 適用するパスを指定（全ページに適用したい場合はこのまま）
 export const config = {
   matcher: '/:path*',
 };

@@ -7,6 +7,8 @@ import WorkDialog from "./work_dialog";
 import { useAuth } from "../firebase/context/auth";
 import { useLoginContext } from "../firebase/context/LoginContext";
 import { getAuthEmail } from "../firebase/lib/auth";
+import { getAuth } from "firebase/auth";
+import { gradeInfoMap } from "../types";
 
 export default function Work() {
   //ユーザ情報のカスタムフックを使用
@@ -14,7 +16,8 @@ export default function Work() {
     userInfo,
     handleUserChange,
     handleGradeChange,
-    loadUserInfoFromLocalStorage,
+    //loadUserInfoFromLocalStorage,
+    fetchUserInfoFromFirestore,
     saveUserInfoToLocalStorage,
     handleUserRegister,
     setUserInfo,
@@ -47,14 +50,19 @@ export default function Work() {
   const user = useAuth(); //認証情報を取得
   const [isUserInfoOpen, setIsUserInfoOpen] = useState(true); // 折りたたみ状態を管理
   const { isLoginTriggered } = useLoginContext(); //ログイン状態を取得
+  const auth = getAuth();
+  const uid = auth.currentUser?.uid;
 
   //初期化時にローカルストレージからデータを読み込む
   useEffect(() => {
-    loadUserInfoFromLocalStorage();
+    //saveUserInfoToLocalStorage();
+    fetchUserInfoFromFirestore();
+    //loadUserInfoFromLocalStorage();
     loadWorkDataFromLocalStorage();
     initworkInfo();
     setIsDialogOpen(false);
-  }, []);
+    //saveUserInfoToLocalStorage();
+  }, [uid]);
 
   useEffect(() => {
     if (user && isLoginTriggered) {
@@ -65,10 +73,6 @@ export default function Work() {
       }));
     }
   }, [isLoginTriggered, user]);
-
-  useEffect(() => {
-    saveUserInfoToLocalStorage();
-  }, [setUserInfo]);
 
   return (
     <>
@@ -108,7 +112,7 @@ export default function Work() {
                     <input
                       type="text"
                       name="name"
-                      value={!user ? "" : userInfo.name}
+                      value={!user ? "" : userInfo.name ?? ""}
                       onChange={handleUserChange}
                       placeholder="例: 山田 太郎"
                       onFocus={(e) => {
@@ -127,7 +131,7 @@ export default function Work() {
                     <input
                       type="text"
                       name="name_kana"
-                      value={!user ? "" : userInfo.name_kana}
+                      value={!user ? "" : userInfo.name_kana ?? ""}
                       onChange={handleUserChange}
                       placeholder="例: やまだ たろう"
                       onFocus={(e) => {
@@ -148,7 +152,7 @@ export default function Work() {
                     </label>
                     <select
                       name="grade"
-                      value={!user ? "" : userInfo.value}
+                      value={!user ? "" : userInfo.value ?? "1"}
                       onChange={handleGradeChange}
                       onMouseDown={(e) => {
                         if (!user) {
@@ -158,15 +162,11 @@ export default function Work() {
                       }}
                       className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition dark:bg-gray-700 dark:text-gray-200"
                     >
-                      <option value="1">学部１年生</option>
-                      <option value="2">学部２年生</option>
-                      <option value="3">学部３年生</option>
-                      <option value="4">学部４年生</option>
-                      <option value="5">博士（前期）課程１年</option>
-                      <option value="6">博士（前期）課程２年</option>
-                      <option value="7">博士（後期）課程１年</option>
-                      <option value="8">博士（後期）課程２年</option>
-                      <option value="9">博士（後期）課程３年</option>
+                      {Object.entries(gradeInfoMap).map(([val, info]) => (
+                        <option key={val} value={val}>
+                          {info.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div className="flex-1">
@@ -195,7 +195,9 @@ export default function Work() {
                     時給
                   </label>
                   <p className="text-lg font-bold text-gray-800 dark:text-gray-200">
-                    {!user ? "    円" : `${userInfo.hourlyWage}円`}
+                    {user && userInfo.value
+                      ? `${gradeInfoMap[userInfo.value].wage}円`
+                      : "    円"}
                   </p>
                 </div>
                 <div className="flex justify-end mt-4">
@@ -214,11 +216,19 @@ export default function Work() {
                         return;
                       }
                       alert("登録しました。");
-                      handleUserRegister();
+                      handleUserRegister(uid);
                     }}
                     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                   >
                     登録
+                  </button>
+                  <button
+                    onClick={() => {
+                      alert(JSON.stringify(userInfo));
+                    }}
+                    className="ml-2 px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition"
+                  >
+                    デバッグ
                   </button>
                 </div>
               </div>

@@ -14,7 +14,8 @@ import ExportDialog, {
   handleExportSubject,
 } from "./export_dialog";
 import { useAuth } from "../firebase/context/auth";
-import { Shift, UserInfo, WorkData } from "../types"; // Shift型をインポート
+import { Shift, WorkData } from "../types"; // Shift型をインポート
+import { useUserInfo } from "../setting/user_setting";
 
 export default function Calendar() {
   const today = new Date();
@@ -24,13 +25,20 @@ export default function Calendar() {
   const [filteredWorkData, setFilteredWorkData] = useState<WorkData[]>([]); // フィルタリングされたデータ
   const [shiftData, setShiftData] = useState<Shift[]>([]); // 初期値を空配列に設定
   const [isDialogOpen, setIsDialogOpen] = useState(false); // ダイアログの状態
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null); // ユーザ情報を管理
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false); // ダイアログの状態
   const [subjectNames, setSubjectNames] = useState<string[]>([]); // 科目名リスト
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // 編集ダイアログの状態
   const [editingShift, setEditingShift] = useState<Shift | null>(null); // 編集対象のシフト
   const [holidays, setHolidays] = useState<{ [date: string]: string }>({});
   const user = useAuth();
+
+  const {
+    userInfo,
+    setUserInfo,
+    loadUserInfoFromLocalStorage,
+    fetchUserInfoFromFirestore,
+    saveUserInfoToLocalStorage,
+  } = useUserInfo();
 
   const startOfMonth = new Date(
     currentDate.getFullYear(),
@@ -71,10 +79,7 @@ export default function Calendar() {
     const parsedShifts = savedShifts ? JSON.parse(savedShifts) : [];
     setShiftData(parsedShifts);
 
-    // userInfoをlocalStorageから取得
-    const savedUserInfo = localStorage.getItem("userInfo");
-    const parsedUserInfo = savedUserInfo ? JSON.parse(savedUserInfo) : null;
-    setUserInfo(parsedUserInfo);
+    loadUserInfoFromLocalStorage(); // ローカルストレージからユーザー情報を読み込む
 
     const fetchHolidays = async () => {
       try {
@@ -141,18 +146,23 @@ export default function Calendar() {
 
   // シフト出力ボタンのクリックハンドラー
   const handleOpenExportDialog = () => {
+    loadUserInfoFromLocalStorage(); // ユーザー情報をローカルストレージから読み込む
+    const savedUserInfo = localStorage.getItem("userInfo");
+    const parsedUserInfo = savedUserInfo ? JSON.parse(savedUserInfo) : null;
     if (!user) {
-      if (
-        !userInfo || // userInfoがnullの場合をチェック
-        userInfo.id === "" ||
-        userInfo.name === "" ||
-        userInfo.grade === "" ||
-        userInfo.name_kana === ""
-      ) {
-        alert("ユーザ情報を登録してください");
-      }
+      alert("ユーザ情報を登録してください");
       return;
     }
+    if (
+      !parsedUserInfo ||
+      !parsedUserInfo.id || // falsy値（空文字、null、undefined、0など）を弾く
+      !parsedUserInfo.name ||
+      !parsedUserInfo.value ||
+      !parsedUserInfo.name_kana
+    ) {
+      alert("ユーザ情報を登録してください");
+    }
+    return;
 
     // 現在の月のシフトデータを取得
     const currentMonthShifts = shiftData.filter(

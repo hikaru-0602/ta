@@ -17,9 +17,7 @@ export type UserInfo = {
   id: string;
   name: string;
   name_kana: string;
-  grade: string;
   value: string;
-  hourlyWage: number;
 };
 
 export type WorkData = {
@@ -34,4 +32,16 @@ export type WorkData = {
   endtime: string; // 終了時刻 ("HH:mm"形式)
   breaktime: number; // 休憩時間（分）
   worktime: string; // 実働時間（フォーマット済み）
+};
+
+export const gradeInfoMap: Record<string, { label: string; wage: number }> = {
+  "1": { label: "学部１年生", wage: 1010 },
+  "2": { label: "学部２年生", wage: 1020 },
+  "3": { label: "学部３年生", wage: 1030 },
+  "4": { label: "学部４年生", wage: 1040 },
+  "5": { label: "博士（前期）課程１年", wage: 1050 },
+  "6": { label: "博士（前期）課程２年", wage: 1090 },
+  "7": { label: "博士（後期）課程１年", wage: 1140 },
+  "8": { label: "博士（後期）課程２年", wage: 1160 },
+  "9": { label: "博士（後期）課程３年", wage: 1170 },
 };

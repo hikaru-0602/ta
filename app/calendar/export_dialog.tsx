@@ -129,6 +129,7 @@ export const exportData = async (
 
   const savedUserInfo = localStorage.getItem("userInfo");
   const userInfo = savedUserInfo ? JSON.parse(savedUserInfo) : null;
+  console.log("userInfo:", userInfo); // デバッグ用
   if (!userInfo) {
     alert("ユーザ情報を登録してください");
     return;

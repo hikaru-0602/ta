@@ -2,7 +2,7 @@
 
 "use client";
 import ExcelJS from "exceljs";
-import { Shift } from "../types";
+import { gradeInfoMap, Shift } from "../types";
 
 //和暦と年月を取得し、配列を作成する関数
 export const getYearAndMonth = (year: number, month: number) => {
@@ -52,7 +52,7 @@ export const getUserData = (userData: {
   name: string; // ユーザ名
   name_kana: string; // ユーザ名（カナ）
   id: string; // 学籍番号
-  grade: string; // 学年
+  value: string; // 学年
 }) => {
   try {
     if (!userData) {
@@ -60,6 +60,9 @@ export const getUserData = (userData: {
       //alert("ユーザデータが正しく読み込まれていません。");
       return;
     }
+    const gradeLabel = gradeInfoMap[userData.value]?.label ?? "";
+    console.log("value:", userData.value); // 学年の値をコンソールに出力
+    console.log("学年ラベル:", gradeLabel); // 学年ラベルをコンソールに出力
 
     const kanadata46 = [
       "ふりがな",
@@ -157,18 +160,18 @@ export const getUserData = (userData: {
     const gradadata49 = [
       "学年",
       "学年",
-      `${userData.grade}`,
-      `${userData.grade}`,
-      `${userData.grade}`,
-      `${userData.grade}`,
-      `${userData.grade}`,
-      `${userData.grade}`,
-      `${userData.grade}`,
-      `${userData.grade}`,
-      `${userData.grade}`,
-      `${userData.grade}`,
-      `${userData.grade}`,
-      `${userData.grade}`,
+      `${gradeLabel}`,
+      `${gradeLabel}`,
+      `${gradeLabel}`,
+      `${gradeLabel}`,
+      `${gradeLabel}`,
+      `${gradeLabel}`,
+      `${gradeLabel}`,
+      `${gradeLabel}`,
+      `${gradeLabel}`,
+      `${gradeLabel}`,
+      `${gradeLabel}`,
+      `${gradeLabel}`,
       "銀行名",
       null,
       null,
@@ -474,7 +477,7 @@ export const formatUserDataForExcel = (userData: {
   name: string; //ユーザ名
   name_kana: string; //ユーザ名（カナ）
   id: string; //学籍番号
-  grade: string; //学年
+  value: string; //学年
 }) => {
   try {
     if (!userData) {
@@ -482,13 +485,14 @@ export const formatUserDataForExcel = (userData: {
       //alert("ユーザデータが正しく読み込まれていません。");
       return;
     }
+    const gradeLabel = gradeInfoMap[userData.value]?.label ?? "";
 
     // ユーザデータをExcel用のフォーマットに変換
     const formattedUserData = [
       userData.name,
       userData.name_kana,
       userData.id,
-      userData.grade,
+      gradeLabel,
     ];
 
     //console.log("フォーマットされたユーザデータ:", formattedUserData);

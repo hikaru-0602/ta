@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./firebase/context/auth";
+import { UserDataProvider } from "./firebase/context/userDataProvider";
 import { LoginProvider } from "./firebase/context/LoginContext";
 
 const geistSans = Geist({
@@ -31,7 +32,9 @@ export default function RootLayout({
       >
         {/* AuthProvider で全体をラップ */}
         <AuthProvider>
-          <LoginProvider>{children}</LoginProvider>
+          <UserDataProvider>
+            <LoginProvider>{children}</LoginProvider>
+          </UserDataProvider>
         </AuthProvider>
       </body>
     </html>
