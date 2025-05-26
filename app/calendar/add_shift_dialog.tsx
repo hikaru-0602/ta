@@ -14,7 +14,7 @@ export const parseTime = (time: string): Date => {
 
 export const saveWorkDataToFirestore = async (uid: string, shift: Shift) => {
   // filterプロパティを除外
-  const { filter, ...shiftForFirestore } = shift;
+  const { ...shiftForFirestore } = shift;
   const ref = doc(
     db,
     `users/${uid}/shifts/${shift.year}_${shift.month}_${shift.day}_${shift.id}`

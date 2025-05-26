@@ -1,7 +1,5 @@
 import React from "react";
 import { Shift } from "../types"; //業務データの型をインポート
-import { doc, setDoc } from "firebase/firestore";
-import { db } from "../firebase/lib/firebase";
 import { getAuth } from "firebase/auth";
 import { saveWorkDataToFirestore } from "./add_shift_dialog"; //Firestoreに保存する関数をインポート
 
