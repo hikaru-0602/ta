@@ -34,6 +34,7 @@ export default function Work() {
     handleScheduleChange,
     handleScheduleTimeEdit,
     saveScheduleTimeEdit,
+    fetchWorkDataFromFirestore,
     addSchedule,
     removeSchedule,
     calculateWorkingTime,
@@ -56,6 +57,7 @@ export default function Work() {
   useEffect(() => {
     //saveUserInfoToLocalStorage();
     fetchUserInfoFromFirestore();
+    fetchWorkDataFromFirestore();
     //loadUserInfoFromLocalStorage();
     loadWorkDataFromLocalStorage();
     initworkInfo();

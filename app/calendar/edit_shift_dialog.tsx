@@ -1,5 +1,9 @@
 import React from "react";
 import { Shift } from "../types"; //業務データの型をインポート
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../firebase/lib/firebase";
+import { getAuth } from "firebase/auth";
+import { saveWorkDataToFirestore } from "./add_shift_dialog"; //Firestoreに保存する関数をインポート
 
 //編集対象のシフトを設定し、編集ダイアログを開く関数
 export const handleEditShift = (
@@ -25,12 +29,19 @@ export const handleSaveEditedShift = (
   // 日付と科目名が一致するシフトデータのみ更新
   console.log("Editing Shift:", editingShift); //編集対象のシフトデータをログに出力
   const updatedShifts = shiftData.map((shift) =>
-    shift.day === editingShift.day && shift.id === editingShift.id
+    shift.day === editingShift.day &&
+    shift.id === editingShift.id &&
+    shift.year === editingShift.year &&
+    shift.month === editingShift.month
       ? { ...shift, ...editingShift } // 編集内容を反映
       : shift
   );
 
   setShiftData(updatedShifts); //状態を更新
+  const uid = getAuth().currentUser?.uid; //現在のユーザーのUIDを取得
+  if (uid) {
+    saveWorkDataToFirestore(uid, editingShift);
+  }
   console.log("Updated Shifts:", updatedShifts); //更新後のシフトデータをログに出力
   saveShiftsToLocalStorage(updatedShifts); //localStorageに保存
   setIsEditDialogOpen(false); //編集ダイアログを閉じる

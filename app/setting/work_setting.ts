@@ -1,4 +1,8 @@
 import { useState } from "react";
+import { WorkData } from "../types";
+import { collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
+import { db } from "../firebase/lib/firebase";
+import { getAuth } from "firebase/auth";
 
 //業務情報を管理するためのカスタムフック
 export const useWorkInfo = () => {
@@ -191,10 +195,33 @@ export const useWorkInfo = () => {
     return { startTime, endTime, breakTime: totalBreakTime };
   };
 
+  const saveWorkDataToFirestore = async (uid: string, work: WorkData) => {
+    const ref = doc(db, `users/${uid}/works/${work.id}`);
+    await setDoc(ref, work, { merge: true });
+  };
+
+  //業務データをFirestoreから取得する関数
+  const fetchWorkDataFromFirestore = async () => {
+    const uid = getAuth().currentUser?.uid;
+    if (!uid) return;
+    const worksRef = collection(db, `users/${uid}/works`);
+    const querySnapshot = await getDocs(worksRef);
+    const works = querySnapshot.docs.map((doc) => doc.data());
+    if (works.length > 0) {
+      // 必要に応じて型変換
+      setWorkData(works as WorkData[]);
+      // ローカルストレージに保存
+      localStorage.setItem("workData", JSON.stringify(works));
+      console.log("業務データをFirestoreから取得しました。", works);
+    } else {
+      console.log("No work data found in Firestore.");
+    }
+  };
+
   //新しい業務を追加または更新する関数
-  const addWork = (workid: number) => {
-    const updatedWorkData = workData.map((work) => {
-      if (work.id === workid) {
+  const addWork = async (workid: number) => {
+    const updatedWorkData = workData.map((existWorkData) => {
+      if (existWorkData.id === workid) {
         // 更新時の時間計算
         const { startTime, endTime } = calculateStartEndTimes(workInfo.schedules[0].periods);
         const finalStartTime = workInfo.schedules[0].startTime || startTime;
@@ -203,24 +230,32 @@ export const useWorkInfo = () => {
 
         const { hours, minutes } = calculateWorkingTime(finalStartTime, finalEndTime, finalBreakTime);
 
-        return {
-          ...work,
+        const updated = {
+          ...existWorkData,
           label: workInfo.label,
           classname: workInfo.subject,
           category: workInfo.category,
           teacher: workInfo.teacher,
-          dayofweek: workInfo.schedules[0].day, // 最初のスケジュールの曜日を使用
-          schedule: workInfo.schedules[0].periods.map((period) => parseInt(period[0], 10)), // 時限を数値配列に変換
+          dayofweek: workInfo.schedules[0].day,
+          schedule: workInfo.schedules[0].periods.map((period) => parseInt(period[0], 10)),
           starttime: finalStartTime,
           endtime: finalEndTime,
           breaktime: finalBreakTime,
-          worktime: `${hours}時間${minutes}分`, // 実働時間を計算して更新
+          worktime: `${hours}時間${minutes}分`,
         };
+
+        const uid = getAuth().currentUser?.uid;
+        //ここで新しいデータをFirestoreに保存
+        if (uid) {
+          saveWorkDataToFirestore(uid, updated);
+        }
+
+        return updated;
       }
-      return work; // 一致しない場合はそのまま
+      return existWorkData;
     });
 
-    // 新しいデータを追加する場合
+    //新しいデータを追加する場合
     if (!workData.some((work) => work.id === workid)) {
       const newWorkData = workInfo.schedules.map((schedule) => {
         const { startTime, endTime, breakTime } = calculateStartEndTimes(schedule.periods);
@@ -246,6 +281,14 @@ export const useWorkInfo = () => {
       });
 
       updatedWorkData.push(...newWorkData);
+      console.log("新しい業務データを追加しました。", newWorkData);
+      const uid = getAuth().currentUser?.uid;
+      if (uid) {
+        for (const work of newWorkData) {
+          await saveWorkDataToFirestore(uid, work);
+        }
+      }
+
     }
 
     setWorkData(updatedWorkData);
@@ -258,15 +301,29 @@ export const useWorkInfo = () => {
     setIsDialogOpen(false);
   };
 
+  const deleteWorkDataFromFirestore = async (uid: string, workId: number) => {
+    const ref = doc(db, `users/${uid}/works/${workId}`);
+    await deleteDoc(ref);
+  };
+
   //業務データを削除する関数
-  const handleDeleteWork = (index: number) => {
+  const handleDeleteWork = async (index: number) => {
+    const deletedWork = workData[index];
+    if (!deletedWork) return;
+
     const updatedWorkData = workData.filter((_, i) => i !== index);
     setWorkData(updatedWorkData);
 
-    //ローカルストレージを更新
+    // ローカルストレージを更新
     localStorage.setItem("workData", JSON.stringify(updatedWorkData));
 
-    //強制的に再レンダリングを促す
+    // Firestoreからも削除
+    const uid = getAuth().currentUser?.uid;
+    if (uid && deletedWork.id !== undefined) {
+      await deleteWorkDataFromFirestore(uid, deletedWork.id);
+    }
+
+    // 強制的に再レンダリングを促す
     setUpdateFlag((prev) => !prev);
   };
 
@@ -321,6 +378,7 @@ export const useWorkInfo = () => {
     removeSchedule, //スケジュールを削除する関数
     calculateWorkingTime, //勤務時間を計算する関数
     calculateStartEndTimes, //時限から開始時刻、終了時刻、休憩時間を計算する関数
+    fetchWorkDataFromFirestore, //業務データをFirestoreから取得する関数
     addWork, //新しい業務を追加または更新する関数
     handleDeleteWork, //業務データを削除する関数
     loadWorkDataFromLocalStorage, //ローカルストレージから業務データを読み込む関数

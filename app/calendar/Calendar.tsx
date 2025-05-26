@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import AddShiftDialog, {
   handleAddShift,
   handleRemoveShift,
@@ -14,21 +14,24 @@ import ExportDialog, {
   handleExportSubject,
 } from "./export_dialog";
 import { useAuth } from "../firebase/context/auth";
-import { Shift, WorkData } from "../types"; // Shift型をインポート
+import { Shift, WorkData } from "../types";
 import { useUserInfo } from "../setting/user_setting";
+import { getAuth } from "firebase/auth";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase/lib/firebase";
 
 export default function Calendar() {
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null); // 選択された日付を管理
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null); //選択された日付を管理
   const [workData, setWorkData] = useState<WorkData[]>([]);
-  const [filteredWorkData, setFilteredWorkData] = useState<WorkData[]>([]); // フィルタリングされたデータ
-  const [shiftData, setShiftData] = useState<Shift[]>([]); // 初期値を空配列に設定
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // ダイアログの状態
-  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false); // ダイアログの状態
-  const [subjectNames, setSubjectNames] = useState<string[]>([]); // 科目名リスト
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // 編集ダイアログの状態
-  const [editingShift, setEditingShift] = useState<Shift | null>(null); // 編集対象のシフト
+  const [filteredWorkData, setFilteredWorkData] = useState<WorkData[]>([]); //フィルタリングされたデータ
+  const [shiftData, setShiftData] = useState<Shift[]>([]); //初期値を空配列に設定
+  const [isDialogOpen, setIsDialogOpen] = useState(false); //ダイアログの状態
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false); //ダイアログの状態
+  const [subjectNames, setSubjectNames] = useState<string[]>([]); //科目名リスト
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); //編集ダイアログの状態
+  const [editingShift, setEditingShift] = useState<Shift | null>(null); //編集対象のシフト
   const [holidays, setHolidays] = useState<{ [date: string]: string }>({});
   const user = useAuth();
 
@@ -51,30 +54,45 @@ export default function Calendar() {
   );
 
   const isHoliday = (date: Date): boolean => {
-    // ローカルタイムゾーンの日付を YYYY-MM-DD 形式に変換
+    //ローカルタイムゾーンの日付を YYYY-MM-DD 形式に変換
     const formattedDate = date
       .toLocaleDateString("ja-JP", {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
       })
-      .replace(/\//g, "-"); // "YYYY/MM/DD" を "YYYY-MM-DD" に変換
+      .replace(/\//g, "-"); //"YYYY/MM/DD" を "YYYY-MM-DD" に変換
 
     return holidays.hasOwnProperty(formattedDate);
   };
+  const uid = getAuth().currentUser?.uid;
 
   useEffect(() => {
-    // クライアントサイドでのみ localStorage を使用
+    // Firestoreからシフトデータを取得してローカルに保存
+    const fetchAndSetShifts = async () => {
+      console.log("Firestoreからシフトデータを取得中...");
+      // ユーザーのUIDを取得
+      const uid = getAuth().currentUser?.uid;
+      if (!uid) return;
+      const shiftsRef = collection(db, `users/${uid}/shifts`);
+      const querySnapshot = await getDocs(shiftsRef);
+      const shifts = querySnapshot.docs.map((doc) => doc.data());
+      setShiftData(shifts as Shift[]);
+      localStorage.setItem("shiftData", JSON.stringify(shifts));
+      console.log(
+        "Firestoreからシフトデータを取得しローカルに保存しました",
+        shifts
+      );
+    };
+
+    // workDataもlocalStorageから取得
     const savedWorkData = localStorage.getItem("workData");
     const parsedWorkData = savedWorkData ? JSON.parse(savedWorkData) : [];
     setWorkData(parsedWorkData);
 
-    const savedShifts = localStorage.getItem("shiftData");
-    const parsedShifts = savedShifts ? JSON.parse(savedShifts) : [];
-    setShiftData(parsedShifts);
+    fetchAndSetShifts();
 
-    loadUserInfoFromLocalStorage(); // ローカルストレージからユーザー情報を読み込む
-
+    // 祝日データ取得
     const fetchHolidays = async () => {
       try {
         const response = await fetch(
@@ -84,14 +102,18 @@ export default function Calendar() {
           throw new Error("Failed to fetch holidays");
         }
         const data = await response.json();
-        setHolidays(data); // 祝日データを状態に保存
+        setHolidays(data);
       } catch (error) {
         console.error("Error fetching holidays:", error);
       }
     };
-
     fetchHolidays();
-  }, []);
+  }, [uid]);
+
+  useEffect(() => {
+    //月が変更されたときに選択日をリセット
+    loadUserInfoFromLocalStorage(); //ユーザー情報をローカルストレージから読み込む
+  }, [workData]);
 
   const saveShiftsToLocalStorage = (shifts: Shift[]) => {
     localStorage.setItem("shiftData", JSON.stringify(shifts));
@@ -101,14 +123,14 @@ export default function Calendar() {
     setCurrentDate(
       new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
     );
-    setSelectedDate(null); // 月を変更したら選択をリセット
+    setSelectedDate(null); //月を変更したら選択をリセット
   };
 
   const handleNextMonth = () => {
     setCurrentDate(
       new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
     );
-    setSelectedDate(null); // 月を変更したら選択をリセット
+    setSelectedDate(null); //月を変更したら選択をリセット
   };
 
   const handleDateClick = (date: Date) => {
@@ -117,30 +139,30 @@ export default function Calendar() {
       return;
     }
 
-    const holiday = isHoliday(date); // 休日判定
-    const isSunday = date.getDay() === 0; // 日曜日
-    const isSaturday = date.getDay() === 6; // 土曜日
+    const holiday = isHoliday(date); //休日判定
+    const isSunday = date.getDay() === 0; //日曜日
+    const isSaturday = date.getDay() === 6; //土曜日
 
     if (holiday || isSunday || isSaturday) {
       alert("この日は休みのため、操作できません。");
-      return; // 処理を終了
+      return; //処理を終了
     }
 
     const savedWorkData = localStorage.getItem("workData");
     const parsedWorkData = savedWorkData ? JSON.parse(savedWorkData) : [];
     setWorkData(parsedWorkData);
-    setSelectedDate(date); // クリックされた日付を選択
-    setFilteredWorkData(workData); // フィルタリングされたデータを保存
-    setIsDialogOpen(true); // ダイアログを開く
+    setSelectedDate(date); //クリックされた日付を選択
+    setFilteredWorkData(parsedWorkData); //フィルタリングされたデータを保存
+    setIsDialogOpen(true); //ダイアログを開く
   };
 
   const closeDialog = () => {
-    setIsDialogOpen(false); // ダイアログを閉じる
+    setIsDialogOpen(false); //ダイアログを閉じる
   };
 
-  // シフト出力ボタンのクリックハンドラー
+  //シフト出力ボタンのクリックハンドラー
   const handleOpenExportDialog = () => {
-    loadUserInfoFromLocalStorage(); // ユーザー情報をローカルストレージから読み込む
+    loadUserInfoFromLocalStorage(); //ユーザー情報をローカルストレージから読み込む
     const savedUserInfo = localStorage.getItem("userInfo");
     const parsedUserInfo = savedUserInfo ? JSON.parse(savedUserInfo) : null;
     if (!user) {
@@ -149,7 +171,7 @@ export default function Calendar() {
     }
     if (
       !parsedUserInfo ||
-      !parsedUserInfo.id || // falsy値（空文字、null、undefined、0など）を弾く
+      !parsedUserInfo.id || //falsy値（空文字、null、undefined、0など）を弾く
       !parsedUserInfo.name ||
       !parsedUserInfo.value ||
       !parsedUserInfo.name_kana
@@ -158,24 +180,24 @@ export default function Calendar() {
       return;
     }
 
-    // 現在の月のシフトデータを取得
+    //現在の月のシフトデータを取得
     const currentMonthShifts = shiftData.filter(
       (shift) =>
         shift.year === currentDate.getFullYear() &&
         shift.month === currentDate.getMonth() + 1
     );
 
-    // 科目名のリストを取得（重複を排除）
+    //科目名のリストを取得（重複を排除）
     const uniqueSubjectNames = Array.from(
       new Set(currentMonthShifts.map((shift) => shift.classname))
     );
 
-    setSubjectNames(uniqueSubjectNames); // 科目名リストを状態に保存
-    setIsExportDialogOpen(true); // ダイアログを開く
+    setSubjectNames(uniqueSubjectNames); //科目名リストを状態に保存
+    setIsExportDialogOpen(true); //ダイアログを開く
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center padding">
+    <div className="w-full h-full flex flex-col items-center justify-center padding lg:ml-20 mr-20">
       <div className="flex items-center justify-center mb-4 w-full max-w-[1200px] space-x-4">
         <button
           onClick={handlePrevMonth}

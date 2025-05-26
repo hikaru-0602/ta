@@ -1,5 +1,8 @@
 import React from "react";
 import { WorkData, Shift } from "../types"; //業務データの型をインポート
+import { deleteDoc, doc, setDoc } from "firebase/firestore";
+import { db } from "../firebase/lib/firebase";
+import { getAuth } from "firebase/auth";
 
 //時間をDateオブジェクトに変換する関数
 export const parseTime = (time: string): Date => {
@@ -7,6 +10,27 @@ export const parseTime = (time: string): Date => {
   const date = new Date(); //現在の日付を基準に新しいDateオブジェクトを作成
   date.setHours(hours, minutes, 0, 0); //時間と分を設定
   return date; //変換したDateオブジェクトを返す
+};
+
+export const saveWorkDataToFirestore = async (uid: string, shift: Shift) => {
+  // filterプロパティを除外
+  const { filter, ...shiftForFirestore } = shift;
+  const ref = doc(
+    db,
+    `users/${uid}/shifts/${shift.year}_${shift.month}_${shift.day}_${shift.id}`
+  );
+  await setDoc(ref, shiftForFirestore, { merge: true });
+};
+
+const deleteWorkDataFromFirestore = async (
+  uid: string,
+  year: number,
+  month: number,
+  day: number,
+  id: number
+) => {
+  const ref = doc(db, `users/${uid}/shifts/${year}_${month}_${day}_${id}`);
+  await deleteDoc(ref);
 };
 
 //シフトを追加する関数
@@ -71,6 +95,12 @@ export const handleAddShift = (
   };
 
   //シフトデータを更新
+  const uid = getAuth().currentUser?.uid;
+  console.log("uid", uid);
+  if (uid) {
+    console.log("Firestoreにシフトデータを保存します。", newShift);
+    saveWorkDataToFirestore(uid, newShift); //Firestoreに保存
+  }
   const updatedShifts = [...shiftData, newShift];
   setShiftData(updatedShifts); //状態を更新
   saveShiftsToLocalStorage(updatedShifts); //localStorageに保存
@@ -96,6 +126,11 @@ export const handleRemoveShift = (
         shift.day === day
       )
   );
+
+  const uid = getAuth().currentUser?.uid;
+  if (uid) {
+    deleteWorkDataFromFirestore(uid, year, month, day, id);
+  }
 
   setShiftData(updatedShifts); //状態を更新
   saveShiftsToLocalStorage(updatedShifts); //localStorageに保存
