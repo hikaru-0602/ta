@@ -70,7 +70,6 @@ export default function Calendar() {
   useEffect(() => {
     // Firestoreからシフトデータを取得してローカルに保存
     const fetchAndSetShifts = async () => {
-      console.log("Firestoreからシフトデータを取得中...");
       // ユーザーのUIDを取得
       const uid = getAuth().currentUser?.uid;
       if (!uid) return;
@@ -79,10 +78,7 @@ export default function Calendar() {
       const shifts = querySnapshot.docs.map((doc) => doc.data());
       setShiftData(shifts as Shift[]);
       localStorage.setItem("shiftData", JSON.stringify(shifts));
-      console.log(
-        "Firestoreからシフトデータを取得しローカルに保存しました",
-        shifts
-      );
+      console.log(shifts);
     };
 
     // workDataもlocalStorageから取得
@@ -205,7 +201,7 @@ export default function Calendar() {
         >
           前の月
         </button>
-        <h2 className="text-2xl font-bold">
+        <h2 className="text-2xl font-bold dark:text-white">
           {currentDate.getFullYear()}年 {currentDate.getMonth() + 1}月
         </h2>
         <button

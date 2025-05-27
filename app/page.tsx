@@ -11,7 +11,7 @@ export default function Home() {
   const { setIsLoginTriggered } = useLoginContext();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
       <div className="py-5 flex justify-end pr-8">
         {!user ? (
           <button
