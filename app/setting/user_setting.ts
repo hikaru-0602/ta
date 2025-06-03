@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { db } from "../firebase/lib/firebase";
 import { doc, getDoc, setDoc } from "@firebase/firestore";
 import { getAuth } from "firebase/auth";
@@ -13,37 +13,37 @@ export const useUserInfo = () => {
   });
 
   //入力フォームの値変更時に呼び出される関数。入力された値をuserInfoに反映する
-  const handleUserChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleUserChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setUserInfo((prev) => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
   //学年選択時に呼び出される関数。学年に応じて時給を更新する
-  const handleGradeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleGradeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const gradeValue = e.target.value;
     //userInfoを更新
     setUserInfo((prev) => ({
       ...prev,
       value: gradeValue,
     }));
-  };
+  }, []);
 
   //ユーザー情報をローカルストレージに保存する関数
-  const saveUserInfoToLocalStorage = () => {
+  const saveUserInfoToLocalStorage = useCallback(() => {
     //slocalStorage.removeItem("userInfo"); // 既存の情報を削除
     localStorage.setItem("userInfo", JSON.stringify(userInfo));
     //alert(JSON.stringify(userInfo)); //保存した情報をアラートで表示
-  };
+  }, [userInfo]);
 
   //ローカルストレージからユーザー情報を読み込む関数
-  const loadUserInfoFromLocalStorage = () => {
+  const loadUserInfoFromLocalStorage = useCallback(() => {
     const savedUserInfo = localStorage.getItem("userInfo");
     if (savedUserInfo) {
       setUserInfo(JSON.parse(savedUserInfo));
     }
-  };
+  }, []);
 
-  const fetchUserInfoFromFirestore = async () => {
+  const fetchUserInfoFromFirestore = useCallback(async () => {
     const uid = getAuth().currentUser?.uid;
     console.log("uid", uid);
     if (!uid) return;
@@ -63,10 +63,10 @@ export const useUserInfo = () => {
       localStorage.setItem("userInfo", JSON.stringify({ name, name_kana, value, id }));
       }
     }
-  };
+  }, []);
 
   // Firestoreにユーザー情報を保存する関数
-  const saveUserInfoToFirestore = async (uid: string) => {
+  const saveUserInfoToFirestore = useCallback(async (uid: string) => {
     const ref = doc(db, `users/${uid}`);
     const { name, name_kana, id, value } = userInfo;
     await setDoc(ref, {
@@ -75,10 +75,10 @@ export const useUserInfo = () => {
       id: id ?? "",
       value: value ?? "1",
     }, { merge: true });
-  };
+  }, [userInfo]);
 
   //ユーザー情報を登録する関数
-  const handleUserRegister = async (uid?: string) => {
+  const handleUserRegister = useCallback(async (uid?: string) => {
     const savedUserInfo = localStorage.getItem("userInfo");
     const parsedUserInfo = savedUserInfo ? JSON.parse(savedUserInfo) : null;
 
@@ -91,7 +91,7 @@ export const useUserInfo = () => {
       }
     }else {
     }
-  };
+  }, [userInfo, saveUserInfoToLocalStorage, saveUserInfoToFirestore]);
 
   //フックが返すオブジェクト
   return {

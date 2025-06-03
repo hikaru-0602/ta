@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { WorkData } from "../types";
 import { collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../firebase/lib/firebase";
@@ -63,13 +63,13 @@ export const useWorkInfo = () => {
   };
 
   //業務情報の入力フォームの値変更時に呼び出される関数
-  const handleWorkChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleWorkChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setWorkInfo((prev) => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
   //スケジュールの曜日や時限を変更する関数
-  const handleScheduleChange = (
+  const handleScheduleChange = useCallback((
     index: number,
     field: "day" | "periods",
     value: string | string[],
@@ -101,10 +101,10 @@ export const useWorkInfo = () => {
     }
 
     setWorkInfo((prev) => ({ ...prev, schedules: updatedSchedules }));
-  };
+  }, [workInfo.schedules]);
 
   //スケジュールの開始時刻、終了時刻、休憩時間を編集する関数
-  const handleScheduleTimeEdit = (
+  const handleScheduleTimeEdit = useCallback((
     index: number,
     field: "startTime" | "endTime" | "breakTime",
     value: string
@@ -122,7 +122,7 @@ export const useWorkInfo = () => {
       //console.log("Updated schedules:", updatedSchedules); // デバッグログ
       return { ...prev, schedules: updatedSchedules };
     });
-  };
+  }, []);
 
   //スケジュール編集を保存する関数
   const saveScheduleTimeEdit = () => {
@@ -201,7 +201,7 @@ export const useWorkInfo = () => {
   };
 
   //業務データをFirestoreから取得する関数
-  const fetchWorkDataFromFirestore = async () => {
+  const fetchWorkDataFromFirestore = useCallback(async () => {
     const uid = getAuth().currentUser?.uid;
     if (!uid) return;
     const worksRef = collection(db, `users/${uid}/works`);
@@ -216,7 +216,7 @@ export const useWorkInfo = () => {
     } else {
       console.log("No work data found in Firestore.");
     }
-  };
+  }, []);
 
   //新しい業務を追加または更新する関数
   const addWork = async (workid: number) => {
@@ -328,12 +328,12 @@ export const useWorkInfo = () => {
   };
 
   //ローカルストレージから業務データを読み込む関数
-  const loadWorkDataFromLocalStorage = () => {
+  const loadWorkDataFromLocalStorage = useCallback(() => {
     const savedData = localStorage.getItem("workData");
     if (savedData) {
       setWorkData(JSON.parse(savedData));
     }
-  };
+  }, []);
 
   //idを生成する関数
   const generateUniqueId = () => {
@@ -345,7 +345,7 @@ export const useWorkInfo = () => {
   };
 
   //業務情報を初期化する関数
-  const initworkInfo = () => {
+  const initworkInfo = useCallback(() => {
     setWorkInfo({
       label: "",
       subject: "",
@@ -356,7 +356,7 @@ export const useWorkInfo = () => {
       breakTime: "",
       teacher: "",
     });
-  };
+  }, []);
 
   //フックが返すオブジェクト
   return {

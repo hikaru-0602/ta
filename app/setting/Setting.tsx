@@ -63,7 +63,7 @@ export default function Work() {
     initworkInfo();
     setIsDialogOpen(false);
     //saveUserInfoToLocalStorage();
-  }, [uid, fetchUserInfoFromFirestore, fetchWorkDataFromFirestore, loadWorkDataFromLocalStorage, initworkInfo, setIsDialogOpen]);
+  }, [uid]);
 
   useEffect(() => {
     if (user && isLoginTriggered) {
@@ -73,7 +73,7 @@ export default function Work() {
         id: auth ?? "",
       }));
     }
-  }, [isLoginTriggered, user, setUserInfo]);
+  }, [isLoginTriggered, user]);
 
   return (
     <>

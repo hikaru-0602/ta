@@ -258,6 +258,7 @@ export const formatShiftDataForExcel = (shiftData: Shift[]) => {
     const formattedShifts = shiftData.map((shift) => {
       const startTime = shift.starttime.split(":"); // "HH:mm" を [HH, mm] に分割
       const endTime = shift.endtime.split(":"); // "HH:mm" を [HH, mm] に分割
+      const breakTime = shift.breaktime === 0 ? null : shift.breaktime;
 
       return [
         shift.day, // 日付
@@ -278,7 +279,7 @@ export const formatShiftDataForExcel = (shiftData: Shift[]) => {
           result: 2,
           ref: "M13",
         },
-        shift.breaktime, // 休憩時間
+        breakTime, // 休憩時間
       ];
     });
 

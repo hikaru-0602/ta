@@ -131,7 +131,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
     handleScheduleTimeEdit(0, "breakTime", String(existingWork.breaktime));
 
     console.log("変更", existingWork.classname);
-  }, [isDialogOpen, workid, workData, setEditingIndex, handleWorkChange, handleScheduleChange, handleScheduleTimeEdit]);
+  }, [isDialogOpen, workid, workData]);
 
   if (!isDialogOpen) return null;
 
