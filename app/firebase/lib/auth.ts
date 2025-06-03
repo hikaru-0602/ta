@@ -29,13 +29,14 @@ export const login = async (): Promise<UserCredential | null> => { //ログイ�
     const result = await signInWithPopup(auth, provider); //ポップアップで認証
     console.log('ログイン成功:', result.user);
     return result;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const firebaseError = error as { code?: string; message?: string };
     // エラータイプ別の処理
-    if (error.code === 'auth/cancelled-popup-request') {
+    if (firebaseError.code === 'auth/cancelled-popup-request') {
       console.log('前のポップアップリクエストがキャンセルされました');
-    } else if (error.code === 'auth/popup-closed-by-user') {
+    } else if (firebaseError.code === 'auth/popup-closed-by-user') {
       console.log('ユーザーがポップアップを閉じました');
-    } else if (error.code === 'auth/popup-blocked') {
+    } else if (firebaseError.code === 'auth/popup-blocked') {
       console.error('ポップアップがブロックされました。ブラウザの設定を確認してください');
       alert('ポップアップがブロックされました。ブラウザの設定でポップアップを許可してください。');
     } else {

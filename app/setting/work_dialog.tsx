@@ -85,7 +85,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
     if (!isDialogOpen) return; // ダイアログが開いていない場合は早期リターン
     const exists = workData.some((work) => work.id === workid);
     return exists;
-  }, [workid, workData]);
+  }, [workid, workData, isDialogOpen]);
 
   const adjustTime = (time: string, adjustment: number): string => {
     const [hour, minute] = time.split(":").map(Number);
@@ -131,7 +131,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
     handleScheduleTimeEdit(0, "breakTime", String(existingWork.breaktime));
 
     console.log("変更", existingWork.classname);
-  }, [isDialogOpen, workid, workData, setEditingIndex]);
+  }, [isDialogOpen, workid, workData, setEditingIndex, handleWorkChange, handleScheduleChange, handleScheduleTimeEdit]);
 
   if (!isDialogOpen) return null;
 

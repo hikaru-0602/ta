@@ -17,11 +17,12 @@ export default function Home() {
       if (result) {
         console.log('ログイン成功:', result);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const firebaseError = error as { code?: string; message?: string };
       console.error('ログインエラー:', error);
       // cancelled-popup-request エラーの場合はユーザーに通知しない
-      if (error.code !== 'auth/cancelled-popup-request' &&
-          error.code !== 'auth/popup-closed-by-user') {
+      if (firebaseError.code !== 'auth/cancelled-popup-request' &&
+          firebaseError.code !== 'auth/popup-closed-by-user') {
         alert('ログインに失敗しました。再度お試しください。');
       }
     } finally {

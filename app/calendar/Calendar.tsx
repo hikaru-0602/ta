@@ -109,7 +109,7 @@ export default function Calendar() {
   useEffect(() => {
     //月が変更されたときに選択日をリセット
     loadUserInfoFromLocalStorage(); //ユーザー情報をローカルストレージから読み込む
-  }, [workData]);
+  }, [workData, loadUserInfoFromLocalStorage]);
 
   const saveShiftsToLocalStorage = (shifts: Shift[]) => {
     localStorage.setItem("shiftData", JSON.stringify(shifts));
