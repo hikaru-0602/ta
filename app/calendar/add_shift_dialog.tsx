@@ -13,13 +13,11 @@ export const parseTime = (time: string): Date => {
 };
 
 export const saveWorkDataToFirestore = async (uid: string, shift: Shift) => {
-  // filterプロパティを除外
-  const { ...shiftForFirestore } = shift;
   const ref = doc(
     db,
     `users/${uid}/shifts/${shift.year}_${shift.month}_${shift.day}_${shift.id}`
   );
-  await setDoc(ref, shiftForFirestore, { merge: true });
+  await setDoc(ref, shift, { merge: true });
 };
 
 const deleteWorkDataFromFirestore = async (
@@ -91,7 +89,6 @@ export const handleAddShift = (
     endtime: work.endtime,
     breaktime: work.breaktime,
     teacher: work.teacher,
-    filter: () => [], // 型定義に合わせてダミー関数を追加
   };
 
   //シフトデータを更新

@@ -7,7 +7,37 @@ import { login, logout } from "../firebase/lib/auth"; // ログイン・ログ�
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const user = useAuth(); // 現在のユーザー情報を取得
+
+  const handleLogin = async () => {
+    if (isLoading) return; // 既にローディング中の場合は何もしない
+
+    try {
+      setIsLoading(true);
+      const result = await login();
+      if (result) {
+        console.log('ログイン処理が完了しました');
+      }
+    } catch (error: any) {
+      console.error('ログインに失敗しました:', error);
+      // cancelled-popup-request エラーの場合はユーザーに通知しない
+      if (error.code !== 'auth/cancelled-popup-request' &&
+          error.code !== 'auth/popup-closed-by-user') {
+        alert('ログインに失敗しました。再度お試しください。');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('ログアウトに失敗しました:', error);
+    }
+  };
 
   return (
     <header className="fixed top-0 left-0 w-full bg-white dark:bg-black shadow-md z-50">
@@ -44,14 +74,19 @@ export default function Header() {
         <div className="ml-4">
           {user === null ? (
             <button
-              onClick={login}
-              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-500 text-white text-sm sm:text-base rounded hover:bg-blue-600 transition"
+              onClick={handleLogin}
+              disabled={isLoading}
+              className={`px-3 py-1.5 sm:px-4 sm:py-2 text-white text-sm sm:text-base rounded transition ${
+                isLoading
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-500 hover:bg-blue-600'
+              }`}
             >
-              学内アカウントログイン
+              {isLoading ? 'ログイン中...' : '学内アカウントログイン'}
             </button>
           ) : (
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
             >
               ログアウト
