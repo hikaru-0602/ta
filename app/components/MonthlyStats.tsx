@@ -218,9 +218,6 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
             <div className="text-2xl font-bold text-foreground">
               ¥{totalSalary.toLocaleString()}
             </div>
-            <div className="text-xs text-muted-foreground mt-1">
-              {gradeInfo.label} • ¥{hourlyRate.toLocaleString()}/時
-            </div>
           </div>
         </div>
 
