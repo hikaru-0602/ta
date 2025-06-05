@@ -11,6 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useAlert } from "../components/AlertProvider";
 
 //時間をDateオブジェクトに変換する関数
 export const parseTime = (time: string): Date => {
@@ -136,7 +137,9 @@ export const handleAddShift = (
   );
 
   if (totalMinutes > 8 * 60) { // 8時間 = 480分
-    alert(`週の勤務時間が8時間を超えます。\n現在の週の合計予定時間: ${formattedTime}\nシフトを追加できません。`);
+    // Note: この関数はコンポーネント外で定義されているため、alertは使用しません
+    // 実際のアラート表示はhandleAddShiftWithAlert()で行われます
+    // alert(`週の勤務時間が8時間を超えます。\n現在の週の合計予定時間: ${formattedTime}\nシフトを追加できません。`);
     return; //処理を終了
   }
 
@@ -164,14 +167,18 @@ export const handleAddShift = (
   });
 
   if (isOverlapping) {
-    alert("このシフトは既存のシフトと時間が重複しています。"); //重複している場合はアラートを表示
+    // Note: この関数はコンポーネント外で定義されているため、alertは使用しません
+    // 実際のアラート表示はhandleAddShiftWithAlert()で行われます
+    // alert("このシフトは既存のシフトと時間が重複しています。");
     return; //処理を終了
   }
 
   //1日のシフト数が2件以上の場合はエラー
   const shiftCountForDate = shiftsForDate.length;
   if (shiftCountForDate >= 2) {
-    alert("働き過ぎ"); //エラーを表示
+    // Note: この関数はコンポーネント外で定義されているため、alertは使用しません
+    // 実際のアラート表示はhandleAddShiftWithAlert()で行われます
+    // alert("働き過ぎ");
     return; //処理を終了
   }
 
@@ -279,12 +286,9 @@ export default function AddShiftDialog({
   setEditingShift,
   setIsEditDialogOpen,
 }: AddShiftDialogProps) {
-  // アラートダイアログの状態管理
-  const [alertDialogOpen, setAlertDialogOpen] = useState(false);
-  const [alertTitle, setAlertTitle] = useState("");
-  const [alertMessage, setAlertMessage] = useState("");
+  const { showAlert } = useAlert();
 
-  // シフト追加処理をラップして、エラー時にAlertDialogを表示
+  // バリデーション付きのシフト追加関数
   const handleAddShiftWithAlert = (work: WorkData) => {
     if (!selectedDate) return;
 
@@ -296,9 +300,7 @@ export default function AddShiftDialog({
     );
 
     if (totalMinutes > 8 * 60) { // 8時間 = 480分
-      setAlertTitle("週の勤務時間超過");
-      setAlertMessage(`週の勤務時間が8時間を超えます。\n現在の週の合計予定時間: ${formattedTime}\nシフトを追加できません。`);
-      setAlertDialogOpen(true);
+      showAlert("勤務時間制限", `週の勤務時間が8時間を超えます。\n現在の週の合計予定時間: ${formattedTime}\nシフトを追加できません。`);
       return;
     }
 
@@ -325,18 +327,14 @@ export default function AddShiftDialog({
     });
 
     if (isOverlapping) {
-      setAlertTitle("時間重複エラー");
-      setAlertMessage("このシフトは既存のシフトと時間が重複しています。");
-      setAlertDialogOpen(true);
+      showAlert("時間重複エラー", "このシフトは既存のシフトと時間が重複しています。");
       return;
     }
 
     //1日のシフト数が2件以上の場合はエラー
     const shiftCountForDate = shiftsForDate.length;
     if (shiftCountForDate >= 2) {
-      setAlertTitle("シフト数制限");
-      setAlertMessage("働き過ぎ");
-      setAlertDialogOpen(true);
+      showAlert("シフト数制限", "働き過ぎ");
       return;
     }
 
@@ -358,21 +356,6 @@ export default function AddShiftDialog({
 
   return (
     <>
-      {/* アラートダイアログ */}
-      <AlertDialog open={alertDialogOpen} onOpenChange={setAlertDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{alertTitle}</AlertDialogTitle>
-            <AlertDialogDescription className="whitespace-pre-line">
-              {alertMessage}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogAction onClick={() => setAlertDialogOpen(false)}>
-            OK
-          </AlertDialogAction>
-        </AlertDialogContent>
-      </AlertDialog>
-
       {/* メインダイアログ */}
       {isDialogOpen && (
         <div
@@ -380,8 +363,8 @@ export default function AddShiftDialog({
           onClick={backDialog}
         >
           <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded shadow-lg w-full max-w-xs sm:max-w-md">
-            <h2 className="text-xl font-bold mb-4">仕事リスト</h2>
-            <h3 className="text-lg font-semibold mb-2">-- 追加 --</h3>
+            <h2 className="text-xl font-bold mb-4 dark:text-white">仕事リスト</h2>
+            <h3 className="text-lg font-semibold mb-2 dark:text-gray-200">-- 追加 --</h3>
             <ul>
               {shiftData
                 .filter(

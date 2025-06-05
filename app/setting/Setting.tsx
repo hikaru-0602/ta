@@ -9,6 +9,7 @@ import { useLoginContext } from "../firebase/context/LoginContext";
 import { getAuthEmail } from "../firebase/lib/auth";
 import { getAuth } from "firebase/auth";
 import { gradeInfoMap } from "../types";
+import { useAlert } from "../components/AlertProvider";
 
 export default function Work() {
   //ユーザ情報のカスタムフックを使用
@@ -52,6 +53,7 @@ export default function Work() {
   const { isLoginTriggered } = useLoginContext(); //ログイン状態を取得
   const auth = getAuth();
   const uid = auth.currentUser?.uid;
+  const { showAlert } = useAlert();
 
   //初期化時にローカルストレージからデータを読み込む
   useEffect(() => {
@@ -118,7 +120,7 @@ export default function Work() {
                       placeholder="例: 山田 太郎"
                       onFocus={(e) => {
                         if (!user) {
-                          alert("ログインしてください。");
+                          showAlert("認証エラー", "ログインしてください。");
                           e.target.blur();
                         }
                       }}
@@ -137,7 +139,7 @@ export default function Work() {
                       placeholder="例: やまだ たろう"
                       onFocus={(e) => {
                         if (!user) {
-                          alert("ログインしてください。");
+                          showAlert("認証エラー", "ログインしてください。");
                           e.target.blur();
                         }
                       }}
@@ -158,7 +160,7 @@ export default function Work() {
                       onMouseDown={(e) => {
                         if (!user) {
                           e.preventDefault(); // デフォルトのフォーカスを防ぐ
-                          alert("ログインしてください。");
+                          showAlert("認証エラー", "ログインしてください。");
                         }
                       }}
                       className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition dark:bg-gray-700 dark:text-gray-200"
@@ -182,7 +184,7 @@ export default function Work() {
                       placeholder="例: 1234567"
                       onFocus={(e) => {
                         if (!user) {
-                          alert("ログインしてください。");
+                          showAlert("認証エラー", "ログインしてください。");
                           e.target.blur();
                         }
                       }}
@@ -205,7 +207,7 @@ export default function Work() {
                   <button
                     onClick={() => {
                       if (!user) {
-                        alert("ログインしてください。");
+                        showAlert("認証エラー", "ログインしてください。");
                         return;
                       } else if (
                         userInfo.name === "" &&
@@ -213,10 +215,10 @@ export default function Work() {
                         userInfo.value === "" &&
                         userInfo.id === ""
                       ) {
-                        alert("入力に不備があります。");
+                        showAlert("入力エラー", "入力に不備があります。");
                         return;
                       }
-                      alert("登録しました。");
+                      showAlert("登録完了", "登録しました。");
                       handleUserRegister(uid);
                     }}
                     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
@@ -238,7 +240,7 @@ export default function Work() {
                 onClick={(e) => {
                   e.preventDefault();
                   if (!user) {
-                    alert("ログインしてください。");
+                    showAlert("認証エラー", "ログインしてください。");
                     return;
                   }
                   const uniqueId = generateUniqueId();

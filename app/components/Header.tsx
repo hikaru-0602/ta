@@ -4,11 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "../firebase/context/auth"; // 認証情報を取得
 import { login, logout } from "../firebase/lib/auth"; // ログイン・ログアウト関数をインポート
+import { useAlert } from './AlertProvider';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const user = useAuth(); // 現在のユーザー情報を取得
+  const { showAlert } = useAlert();
 
   const handleLogin = async () => {
     if (isLoading) return; // 既にローディング中の場合は何もしない
@@ -25,7 +27,7 @@ export default function Header() {
       // cancelled-popup-request エラーの場合はユーザーに通知しない
       if (firebaseError.code !== 'auth/cancelled-popup-request' &&
           firebaseError.code !== 'auth/popup-closed-by-user') {
-        alert('ログインに失敗しました。再度お試しください。');
+        showAlert('ログインエラー', 'ログインに失敗しました。再度お試しください。');
       }
     } finally {
       setIsLoading(false);

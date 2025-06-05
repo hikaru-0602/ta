@@ -6,11 +6,13 @@ import { useAuth } from "./firebase/context/auth";
 import { login, logout } from "./firebase/lib/auth";
 import { useLoginContext } from "./firebase/context/LoginContext";
 import { useState, useEffect } from "react";
+import { AlertProvider, useAlert } from "./components/AlertProvider";
 
-export default function Home() {
+function AppContent() {
   const user = useAuth();
   const { setIsLoginTriggered } = useLoginContext();
   const [isLoading, setIsLoading] = useState(false);
+  const { showAlert } = useAlert();
 
   // システムのダークモード設定を監視
   useEffect(() => {
@@ -57,7 +59,7 @@ export default function Home() {
       // cancelled-popup-request エラーの場合はユーザーに通知しない
       if (firebaseError.code !== 'auth/cancelled-popup-request' &&
           firebaseError.code !== 'auth/popup-closed-by-user') {
-        alert('ログインに失敗しました。再度お試しください。');
+        showAlert('ログインエラー', 'ログインに失敗しました。再度お試しください。');
       }
     } finally {
       setIsLoading(false);
@@ -103,5 +105,13 @@ export default function Home() {
         <Setting />
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <AlertProvider>
+      <AppContent />
+    </AlertProvider>
   );
 }

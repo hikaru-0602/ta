@@ -19,6 +19,7 @@ import { useUserInfo } from "../setting/user_setting";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { collection, onSnapshot, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/lib/firebase";
+import { useAlert } from "../components/AlertProvider";
 
 export default function Calendar() {
   const today = new Date();
@@ -34,6 +35,7 @@ export default function Calendar() {
   const [editingShift, setEditingShift] = useState<Shift | null>(null); //編集対象のシフト
   const [holidays, setHolidays] = useState<{ [date: string]: string }>({});
   const user = useAuth();
+  const { showAlert } = useAlert();
 
   const { loadUserInfoFromLocalStorage } = useUserInfo();
 
@@ -133,7 +135,7 @@ export default function Calendar() {
   // 日付をタップして週の勤務時間を表示する関数
   const handleShowWeeklyWorkTime = (date: Date) => {
     if (!user) {
-      alert("ログインしてください。");
+      showAlert("認証エラー", "ログインしてください。");
       return;
     }
 
@@ -147,7 +149,7 @@ export default function Calendar() {
       message += '\n\nこの週にシフトはありません。';
     }
 
-    alert(message);
+    showAlert("週勤務時間", message);
   };
 
   const isHoliday = (date: Date): boolean => {
@@ -275,7 +277,7 @@ export default function Calendar() {
 
   const handleDateClick = (date: Date) => {
     if (!user) {
-      alert("ログインしてください。");
+      showAlert("認証エラー", "ログインしてください。");
       return;
     }
 
@@ -284,7 +286,7 @@ export default function Calendar() {
     const isSaturday = date.getDay() === 6; //土曜日
 
     if (holiday || isSunday || isSaturday) {
-      alert("この日は休みのため、操作できません。");
+      showAlert("操作制限", "この日は休みのため、操作できません。");
       return; //処理を終了
     }
 
@@ -300,14 +302,14 @@ export default function Calendar() {
   //シフト出力ボタンのクリックハンドラー
   const handleOpenExportDialog = async () => {
     if (!user) {
-      alert("ユーザ情報を登録してください");
+      showAlert("認証エラー", "ユーザ情報を登録してください");
       return;
     }
 
     // Firestoreからユーザー情報を取得
     const uid = getAuth().currentUser?.uid;
     if (!uid) {
-      alert("ログインしてください");
+      showAlert("認証エラー", "ログインしてください");
       return;
     }
 
@@ -316,7 +318,7 @@ export default function Calendar() {
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
-        alert("ユーザ情報を登録してください");
+        showAlert("設定エラー", "ユーザ情報を登録してください");
         return;
       }
 
@@ -329,7 +331,7 @@ export default function Calendar() {
         !userData.value ||
         !userData.name_kana
       ) {
-        alert("ユーザ情報を登録してください");
+        showAlert("設定エラー", "ユーザ情報を登録してください");
         return;
       }
 
@@ -349,7 +351,7 @@ export default function Calendar() {
       setIsExportDialogOpen(true); //ダイアログを開く
     } catch (error) {
       console.error("エラーが発生しました:", error);
-      alert("エラーが発生しました。後でもう一度お試しください。");
+      showAlert("システムエラー", "エラーが発生しました。後でもう一度お試しください。");
     }
   };
 

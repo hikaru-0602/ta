@@ -10,6 +10,7 @@ import { Shift } from "../types"; //業務データの型をインポート
 import { getAuth } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/lib/firebase";
+import { useAlert } from "../components/AlertProvider";
 
 interface ExportDialogProps {
   isExportDialogOpen: boolean; // ダイアログの開閉状態
@@ -79,212 +80,18 @@ export const handleExportSubject = (
   shiftData: Shift[], //シフトデータ
   setIsExportDialogOpen: (isOpen: boolean) => void //ダイアログを閉じる関数
 ) => {
-  if (!currentDate || !(currentDate instanceof Date)) {
-    console.error("currentDate is not defined or not a valid Date object."); //エラーをコンソールに出力
-    alert("現在の日付が正しく設定されていません。"); //エラーをアラートで表示
-    return; //処理を終了
-  }
-
-  if (!shiftData || !Array.isArray(shiftData)) {
-    console.error("shiftData is not defined or not an array."); //エラーをコンソールに出力
-    alert("シフトデータが正しく読み込まれていません。"); //エラーをアラートで表示
-    return; //処理を終了
-  }
-
-  //現在の月のシフトデータを取得
-  const currentMonthShifts = shiftData.filter(
-    (shift) =>
-      shift.year === currentDate.getFullYear() &&
-      shift.month === currentDate.getMonth() + 1
-  );
-
-  //選択された科目名に一致するシフトをフィルタリング
-  const filteredShifts = currentMonthShifts.filter(
-    (shift) => shift.classname === selectedSubject
-  );
-
-  //JSON形式で出力
-  const jsonOutput = JSON.stringify(filteredShifts, null, 2); //シフトデータをJSON形式に変換
-  //console.log(jsonOutput); //JSONデータをコンソールに出力
-  alert(`選択された科目名のシフトデータ:\n${jsonOutput}`); //JSONデータをアラートで表示
-
-  setIsExportDialogOpen(false); //ダイアログを閉じる
+  // Note: この関数内でshowAlertを使用するには、コンポーネント内で定義し直す必要があります
+  console.log("handleExportSubject called - この関数は非推奨になります");
 };
 
 //選択された科目名のシフトデータを統一してエクスポートする関数
 export const exportData = async (
-  selectedSubject: string, // 選択された科目名
-  currentDate: Date, // 現在の日付
-  shiftData: Shift[], // シフトデータ
-  setIsExportDialogOpen: (isOpen: boolean) => void // ダイアログを閉じる関数
+  selectedSubject: string,
+  currentDate: Date,
+  shiftData: Shift[],
+  setIsExportDialogOpen: (isOpen: boolean) => void
 ) => {
-  if (!currentDate || !(currentDate instanceof Date)) {
-    console.error("currentDate is not defined or not a valid Date object.");
-    alert("現在の日付が正しく設定されていません。");
-    return;
-  }
-
-  if (!shiftData || !Array.isArray(shiftData)) {
-    console.error("shiftData is not defined or not an array.");
-    alert("シフトデータが正しく読み込まれていません。");
-    return;
-  }
-
-  // Firestoreからユーザー情報を取得
-  const uid = getAuth().currentUser?.uid;
-  if (!uid) {
-    alert("ログインしてください");
-    return;
-  }
-
-  try {
-    const userRef = doc(db, `users/${uid}`);
-    const userSnap = await getDoc(userRef);
-
-    if (!userSnap.exists()) {
-      alert("ユーザ情報を登録してください");
-      return;
-    }
-
-    const userData = userSnap.data();
-    console.log("userInfo:", userData); // デバッグ用
-
-    // 型安全にユーザー情報を抽出
-    const userInfo = {
-      name: userData.name || "",
-      name_kana: userData.name_kana || "",
-      id: userData.id || "",
-      value: userData.value || "1"
-    };
-
-    if (!userInfo.id || !userInfo.name || !userInfo.value || !userInfo.name_kana) {
-      alert("ユーザ情報を登録してください");
-      return;
-    }
-
-    // 現在の月のシフトデータを取得
-    const currentMonthShifts = shiftData.filter(
-      (shift) =>
-        shift.year === currentDate.getFullYear() &&
-        shift.month === currentDate.getMonth() + 1
-    );
-
-    // 選択された科目名に一致するシフトをフィルタリング
-    const filteredShifts = currentMonthShifts.filter(
-      (shift) => shift.classname === selectedSubject
-    );
-
-    let teacher = "";
-    for (const shift of filteredShifts) {
-      if (shift.teacher) {
-        teacher = shift.teacher;
-        break;
-      }
-    }
-
-    // 日付ごとにシフトをグループ化
-    const groupedShifts: { [date: string]: Shift[] } = {};
-    filteredShifts.forEach((shift) => {
-      const dateKey = shift.day; // シフトの日付をキーにする
-      if (!groupedShifts[dateKey]) {
-        groupedShifts[dateKey] = [];
-      }
-      groupedShifts[dateKey].push(shift);
-    });
-
-    // シフトを統一
-    const unifiedShifts: Shift[] = [];
-    Object.keys(groupedShifts).forEach((dateKey) => {
-      const shifts = groupedShifts[dateKey];
-      if (shifts.length === 1) {
-        unifiedShifts.push(shifts[0]); // シフトが1つだけの場合はそのまま追加
-      } else {
-        // シフトが複数ある場合は統一
-        const earliestStart = shifts.reduce(
-          (earliest, shift) =>
-            shift.starttime < earliest ? shift.starttime : earliest,
-          shifts[0].starttime
-        );
-
-        const latestEnd = shifts.reduce(
-          (latest, shift) => (shift.endtime > latest ? shift.endtime : latest),
-          shifts[0].endtime
-        );
-
-        const totalBreakTimes = shifts.reduce(
-          (total, shift) => total + shift.breaktime,
-          0
-        );
-
-        const earliestEnd = shifts.reduce(
-          (earliest, shift) =>
-            shift.endtime < earliest ? shift.endtime : earliest,
-          shifts[0].endtime
-        );
-
-        const latestStart = shifts.reduce(
-          (latest, shift) =>
-            shift.starttime > latest ? shift.starttime : latest,
-          shifts[0].starttime
-        );
-
-        const start = new Date(`1970-01-01T${earliestEnd}:00`);
-        const end = new Date(`1970-01-01T${latestStart}:00`);
-        const overlappingDuration = Math.max(
-          0,
-          (end.getTime() - start.getTime()) / (1000 * 60) // 分単位
-        );
-
-        const finalBreakTime = totalBreakTimes + overlappingDuration; // 合計休憩時間
-
-        // 統一されたデータをそれぞれのシフトに適用
-        shifts.forEach((shift) => {
-          unifiedShifts.push({
-            ...shift,
-            starttime: earliestStart,
-            endtime: latestEnd,
-            breaktime: finalBreakTime,
-          });
-        });
-      }
-    });
-
-    // シフトデータをフォーマット
-    const formattedData = formatShiftDataForExcel(unifiedShifts);
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth() + 1;
-    const holidays = getHolidaysInMonth(year, month); // 祝日を取得
-    const yearMonthArray = getYearAndMonth(year, month); // 和暦と月を含む配列を取得
-
-    const userDataArrays = getUserData(userInfo); // ユーザデータを取得
-
-    const teacherDataArrays = getteacherData({ name: teacher }); // 教員データを取得
-
-    // 必要に応じてExcelに書き込む処理を追加
-    //console.log("Excel用フォーマット済みデータ:", formattedData);
-
-    // JSON形式で出力
-    const jsonOutput = JSON.stringify(unifiedShifts, null, 2);
-    console.log(jsonOutput);
-    //alert(`統一されたシフトデータ:\n${jsonOutput}`);
-
-    if (formattedData && yearMonthArray && userDataArrays && teacherDataArrays) {
-      replaceAllData(
-        formattedData,
-        yearMonthArray,
-        userDataArrays,
-        teacherDataArrays,
-        currentDate.getFullYear(),
-        await holidays
-      );
-    }
-
-    setIsExportDialogOpen(false); // ダイアログを閉じる
-  } catch (error) {
-    console.error("エラーが発生しました:", error);
-    alert("エラーが発生しました。後でもう一度お試しください。");
-    setIsExportDialogOpen(false);
-  }
+  console.log("exportData called - この関数は非推奨になります");
 };
 
 //エクスポートダイアログを閉じる関数
@@ -302,6 +109,217 @@ export default function ExportDialog({
   shiftData, // シフトデータ
   setIsExportDialogOpen, // ダイアログを閉じる関数
 }: ExportDialogProps) {
+  const { showAlert } = useAlert();
+
+  // コンポーネント内でエクスポート関数を再定義
+  const handleExportSubjectInternal = (
+    selectedSubject: string,
+    currentDate: Date,
+    shiftData: Shift[],
+    setIsExportDialogOpen: (isOpen: boolean) => void
+  ) => {
+    if (!currentDate || !(currentDate instanceof Date)) {
+      console.error("currentDate is not defined or not a valid Date object.");
+      showAlert("データエラー", "現在の日付が正しく設定されていません。");
+      return;
+    }
+
+    if (!shiftData || !Array.isArray(shiftData)) {
+      console.error("shiftData is not defined or not an array.");
+      showAlert("データエラー", "シフトデータが正しく読み込まれていません。");
+      return;
+    }
+
+    //現在の月のシフトデータを取得
+    const currentMonthShifts = shiftData.filter(
+      (shift) =>
+        shift.year === currentDate.getFullYear() &&
+        shift.month === currentDate.getMonth() + 1
+    );
+
+    //選択された科目名に一致するシフトをフィルタリング
+    const filteredShifts = currentMonthShifts.filter(
+      (shift) => shift.classname === selectedSubject
+    );
+
+    //JSON形式で出力
+    const jsonOutput = JSON.stringify(filteredShifts, null, 2);
+    showAlert("エクスポート完了", `選択された科目名のシフトデータ:\n${jsonOutput}`);
+
+    setIsExportDialogOpen(false);
+  };
+
+  const exportDataInternal = async (
+    selectedSubject: string,
+    currentDate: Date,
+    shiftData: Shift[],
+    setIsExportDialogOpen: (isOpen: boolean) => void
+  ) => {
+    if (!currentDate || !(currentDate instanceof Date)) {
+      console.error("currentDate is not defined or not a valid Date object.");
+      showAlert("データエラー", "現在の日付が正しく設定されていません。");
+      return;
+    }
+
+    if (!shiftData || !Array.isArray(shiftData)) {
+      console.error("shiftData is not defined or not an array.");
+      showAlert("データエラー", "シフトデータが正しく読み込まれていません。");
+      return;
+    }
+
+    // Firestoreからユーザー情報を取得
+    const uid = getAuth().currentUser?.uid;
+    if (!uid) {
+      showAlert("認証エラー", "ログインしてください");
+      return;
+    }
+
+    try {
+      const userRef = doc(db, `users/${uid}`);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        showAlert("設定エラー", "ユーザ情報を登録してください");
+        return;
+      }
+
+      const userData = userSnap.data();
+      console.log("userInfo:", userData); // デバッグ用
+
+      // 型安全にユーザー情報を抽出
+      const userInfo = {
+        name: userData.name || "",
+        name_kana: userData.name_kana || "",
+        id: userData.id || "",
+        value: userData.value || "1"
+      };
+
+      if (!userInfo.id || !userInfo.name || !userInfo.value || !userInfo.name_kana) {
+        showAlert("設定エラー", "ユーザ情報を登録してください");
+        return;
+      }
+
+      // 現在の月のシフトデータを取得
+      const currentMonthShifts = shiftData.filter(
+        (shift) =>
+          shift.year === currentDate.getFullYear() &&
+          shift.month === currentDate.getMonth() + 1
+      );
+
+      // 選択された科目名に一致するシフトをフィルタリング
+      const filteredShifts = currentMonthShifts.filter(
+        (shift) => shift.classname === selectedSubject
+      );
+
+      let teacher = "";
+      for (const shift of filteredShifts) {
+        if (shift.teacher) {
+          teacher = shift.teacher;
+          break;
+        }
+      }
+
+      // 日付ごとにシフトをグループ化
+      const groupedShifts: { [date: string]: Shift[] } = {};
+      filteredShifts.forEach((shift) => {
+        const dateKey = shift.day; // シフトの日付をキーにする
+        if (!groupedShifts[dateKey]) {
+          groupedShifts[dateKey] = [];
+        }
+        groupedShifts[dateKey].push(shift);
+      });
+
+      // シフトを統一
+      const unifiedShifts: Shift[] = [];
+      Object.keys(groupedShifts).forEach((dateKey) => {
+        const shifts = groupedShifts[dateKey];
+        if (shifts.length === 1) {
+          unifiedShifts.push(shifts[0]); // シフトが1つだけの場合はそのまま追加
+        } else {
+          // シフトが複数ある場合は統一
+          const earliestStart = shifts.reduce(
+            (earliest, shift) =>
+              shift.starttime < earliest ? shift.starttime : earliest,
+            shifts[0].starttime
+          );
+
+          const latestEnd = shifts.reduce(
+            (latest, shift) => (shift.endtime > latest ? shift.endtime : latest),
+            shifts[0].endtime
+          );
+
+          const totalBreakTimes = shifts.reduce(
+            (total, shift) => total + shift.breaktime,
+            0
+          );
+
+          const earliestEnd = shifts.reduce(
+            (earliest, shift) =>
+              shift.endtime < earliest ? shift.endtime : earliest,
+            shifts[0].endtime
+          );
+
+          const latestStart = shifts.reduce(
+            (latest, shift) =>
+              shift.starttime > latest ? shift.starttime : latest,
+            shifts[0].starttime
+          );
+
+          const start = new Date(`1970-01-01T${earliestEnd}:00`);
+          const end = new Date(`1970-01-01T${latestStart}:00`);
+          const overlappingDuration = Math.max(
+            0,
+            (end.getTime() - start.getTime()) / (1000 * 60) // 分単位
+          );
+
+          const finalBreakTime = totalBreakTimes + overlappingDuration; // 合計休憩時間
+
+          // 統一されたデータをそれぞれのシフトに適用
+          shifts.forEach((shift) => {
+            unifiedShifts.push({
+              ...shift,
+              starttime: earliestStart,
+              endtime: latestEnd,
+              breaktime: finalBreakTime,
+            });
+          });
+        }
+      });
+
+      // シフトデータをフォーマット
+      const formattedData = formatShiftDataForExcel(unifiedShifts);
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth() + 1;
+      const holidays = getHolidaysInMonth(year, month); // 祝日を取得
+      const yearMonthArray = getYearAndMonth(year, month); // 和暦と月を含む配列を取得
+
+      const userDataArrays = getUserData(userInfo); // ユーザデータを取得
+
+      const teacherDataArrays = getteacherData({ name: teacher }); // 教員データを取得
+
+      // JSON形式で出力
+      const jsonOutput = JSON.stringify(unifiedShifts, null, 2);
+      console.log(jsonOutput);
+
+      if (formattedData && yearMonthArray && userDataArrays && teacherDataArrays) {
+        replaceAllData(
+          formattedData,
+          yearMonthArray,
+          userDataArrays,
+          teacherDataArrays,
+          currentDate.getFullYear(),
+          await holidays
+        );
+      }
+
+      setIsExportDialogOpen(false); // ダイアログを閉じる
+    } catch (error) {
+      console.error("エラーが発生しました:", error);
+      showAlert("システムエラー", "エラーが発生しました。後でもう一度お試しください。");
+      setIsExportDialogOpen(false);
+    }
+  };
+
   const backDialog = (e: React.MouseEvent<HTMLDivElement>) => {
     // ダイアログの外側をクリックした場合のみ閉じる
     if (e.target === e.currentTarget) {
@@ -324,7 +342,7 @@ export default function ExportDialog({
               <li
                 key={index}
                 onClick={() =>
-                  exportData(
+                  exportDataInternal(
                     subject,
                     currentDate,
                     shiftData,

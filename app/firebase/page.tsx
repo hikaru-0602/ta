@@ -2,10 +2,12 @@
 import { useAuth } from "./context/auth";
 import { login, logout } from "./lib/auth";
 import { useState } from "react";
+import { useAlert } from '../components/AlertProvider';
 
 export default function Home() {
   const user = useAuth();
   const [waiting, setWaiting] = useState<boolean>(false);
+  const { showAlert } = useAlert();
 
   const signIn = async () => {
     if (waiting) return; // 既に処理中の場合は何もしない
@@ -23,7 +25,7 @@ export default function Home() {
       // cancelled-popup-request エラーの場合はユーザーに通知しない
       if (firebaseError.code !== 'auth/cancelled-popup-request' &&
           firebaseError.code !== 'auth/popup-closed-by-user') {
-        alert('ログインに失敗しました。再度お試しください。');
+        showAlert('ログインエラー', 'ログインに失敗しました。再度お試しください。');
       }
     } finally {
       console.log("finally");
