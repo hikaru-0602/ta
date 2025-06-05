@@ -1,16 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { WorkData, Shift } from "../types"; //業務データの型をインポート
 import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/lib/firebase";
 import { getAuth } from "firebase/auth";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useAlert } from "../components/AlertProvider";
 
 //時間をDateオブジェクトに変換する関数
@@ -125,12 +117,11 @@ export const handleAddShift = (
   selectedDate: Date | null, //選択された日付
   shiftData: Shift[], //既存のシフトデータ
   setShiftData: (shifts: Shift[]) => void, //シフトデータを更新する関数
-  saveShiftsToLocalStorage: (shifts: Shift[]) => void //シフトデータをlocalStorageに保存する関数（互換性のため残す）
 ) => {
   if (!selectedDate) return; //日付が選択されていない場合は処理を終了
 
   // 週の勤務時間チェック（8時間制限）
-  const { totalMinutes, formattedTime } = calculateWeeklyWorkTimeWithNewShift(
+  const { totalMinutes } = calculateWeeklyWorkTimeWithNewShift(
     selectedDate,
     shiftData,
     work
@@ -217,7 +208,6 @@ export const handleRemoveShift = (
   day: number, //削除するシフトの日
   shiftData: Shift[], //既存のシフトデータ
   setShiftData: (shifts: Shift[]) => void, //シフトデータを更新する関数
-  saveShiftsToLocalStorage: (shifts: Shift[]) => void //シフトデータをlocalStorageに保存する関数（互換性のため残す）
 ) => {
   //指定されたシフトを除外した新しいシフトデータを作成
   const updatedShifts = shiftData.filter(

@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { WorkData } from "../types";
-import { collection, doc, getDocs, setDoc, deleteDoc, onSnapshot } from "firebase/firestore";
+import { collection, doc, setDoc, deleteDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/lib/firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 

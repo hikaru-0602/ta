@@ -55,103 +55,6 @@ export default function Calendar() {
     (_, i) => new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1)
   );
 
-  // 週の開始日（月曜日）を取得する関数
-  const getWeekStart = (date: Date): Date => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // 月曜日を週の開始とする
-    return new Date(d.setDate(diff));
-  };
-
-  // 週の終了日（日曜日）を取得する関数
-  const getWeekEnd = (date: Date): Date => {
-    const weekStart = getWeekStart(date);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
-    return weekEnd;
-  };
-
-  // 時刻文字列（HH:MM）を分に変換する関数
-  const timeToMinutes = (time: string): number => {
-    if (!time || !time.includes(':')) return 0;
-    const [hours, minutes] = time.split(':').map(Number);
-    if (isNaN(hours) || isNaN(minutes)) return 0;
-    return hours * 60 + minutes;
-  };
-
-  // 分を時間:分の形式に変換する関数
-  const minutesToTimeFormat = (totalMinutes: number): string => {
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    return `${hours}時間${minutes}分`;
-  };
-
-  // シフト1件の実働時間を計算する関数
-  const calculateShiftWorkTime = (shift: Shift): number => {
-    const startMinutes = timeToMinutes(shift.starttime);
-    const endMinutes = timeToMinutes(shift.endtime);
-    const breakMinutes = shift.breaktime || 0;
-
-    // 実働時間 = 終了時刻 - 開始時刻 - 休憩時間
-    const workTimeMinutes = endMinutes - startMinutes - breakMinutes;
-
-    console.log(`シフト計算: ${shift.starttime}-${shift.endtime}, 休憩:${breakMinutes}分 → 実働:${workTimeMinutes}分`);
-
-    return Math.max(0, workTimeMinutes); // 負の値を防ぐ
-  };
-
-  // 週の合計勤務時間を計算する関数
-  const calculateWeeklyWorkTime = (date: Date): { totalMinutes: number; formattedTime: string; weekRange: string; details: string[] } => {
-    const weekStart = getWeekStart(date);
-    const weekEnd = getWeekEnd(date);
-
-    // 週の範囲内のシフトデータを取得
-    const weeklyShifts = shiftData.filter((shift) => {
-      const shiftDate = new Date(shift.year, shift.month - 1, shift.day);
-      return shiftDate >= weekStart && shiftDate <= weekEnd;
-    });
-
-    let totalMinutes = 0;
-    const details: string[] = [];
-
-    weeklyShifts.forEach((shift) => {
-      const workTimeMinutes = calculateShiftWorkTime(shift);
-      totalMinutes += workTimeMinutes;
-
-      const formattedWorkTime = minutesToTimeFormat(workTimeMinutes);
-      details.push(`${shift.month}/${shift.day} ${shift.starttime}-${shift.endtime} (休憩${shift.breaktime || 0}分) → ${formattedWorkTime}`);
-    });
-
-    const weekRangeStr = `${weekStart.getMonth() + 1}/${weekStart.getDate()} - ${weekEnd.getMonth() + 1}/${weekEnd.getDate()}`;
-
-    return {
-      totalMinutes,
-      formattedTime: minutesToTimeFormat(totalMinutes),
-      weekRange: weekRangeStr,
-      details
-    };
-  };
-
-  // 日付をタップして週の勤務時間を表示する関数
-  const handleShowWeeklyWorkTime = (date: Date) => {
-    if (!user) {
-      showAlert("認証エラー", "ログインしてください。");
-      return;
-    }
-
-    const { formattedTime, weekRange, details } = calculateWeeklyWorkTime(date);
-
-    let message = `週の合計勤務時間\n期間: ${weekRange}\n合計: ${formattedTime}`;
-
-    if (details.length > 0) {
-      message += '\n\n詳細:\n' + details.join('\n');
-    } else {
-      message += '\n\nこの週にシフトはありません。';
-    }
-
-    showAlert("週勤務時間", message);
-  };
-
   const isHoliday = (date: Date): boolean => {
     //ローカルタイムゾーンの日付を YYYY-MM-DD 形式に変換
     const formattedDate = date
@@ -164,7 +67,6 @@ export default function Calendar() {
 
     return holidays.hasOwnProperty(formattedDate);
   };
-  const uid = getAuth().currentUser?.uid;
 
   // 認証状態を監視してからFirestoreからシフトデータをリアルタイムで取得
   useEffect(() => {
@@ -256,7 +158,7 @@ export default function Calendar() {
   }, [workData]); // loadUserInfoFromLocalStorageの依存関係を削除
 
   // ローカルストレージ保存関数（互換性のため残すが、実際はFirestoreで自動保存）
-  const saveShiftsToLocalStorage = (shifts: Shift[]) => {
+  const saveShiftsToLocalStorage = () => {
     // リアルタイム監視により自動で保存されるため、何もしない
     // 既存コードとの互換性のため関数は残す
   };

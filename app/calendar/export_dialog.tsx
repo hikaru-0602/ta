@@ -74,23 +74,13 @@ export const getHolidaysInMonth = async (
 };
 
 //選択された科目名のシフトデータをエクスポートする関数
-export const handleExportSubject = (
-  selectedSubject: string, //選択された科目名
-  currentDate: Date, //現在の日付
-  shiftData: Shift[], //シフトデータ
-  setIsExportDialogOpen: (isOpen: boolean) => void //ダイアログを閉じる関数
-) => {
+export const handleExportSubject = () => {
   // Note: この関数内でshowAlertを使用するには、コンポーネント内で定義し直す必要があります
   console.log("handleExportSubject called - この関数は非推奨になります");
 };
 
 //選択された科目名のシフトデータを統一してエクスポートする関数
-export const exportData = async (
-  selectedSubject: string,
-  currentDate: Date,
-  shiftData: Shift[],
-  setIsExportDialogOpen: (isOpen: boolean) => void
-) => {
+export const exportData = async () => {
   console.log("exportData called - この関数は非推奨になります");
 };
 
@@ -110,44 +100,6 @@ export default function ExportDialog({
   setIsExportDialogOpen, // ダイアログを閉じる関数
 }: ExportDialogProps) {
   const { showAlert } = useAlert();
-
-  // コンポーネント内でエクスポート関数を再定義
-  const handleExportSubjectInternal = (
-    selectedSubject: string,
-    currentDate: Date,
-    shiftData: Shift[],
-    setIsExportDialogOpen: (isOpen: boolean) => void
-  ) => {
-    if (!currentDate || !(currentDate instanceof Date)) {
-      console.error("currentDate is not defined or not a valid Date object.");
-      showAlert("データエラー", "現在の日付が正しく設定されていません。");
-      return;
-    }
-
-    if (!shiftData || !Array.isArray(shiftData)) {
-      console.error("shiftData is not defined or not an array.");
-      showAlert("データエラー", "シフトデータが正しく読み込まれていません。");
-      return;
-    }
-
-    //現在の月のシフトデータを取得
-    const currentMonthShifts = shiftData.filter(
-      (shift) =>
-        shift.year === currentDate.getFullYear() &&
-        shift.month === currentDate.getMonth() + 1
-    );
-
-    //選択された科目名に一致するシフトをフィルタリング
-    const filteredShifts = currentMonthShifts.filter(
-      (shift) => shift.classname === selectedSubject
-    );
-
-    //JSON形式で出力
-    const jsonOutput = JSON.stringify(filteredShifts, null, 2);
-    showAlert("エクスポート完了", `選択された科目名のシフトデータ:\n${jsonOutput}`);
-
-    setIsExportDialogOpen(false);
-  };
 
   const exportDataInternal = async (
     selectedSubject: string,
