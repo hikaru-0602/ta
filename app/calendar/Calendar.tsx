@@ -259,21 +259,30 @@ export default function Calendar() {
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center padding lg:ml-20 mr-20">
-      <div className="flex items-center justify-center mb-4 w-full max-w-[1200px] space-x-4">
+      <div className="flex items-center justify-between mb-4 w-full max-w-[1200px]">
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={handlePrevMonth}
+            className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+          >
+            前の月
+          </button>
+          <h2 className="text-2xl font-bold text-foreground">
+            {currentDate.getFullYear()}年 {currentDate.getMonth() + 1}月
+          </h2>
+          <button
+            onClick={handleNextMonth}
+            className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+          >
+            次の月
+          </button>
+        </div>
+
         <button
-          onClick={handlePrevMonth}
-          className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+          onClick={handleOpenExportDialog}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
         >
-          前の月
-        </button>
-        <h2 className="text-2xl font-bold text-foreground">
-          {currentDate.getFullYear()}年 {currentDate.getMonth() + 1}月
-        </h2>
-        <button
-          onClick={handleNextMonth}
-          className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
-        >
-          次の月
+          Excel出力
         </button>
       </div>
 
@@ -332,16 +341,6 @@ export default function Calendar() {
             </div>
           );
         })}
-      </div>
-
-      {/* ボタンエリア */}
-      <div className="flex space-x-4 mt-6">
-        <button
-          onClick={handleOpenExportDialog}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
-        >
-          Excel出力
-        </button>
       </div>
 
       {/* ダイアログのレンダリング部分 */}
