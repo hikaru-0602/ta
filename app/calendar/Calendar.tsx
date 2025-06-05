@@ -9,17 +9,14 @@ import EditShiftDialog, {
   handleEditShift,
   handleSaveEditedShift,
 } from "./edit_shift_dialog";
-import ExportDialog, {
-  handleCloseExportDialog,
-  handleExportSubject,
-} from "./export_dialog";
 import { useAuth } from "../firebase/context/auth";
 import { Shift, WorkData } from "../types";
 import { useUserInfo } from "../setting/user_setting";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { collection, onSnapshot, doc, getDoc } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/lib/firebase";
 import { useAlert } from "../components/AlertProvider";
+import MonthlyStats from "../components/MonthlyStats";
 
 export default function Calendar() {
   const today = new Date();
@@ -29,8 +26,6 @@ export default function Calendar() {
   const [filteredWorkData, setFilteredWorkData] = useState<WorkData[]>([]); //フィルタリングされたデータ
   const [shiftData, setShiftData] = useState<Shift[]>([]); //初期値を空配列に設定
   const [isDialogOpen, setIsDialogOpen] = useState(false); //ダイアログの状態
-  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false); //ダイアログの状態
-  const [subjectNames, setSubjectNames] = useState<string[]>([]); //科目名リスト
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); //編集ダイアログの状態
   const [editingShift, setEditingShift] = useState<Shift | null>(null); //編集対象のシフト
   const [holidays, setHolidays] = useState<{ [date: string]: string }>({});
@@ -201,65 +196,9 @@ export default function Calendar() {
     setIsDialogOpen(false); //ダイアログを閉じる
   };
 
-  //シフト出力ボタンのクリックハンドラー
-  const handleOpenExportDialog = async () => {
-    if (!user) {
-      showAlert("認証エラー", "ユーザ情報を登録してください");
-      return;
-    }
-
-    // Firestoreからユーザー情報を取得
-    const uid = getAuth().currentUser?.uid;
-    if (!uid) {
-      showAlert("認証エラー", "ログインしてください");
-      return;
-    }
-
-    try {
-      const userRef = doc(db, `users/${uid}`);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        showAlert("設定エラー", "ユーザ情報を登録してください");
-        return;
-      }
-
-      const userData = userSnap.data();
-
-      if (
-        !userData ||
-        !userData.id || //falsy値（空文字、null、undefined、0など）を弾く
-        !userData.name ||
-        !userData.value ||
-        !userData.name_kana
-      ) {
-        showAlert("設定エラー", "ユーザ情報を登録してください");
-        return;
-      }
-
-      //現在の月のシフトデータを取得
-      const currentMonthShifts = shiftData.filter(
-        (shift) =>
-          shift.year === currentDate.getFullYear() &&
-          shift.month === currentDate.getMonth() + 1
-      );
-
-      //科目名のリストを取得（重複を排除）
-      const uniqueSubjectNames = Array.from(
-        new Set(currentMonthShifts.map((shift) => shift.classname))
-      );
-
-      setSubjectNames(uniqueSubjectNames); //科目名リストを状態に保存
-      setIsExportDialogOpen(true); //ダイアログを開く
-    } catch (error) {
-      console.error("エラーが発生しました:", error);
-      showAlert("システムエラー", "エラーが発生しました。後でもう一度お試しください。");
-    }
-  };
-
   return (
     <div className="w-full h-full flex flex-col items-center justify-center padding lg:ml-20 mr-20">
-      <div className="flex items-center justify-between mb-4 w-full max-w-[1200px]">
+      <div className="flex items-center justify-center mb-4 w-full max-w-[1200px]">
         <div className="flex items-center space-x-4">
           <button
             onClick={handlePrevMonth}
@@ -277,13 +216,6 @@ export default function Calendar() {
             次の月
           </button>
         </div>
-
-        <button
-          onClick={handleOpenExportDialog}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
-        >
-          Excel出力
-        </button>
       </div>
 
       <div className="grid grid-cols-7 gap-1 text-center w-full max-w-[1200px]">
@@ -370,15 +302,8 @@ export default function Calendar() {
         saveShiftsToLocalStorage={saveShiftsToLocalStorage}
       />
 
-      <ExportDialog
-        isExportDialogOpen={isExportDialogOpen}
-        subjectNames={subjectNames}
-        handleExportSubject={handleExportSubject}
-        handleCloseExportDialog={handleCloseExportDialog}
-        shiftData={shiftData}
-        currentDate={currentDate}
-        setIsExportDialogOpen={setIsExportDialogOpen}
-      />
+      {/* 月間統計コンポーネントを追加 */}
+      <MonthlyStats currentDate={currentDate} shiftData={shiftData} />
     </div>
   );
 }

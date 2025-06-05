@@ -146,23 +146,6 @@ export const useWorkInfo = () => {
     };
   };
 
-  //新しいスケジュールを追加する関数
-  const addSchedule = () => {
-    setWorkInfo((prev) => ({
-      ...prev,
-      schedules: [
-        ...prev.schedules,
-        { day: "", periods: ["1限"], startTime: "", endTime: "", breakTime: "" },
-      ],
-    }));
-  };
-
-  //スケジュールを削除する関数
-  const removeSchedule = (index: number) => {
-    const updatedSchedules = workInfo.schedules.filter((_, i) => i !== index);
-    setWorkInfo((prev) => ({ ...prev, schedules: updatedSchedules }));
-  };
-
   //時限から開始時刻、終了時刻、休憩時間を計算する関数
   const calculateStartEndTimes = (periods: string[]) => {
     if (periods.length === 0) {
@@ -337,6 +320,12 @@ export const useWorkInfo = () => {
     });
   }, []);
 
+  //スケジュールを削除する関数
+  const removeSchedule = (index: number) => {
+    const updatedSchedules = workInfo.schedules.filter((_, i) => i !== index);
+    setWorkInfo((prev) => ({ ...prev, schedules: updatedSchedules }));
+  };
+
   //フックが返すオブジェクト
   return {
     workInfo, //業務情報の状態
@@ -353,7 +342,6 @@ export const useWorkInfo = () => {
     handleScheduleChange, //スケジュールの曜日や時限変更時のハンドラー
     handleScheduleTimeEdit, //スケジュールの時刻編集時のハンドラー
     saveScheduleTimeEdit, //スケジュール編集を保存する関数
-    addSchedule, //新しいスケジュールを追加する関数
     removeSchedule, //スケジュールを削除する関数
     calculateWorkingTime, //勤務時間を計算する関数
     calculateStartEndTimes, //時限から開始時刻、終了時刻、休憩時間を計算する関数

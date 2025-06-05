@@ -44,7 +44,6 @@ interface WorkDialogProps {
     field: "startTime" | "endTime" | "breakTime",
     value: string
   ) => void;
-  addSchedule: () => void;
   removeSchedule: (index: number) => void;
   calculateStartEndTimes: (periods: string[]) => {
     startTime: string;
@@ -73,7 +72,6 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
   handleWorkChange,
   handleScheduleChange,
   handleScheduleTimeEdit,
-  addSchedule,
   removeSchedule,
   calculateStartEndTimes,
   calculateWorkingTime,
@@ -526,14 +524,6 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
               </div>
             );
           })}
-          {!checkWorkIdExists() && (
-            <button
-              onClick={addSchedule}
-              className="text-primary hover:text-primary/80 transition-colors"
-            >
-              + スケジュールを追加
-            </button>
-          )}
         </div>
         <div className="flex justify-end mt-4 space-x-2">
           <button

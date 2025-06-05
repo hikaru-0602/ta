@@ -36,7 +36,6 @@ export default function Work() {
     handleScheduleTimeEdit,
     saveScheduleTimeEdit,
     fetchWorkDataFromFirestore,
-    addSchedule,
     removeSchedule,
     calculateWorkingTime,
     calculateStartEndTimes,
@@ -360,7 +359,6 @@ export default function Work() {
           handleWorkChange={handleWorkChange}
           handleScheduleChange={handleScheduleChange}
           handleScheduleTimeEdit={handleScheduleTimeEdit}
-          addSchedule={addSchedule}
           removeSchedule={removeSchedule}
           calculateStartEndTimes={calculateStartEndTimes}
           calculateWorkingTime={calculateWorkingTime}
