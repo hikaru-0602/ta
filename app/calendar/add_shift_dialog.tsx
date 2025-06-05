@@ -208,10 +208,18 @@ export default function AddShiftDialog({
                   key={index}
                   className="mb-2 flex justify-between items-center"
                 >
-                  <div>
-                    {shift.starttime}~{shift.endtime} {shift.label}
+                  <div className="flex-1 mr-2 min-w-0">
+                    <span className="block text-sm">
+                      {shift.starttime}~{shift.endtime}
+                    </span>
+                    <span
+                      className="block text-sm font-medium truncate"
+                      title={shift.label || "（ラベルなし）"}
+                    >
+                      {shift.label || "（ラベルなし）"}
+                    </span>
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-2 flex-shrink-0">
                     {" "}
                     {/* ボタンを右端に配置 */}
                     <button
@@ -222,7 +230,7 @@ export default function AddShiftDialog({
                           setIsEditDialogOpen
                         )
                       }
-                      className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                      className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-xs"
                     >
                       編集
                     </button>
@@ -238,7 +246,7 @@ export default function AddShiftDialog({
                           saveShiftsToLocalStorage
                         )
                       }
-                      className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                      className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs"
                     >
                       削除
                     </button>
@@ -271,8 +279,18 @@ export default function AddShiftDialog({
                   )
               )
               .map((work, index) => (
-                <li key={index} className="mb-2 flex justify-between">
-                  {work.starttime}~{work.endtime} {work.label}
+                <li key={index} className="mb-2 flex justify-between items-center">
+                  <div className="flex-1 mr-2 min-w-0">
+                    <span className="block text-sm">
+                      {work.starttime}~{work.endtime}
+                    </span>
+                    <span
+                      className="block text-sm font-medium truncate"
+                      title={work.label || "（ラベルなし）"}
+                    >
+                      {work.label || "（ラベルなし）"}
+                    </span>
+                  </div>
                   <button
                     onClick={() =>
                       handleAddShift(
@@ -283,7 +301,7 @@ export default function AddShiftDialog({
                         saveShiftsToLocalStorage
                       )
                     }
-                    className="ml-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs flex-shrink-0"
                   >
                     追加
                   </button>

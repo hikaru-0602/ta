@@ -91,7 +91,7 @@ export default function EditShiftDialog({
       >
         <div className="bg-white dark:bg-gray-800 p-6 rounded shadow-lg max-w-md w-full">
           <h2 className="text-lg sm:text-xl font-bold mb-4">
-            {editingShift.label}シフトを編集
+            {editingShift.label || "（ラベルなし）"}シフトを編集
           </h2>
           <form>
             <div className="mb-4">

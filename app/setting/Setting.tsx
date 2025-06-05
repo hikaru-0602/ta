@@ -257,19 +257,28 @@ export default function Work() {
                     key={index}
                     className="p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-md hover:shadow-lg transition-shadow"
                   >
-                    <div className="flex justify-between items-center">
-                      <div className="flex-1">
-                        <p className="text-lg font-bold text-gray-800 dark:text-gray-200">
-                          ラベル: {work.label}
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1 min-w-0 mr-4">
+                        <p className="text-lg font-bold text-gray-800 dark:text-gray-200 break-words">
+                          <span className="text-sm text-gray-500 dark:text-gray-400">ラベル:</span>{" "}
+                          <span title={work.label || "（ラベルなし）"}>
+                            {work.label || "（ラベルなし）"}
+                          </span>
                         </p>
-                        <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
-                          科目名: {work.classname}
+                        <p className="text-sm font-bold text-gray-800 dark:text-gray-200 truncate">
+                          <span className="text-gray-500 dark:text-gray-400">科目名:</span>{" "}
+                          <span title={work.classname || "（未設定）"}>
+                            {work.classname || "（未設定）"}
+                          </span>
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           業務内容: {work.category}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          教員名: {work.teacher}
+                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                          <span>教員名:</span>{" "}
+                          <span title={work.teacher || "（未設定）"}>
+                            {work.teacher || "（未設定）"}
+                          </span>
                         </p>
                         <div className="flex space-x-4">
                           <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -295,35 +304,37 @@ export default function Work() {
                           </p>
                         </div>
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setId(work.id);
-                          setIsDialogOpen(true);
-                        }}
-                        className="text-blue-500 hover:text-blue-700"
-                      >
-                        編集
-                      </button>
-                      <button
-                        onClick={() => handleDeleteWork(index)}
-                        className="text-red-500 hover:text-red-700 ml-4"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-6 w-6"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
+                      <div className="flex flex-col space-y-2 flex-shrink-0">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setId(work.id);
+                            setIsDialogOpen(true);
+                          }}
+                          className="text-blue-500 hover:text-blue-700 text-sm"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
+                          編集
+                        </button>
+                        <button
+                          onClick={() => handleDeleteWork(index)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </li>
                 ))}

@@ -158,7 +158,6 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
           <input
             type="text"
             name="label"
-            maxLength={12}
             value={workInfo.label || ""}
             onChange={handleWorkChange}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
