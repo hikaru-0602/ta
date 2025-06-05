@@ -222,16 +222,16 @@ export default function EditShiftDialog({
       {isEditDialogOpen &&
         editingShift && (
           <div
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
             onClick={backDialog} //ダイアログの外側をクリックしたら閉じる
           >
-            <div className="bg-white dark:bg-gray-800 p-6 rounded shadow-lg max-w-md w-full">
-              <h2 className="text-lg sm:text-xl font-bold mb-4">
+            <div className="bg-card text-card-foreground p-6 rounded-lg shadow-lg max-w-md w-full border border-border">
+              <h2 className="text-lg sm:text-xl font-bold mb-4 text-foreground">
                 {editingShift.label || "（ラベルなし）"}シフトを編集
               </h2>
               <form>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">科目名</label>
+                  <label className="block text-sm font-medium mb-1 text-foreground">科目名</label>
                   <input
                     type="text"
                     value={editingShift.classname} //現在の科目名を表示
@@ -241,12 +241,12 @@ export default function EditShiftDialog({
                         classname: e.target.value, //科目名を更新
                       })
                     }
-                    className="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full p-2 border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
                   />
                 </div>
                 <div className="flex space-x-4 items-end">
                   <div className="mb-4">
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-sm font-medium mb-1 text-foreground">
                       業務内容
                     </label>
                     <select
@@ -257,14 +257,14 @@ export default function EditShiftDialog({
                           category: e.target.value,
                         })
                       }
-                      className="w-full p-2 border rounded h-[40px] bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white" // 高さを指定
+                      className="w-full p-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors h-[40px]"
                     >
                       <option value="(授業)">(授業)</option>
                       <option value="(準備等)">(準備等)</option>
                     </select>
                   </div>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-sm font-medium mb-1 text-foreground">
                       担当教員
                     </label>
                     <input
@@ -276,12 +276,12 @@ export default function EditShiftDialog({
                           teacher: e.target.value,
                         })
                       }
-                      className="w-full p-2 border rounded h-[40px] bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white" // 高さを指定
+                      className="w-full p-2 border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors h-[40px]"
                     />
                   </div>
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">開始時間</label>
+                  <label className="block text-sm font-medium mb-1 text-foreground">開始時間</label>
                   <div className="flex items-center space-x-2">
                     <input
                       type="text"
@@ -306,9 +306,9 @@ export default function EditShiftDialog({
                         }`;
                         setEditingShift({ ...editingShift, starttime: newTime });
                       }}
-                      className="w-12 p-1 border rounded text-center bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="w-12 p-1 border border-input rounded-md text-center bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
                     />
-                    <span>:</span>
+                    <span className="text-foreground">:</span>
                     <input
                       type="text"
                       maxLength={2}
@@ -332,12 +332,12 @@ export default function EditShiftDialog({
                         }:${formattedMinute}`;
                         setEditingShift({ ...editingShift, starttime: newTime });
                       }}
-                      className="w-12 p-1 border rounded text-center bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="w-12 p-1 border border-input rounded-md text-center bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
                     />
                   </div>
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">終了時間</label>
+                  <label className="block text-sm font-medium mb-1 text-foreground">終了時間</label>
                   <div className="flex items-center space-x-2">
                     <input
                       type="text"
@@ -362,9 +362,9 @@ export default function EditShiftDialog({
                         }`;
                         setEditingShift({ ...editingShift, endtime: newTime });
                       }}
-                      className="w-12 p-1 border rounded text-center bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="w-12 p-1 border border-input rounded-md text-center bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
                     />
-                    <span>:</span>
+                    <span className="text-foreground">:</span>
                     <input
                       type="text"
                       maxLength={2}
@@ -388,12 +388,12 @@ export default function EditShiftDialog({
                         }:${formattedMinute}`;
                         setEditingShift({ ...editingShift, endtime: newTime });
                       }}
-                      className="w-12 p-1 border rounded text-center bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="w-12 p-1 border border-input rounded-md text-center bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
                     />
                   </div>
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium mb-1 text-foreground">
                     休憩時間(分)
                   </label>
                   <div className="flex items-center space-x-2">
@@ -408,7 +408,7 @@ export default function EditShiftDialog({
                           ),
                         })
                       }
-                      className="px-2 py-1 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded hover:bg-gray-400 dark:hover:bg-gray-500 transition"
+                      className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
                     >
                       -10分
                     </button>
@@ -434,7 +434,7 @@ export default function EditShiftDialog({
                           breaktime: Number(formattedBreakTime),
                         });
                       }}
-                      className="w-12 p-1 border rounded text-center bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="w-12 p-1 border border-input rounded-md text-center bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
                     />
                     <button
                       type="button"
@@ -444,23 +444,23 @@ export default function EditShiftDialog({
                           breaktime: Number(editingShift.breaktime || 0) + 10,
                         })
                       }
-                      className="px-2 py-1 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded hover:bg-gray-400 dark:hover:bg-gray-500 transition"
+                      className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
                     >
                       +10分
                     </button>
                   </div>
                 </div>
               </form>
-              <div className="flex justify-end">
+              <div className="flex justify-end space-x-2">
                 <button
                   onClick={() => setIsEditDialogOpen(false)} //編集ダイアログを閉じる
-                  className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 mr-2"
+                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
                 >
                   キャンセル
                 </button>
                 <button
                   onClick={handleSaveWithValidation} //週の実働時間チェック付きの保存処理
-                  className="px-4 py-2 text-sm sm:text-base bg-blue-500 text-white rounded hover:bg-blue-600"
+                  className="px-4 py-2 text-sm sm:text-base bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
                 >
                   保存
                 </button>
