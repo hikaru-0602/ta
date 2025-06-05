@@ -1,8 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { WorkData, Shift } from "../types"; //業務データの型をインポート
 import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/lib/firebase";
 import { getAuth } from "firebase/auth";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 //時間をDateオブジェクトに変換する関数
 export const parseTime = (time: string): Date => {
@@ -271,142 +279,213 @@ export default function AddShiftDialog({
   setEditingShift,
   setIsEditDialogOpen,
 }: AddShiftDialogProps) {
+  // アラートダイアログの状態管理
+  const [alertDialogOpen, setAlertDialogOpen] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+
+  // シフト追加処理をラップして、エラー時にAlertDialogを表示
+  const handleAddShiftWithAlert = (work: WorkData) => {
+    if (!selectedDate) return;
+
+    // 週の勤務時間チェック（8時間制限）
+    const { totalMinutes, formattedTime } = calculateWeeklyWorkTimeWithNewShift(
+      selectedDate,
+      shiftData,
+      work
+    );
+
+    if (totalMinutes > 8 * 60) { // 8時間 = 480分
+      setAlertTitle("週の勤務時間超過");
+      setAlertMessage(`週の勤務時間が8時間を超えます。\n現在の週の合計予定時間: ${formattedTime}\nシフトを追加できません。`);
+      setAlertDialogOpen(true);
+      return;
+    }
+
+    //選択された日付のシフトを取得
+    const shiftsForDate: Shift[] = shiftData.filter(
+      (shift) =>
+        shift.year === selectedDate.getFullYear() &&
+        shift.month === selectedDate.getMonth() + 1 &&
+        shift.day === selectedDate.getDate()
+    );
+
+    //新しいシフトが既存のシフトと時間が重複しているか確認
+    const isOverlapping = shiftsForDate.some((shift) => {
+      const newStart = parseTime(work.starttime);
+      const newEnd = parseTime(work.endtime);
+      const existingStart = parseTime(shift.starttime);
+      const existingEnd = parseTime(shift.endtime);
+
+      return (
+        (newStart >= existingStart && newStart < existingEnd) ||
+        (newEnd > existingStart && newEnd <= existingEnd) ||
+        (newStart <= existingStart && newEnd >= existingEnd)
+      );
+    });
+
+    if (isOverlapping) {
+      setAlertTitle("時間重複エラー");
+      setAlertMessage("このシフトは既存のシフトと時間が重複しています。");
+      setAlertDialogOpen(true);
+      return;
+    }
+
+    //1日のシフト数が2件以上の場合はエラー
+    const shiftCountForDate = shiftsForDate.length;
+    if (shiftCountForDate >= 2) {
+      setAlertTitle("シフト数制限");
+      setAlertMessage("働き過ぎ");
+      setAlertDialogOpen(true);
+      return;
+    }
+
+    // エラーがない場合は元のhandleAddShift関数を呼び出し
+    handleAddShift(
+      work,
+      selectedDate,
+      shiftData,
+      setShiftData,
+      saveShiftsToLocalStorage
+    );
+  };
+
   const backDialog = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       closeDialog();
     }
   };
+
   return (
-    isDialogOpen && (
-      <div
-        className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center"
-        onClick={backDialog}
-      >
-        <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded shadow-lg w-full max-w-xs sm:max-w-md">
-          <h2 className="text-xl font-bold mb-4">仕事リスト</h2>
-          <h3 className="text-lg font-semibold mb-2">-- 追加 --</h3>
-          <ul>
-            {shiftData
-              .filter(
-                (shift) =>
-                  selectedDate &&
-                  shift.year === selectedDate.getFullYear() &&
-                  shift.month === selectedDate.getMonth() + 1 &&
-                  shift.day === selectedDate.getDate()
-              )
-              .map((shift, index) => (
-                <li
-                  key={index}
-                  className="mb-2 flex justify-between items-center"
-                >
-                  <div className="flex-1 mr-2 min-w-0">
-                    <span className="block text-sm">
-                      {shift.starttime}~{shift.endtime}
-                    </span>
-                    <span
-                      className="block text-sm font-medium truncate"
-                      title={shift.label || "（ラベルなし）"}
-                    >
-                      {shift.label || "（ラベルなし）"}
-                    </span>
-                  </div>
-                  <div className="flex space-x-2 flex-shrink-0">
-                    {" "}
-                    {/* ボタンを右端に配置 */}
-                    <button
-                      onClick={() =>
-                        handleEditShift(
-                          shift,
-                          setEditingShift,
-                          setIsEditDialogOpen
-                        )
-                      }
-                      className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-xs"
-                    >
-                      編集
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleRemoveShift(
-                          shift.id,
-                          shift.year,
-                          shift.month,
-                          shift.day,
-                          shiftData,
-                          setShiftData,
-                          saveShiftsToLocalStorage
-                        )
-                      }
-                      className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs"
-                    >
-                      削除
-                    </button>
-                  </div>
-                </li>
-              ))}
-          </ul>
-          <h3 className="text-lg font-semibold mt-4 mb-2">-- 一覧 --</h3>
-          <ul>
-            {filteredWorkData
-              .filter(
-                (work) =>
-                  !shiftData.some(
-                    (shift) =>
-                      shift.label === work.label &&
-                      shift.id === work.id &&
-                      selectedDate &&
-                      shift.year === selectedDate.getFullYear() &&
-                      shift.month === selectedDate.getMonth() + 1 &&
-                      shift.day === selectedDate.getDate()
-                    /*
-                      shift.classname === work.classname &&
-                      shift.starttime === work.starttime &&
-                      shift.endtime === work.endtime &&
-                      shift.label === work.label &&
-                      selectedDate &&
-                      shift.month === selectedDate.getMonth() + 1 &&
-                      shift.day === selectedDate.getDate()
-                    */
-                  )
-              )
-              .map((work, index) => (
-                <li key={index} className="mb-2 flex justify-between items-center">
-                  <div className="flex-1 mr-2 min-w-0">
-                    <span className="block text-sm">
-                      {work.starttime}~{work.endtime}
-                    </span>
-                    <span
-                      className="block text-sm font-medium truncate"
-                      title={work.label || "（ラベルなし）"}
-                    >
-                      {work.label || "（ラベルなし）"}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() =>
-                      handleAddShift(
-                        work,
-                        selectedDate,
-                        shiftData,
-                        setShiftData,
-                        saveShiftsToLocalStorage
-                      )
-                    }
-                    className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs flex-shrink-0"
+    <>
+      {/* アラートダイアログ */}
+      <AlertDialog open={alertDialogOpen} onOpenChange={setAlertDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{alertTitle}</AlertDialogTitle>
+            <AlertDialogDescription className="whitespace-pre-line">
+              {alertMessage}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogAction onClick={() => setAlertDialogOpen(false)}>
+            OK
+          </AlertDialogAction>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* メインダイアログ */}
+      {isDialogOpen && (
+        <div
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center"
+          onClick={backDialog}
+        >
+          <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded shadow-lg w-full max-w-xs sm:max-w-md">
+            <h2 className="text-xl font-bold mb-4">仕事リスト</h2>
+            <h3 className="text-lg font-semibold mb-2">-- 追加 --</h3>
+            <ul>
+              {shiftData
+                .filter(
+                  (shift) =>
+                    selectedDate &&
+                    shift.year === selectedDate.getFullYear() &&
+                    shift.month === selectedDate.getMonth() + 1 &&
+                    shift.day === selectedDate.getDate()
+                )
+                .map((shift, index) => (
+                  <li
+                    key={index}
+                    className="mb-2 flex justify-between items-center"
                   >
-                    追加
-                  </button>
-                </li>
-              ))}
-          </ul>
-          <button
-            onClick={closeDialog}
-            className="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-          >
-            閉じる
-          </button>
+                    <div className="flex-1 mr-2 min-w-0">
+                      <span className="block text-sm">
+                        {shift.starttime}~{shift.endtime}
+                      </span>
+                      <span
+                        className="block text-sm font-medium truncate"
+                        title={shift.label || "（ラベルなし）"}
+                      >
+                        {shift.label || "（ラベルなし）"}
+                      </span>
+                    </div>
+                    <div className="flex space-x-2 flex-shrink-0">
+                      <button
+                        onClick={() =>
+                          handleEditShift(
+                            shift,
+                            setEditingShift,
+                            setIsEditDialogOpen
+                          )
+                        }
+                        className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-xs"
+                      >
+                        編集
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleRemoveShift(
+                            shift.id,
+                            shift.year,
+                            shift.month,
+                            shift.day,
+                            shiftData,
+                            setShiftData,
+                            saveShiftsToLocalStorage
+                          )
+                        }
+                        className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs"
+                      >
+                        削除
+                      </button>
+                    </div>
+                  </li>
+                ))}
+            </ul>
+            <h3 className="text-lg font-semibold mt-4 mb-2">-- 一覧 --</h3>
+            <ul>
+              {filteredWorkData
+                .filter(
+                  (work) =>
+                    !shiftData.some(
+                      (shift) =>
+                        shift.label === work.label &&
+                        shift.id === work.id &&
+                        selectedDate &&
+                        shift.year === selectedDate.getFullYear() &&
+                        shift.month === selectedDate.getMonth() + 1 &&
+                        shift.day === selectedDate.getDate()
+                    )
+                )
+                .map((work, index) => (
+                  <li key={index} className="mb-2 flex justify-between items-center">
+                    <div className="flex-1 mr-2 min-w-0">
+                      <span className="block text-sm">
+                        {work.starttime}~{work.endtime}
+                      </span>
+                      <span
+                        className="block text-sm font-medium truncate"
+                        title={work.label || "（ラベルなし）"}
+                      >
+                        {work.label || "（ラベルなし）"}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleAddShiftWithAlert(work)}
+                      className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs flex-shrink-0"
+                    >
+                      追加
+                    </button>
+                  </li>
+                ))}
+            </ul>
+            <button
+              onClick={closeDialog}
+              className="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+            >
+              閉じる
+            </button>
+          </div>
         </div>
-      </div>
-    )
+      )}
+    </>
   );
 }

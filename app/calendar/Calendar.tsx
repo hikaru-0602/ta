@@ -293,11 +293,6 @@ export default function Calendar() {
     setIsDialogOpen(true); //ダイアログを開く
   };
 
-  // 今週の勤務時間を表示するボタンのハンドラー
-  const handleShowCurrentWeekTime = () => {
-    handleShowWeeklyWorkTime(today);
-  };
-
   const closeDialog = () => {
     setIsDialogOpen(false); //ダイアログを閉じる
   };
@@ -432,12 +427,6 @@ export default function Calendar() {
 
       {/* ボタンエリア */}
       <div className="flex space-x-4 mt-6">
-        <button
-          onClick={handleShowCurrentWeekTime}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition font-bold"
-        >
-          今週の勤務時間
-        </button>
         <button
           onClick={handleOpenExportDialog}
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition font-bold"

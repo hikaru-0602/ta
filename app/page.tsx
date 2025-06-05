@@ -5,12 +5,41 @@ import Setting from "./setting/Setting";
 import { useAuth } from "./firebase/context/auth";
 import { login, logout } from "./firebase/lib/auth";
 import { useLoginContext } from "./firebase/context/LoginContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const user = useAuth();
   const { setIsLoginTriggered } = useLoginContext();
   const [isLoading, setIsLoading] = useState(false);
+
+  // システムのダークモード設定を監視
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const handleSystemThemeChange = (e: MediaQueryListEvent) => {
+      // システム設定に応じてダークモードを自動切り替え
+      if (e.matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+
+    // 初期設定
+    if (mediaQuery.matches) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+    // システム設定の変更を監視
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+
+    // クリーンアップ
+    return () => {
+      mediaQuery.removeEventListener('change', handleSystemThemeChange);
+    };
+  }, []);
 
   const handleLogin = async () => {
     if (isLoading) return; // 既にローディング中の場合は何もしない
