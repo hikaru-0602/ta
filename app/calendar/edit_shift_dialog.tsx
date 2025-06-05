@@ -18,7 +18,7 @@ export const handleSaveEditedShift = (
   editingShift: Shift, //編集されたシフトデータ
   shiftData: Shift[], //既存のシフトデータ
   setShiftData: (shift: Shift[]) => void, //シフトデータを更新する関数
-  saveShiftsToLocalStorage: (shift: Shift[]) => void, //シフトデータをlocalStorageに保存する関数
+  saveShiftsToLocalStorage: (shift: Shift[]) => void, //シフトデータをlocalStorageに保存する関数（互換性のため残す）
   setIsEditDialogOpen: (isOpen: boolean) => void //編集ダイアログを閉じる関数
 ) => {
   console.log("handleSaveEditedShift called"); //関数が呼び出されたことを確認するためのログ
@@ -41,7 +41,7 @@ export const handleSaveEditedShift = (
     saveWorkDataToFirestore(uid, editingShift);
   }
   console.log("Updated Shifts:", updatedShifts); //更新後のシフトデータをログに出力
-  saveShiftsToLocalStorage(updatedShifts); //localStorageに保存
+  // リアルタイム監視により自動保存されるため、localStorageへの保存は不要
   setIsEditDialogOpen(false); //編集ダイアログを閉じる
 };
 

@@ -1,8 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { WorkData } from "../types";
-import { collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
+import { collection, doc, getDocs, setDoc, deleteDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/lib/firebase";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 //業務情報を管理するためのカスタムフック
 export const useWorkInfo = () => {
@@ -52,8 +52,41 @@ export const useWorkInfo = () => {
   //データ更新のフラグを管理するための状態を定義
   const [updateFlag, setUpdateFlag] = useState(false);
 
+  // 認証状態を監視してからFirestoreの業務データをリアルタイムで取得
+  useEffect(() => {
+    const auth = getAuth();
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // ユーザーがログインしている場合のみデータ監視を開始
+        const unsubscribeSnapshot = onSnapshot(
+          collection(db, `users/${user.uid}/works`),
+          (snapshot) => {
+            const works = snapshot.docs.map((doc) => ({
+              ...doc.data(),
+              id: Number(doc.data().id) || Number(doc.id)
+            })) as WorkData[];
+            setWorkData(works);
+            console.log("業務データをFirestoreから取得しました。", works);
+          },
+          (error) => {
+            console.error("業務データの監視エラー:", error);
+          }
+        );
+
+        // 認証状態が変更されたときにFirestore監視を停止
+        return unsubscribeSnapshot;
+      } else {
+        // ログアウト時は初期状態に戻す
+        setWorkData([]);
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
+
   //時限ごとの開始時刻と終了時刻を定義
-  const periodTimes: Record<"1限" | "2限" | "3限" | "4限" | "5限" | "6限", { start: string; end: string }> = {
+  const periodTimes = {
     "1限": { start: "09:00", end: "10:30" },
     "2限": { start: "10:40", end: "12:10" },
     "3限": { start: "13:10", end: "14:40" },
@@ -62,64 +95,30 @@ export const useWorkInfo = () => {
     "6限": { start: "18:10", end: "19:40" },
   };
 
-  //業務情報の入力フォームの値変更時に呼び出される関数
+  //業務情報の入力フォーム変更時のハンドラー
   const handleWorkChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setWorkInfo((prev) => ({ ...prev, [name]: value }));
   }, []);
 
-  //スケジュールの曜日や時限を変更する関数
+  //スケジュールの曜日や時限変更時のハンドラー
   const handleScheduleChange = useCallback((
     index: number,
     field: "day" | "periods",
-    value: string | string[],
-    editing: boolean = false
-  ) => {
-    const updatedSchedules = [...workInfo.schedules];
-
-    // indexが有効かどうかを確認
-    if (!updatedSchedules[index]) {
-      console.error(`Invalid index: ${index}`);
-      return;
-    }
-
-    if (field === "day" && typeof value === "string") {
-      updatedSchedules[index][field] = value;
-    } else if (field === "periods" && Array.isArray(value)) {
-      // 時限を並び替える処理
-      const periodOrder = ["1限", "2限", "3限", "4限", "5限", "6限"];
-      const sortedPeriods = value.sort((a, b) => periodOrder.indexOf(a) - periodOrder.indexOf(b));
-      updatedSchedules[index][field] = sortedPeriods;
-
-      // 時限が変更された場合、休憩時間を再計算
-      if (editing) {
-        const { startTime, endTime, breakTime } = calculateStartEndTimes(sortedPeriods);
-        updatedSchedules[index].startTime = startTime;
-        updatedSchedules[index].endTime = endTime;
-        updatedSchedules[index].breakTime = `${breakTime}`; // 休憩時間を文字列として設定
-      }
-    }
-
-    setWorkInfo((prev) => ({ ...prev, schedules: updatedSchedules }));
-  }, [workInfo.schedules]);
-
-  //スケジュールの開始時刻、終了時刻、休憩時間を編集する関数
-  const handleScheduleTimeEdit = useCallback((
-    index: number,
-    field: "startTime" | "endTime" | "breakTime",
-    value: string
+    value: string | string[]
   ) => {
     setWorkInfo((prev) => {
-      const updatedSchedules = prev.schedules.map((schedule, i) =>
-        i === index
-          ? {
-              ...schedule,
-              [field]: field === "breakTime" ? String(Math.max(0, Number(value))) : value,
-            }
-          : schedule
-      );
+      const updatedSchedules = [...prev.schedules];
+      updatedSchedules[index] = { ...updatedSchedules[index], [field]: value };
+      return { ...prev, schedules: updatedSchedules };
+    });
+  }, []);
 
-      //console.log("Updated schedules:", updatedSchedules); // デバッグログ
+  //スケジュールの時刻編集時のハンドラー
+  const handleScheduleTimeEdit = useCallback((index: number, field: "startTime" | "endTime" | "breakTime", value: string) => {
+    setWorkInfo((prev) => {
+      const updatedSchedules = [...prev.schedules];
+      updatedSchedules[index] = { ...updatedSchedules[index], [field]: value };
       return { ...prev, schedules: updatedSchedules };
     });
   }, []);
@@ -200,22 +199,10 @@ export const useWorkInfo = () => {
     await setDoc(ref, work, { merge: true });
   };
 
-  //業務データをFirestoreから取得する関数
+  //業務データをFirestoreから取得する関数（互換性のため残すが、リアルタイム監視により自動取得）
   const fetchWorkDataFromFirestore = useCallback(async () => {
-    const uid = getAuth().currentUser?.uid;
-    if (!uid) return;
-    const worksRef = collection(db, `users/${uid}/works`);
-    const querySnapshot = await getDocs(worksRef);
-    const works = querySnapshot.docs.map((doc) => doc.data());
-    if (works.length > 0) {
-      // 必要に応じて型変換
-      setWorkData(works as WorkData[]);
-      // ローカルストレージに保存
-      localStorage.setItem("workData", JSON.stringify(works));
-      console.log("業務データをFirestoreから取得しました。", works);
-    } else {
-      console.log("No work data found in Firestore.");
-    }
+    // リアルタイム監視により自動で最新データが取得されるため、何もしない
+    // 既存コードとの互換性のため関数は残す
   }, []);
 
   //新しい業務を追加または更新する関数
@@ -293,9 +280,6 @@ export const useWorkInfo = () => {
 
     setWorkData(updatedWorkData);
 
-    // ローカルストレージに保存
-    localStorage.setItem("workData", JSON.stringify(updatedWorkData));
-
     // 業務情報を初期化
     initworkInfo();
     setIsDialogOpen(false);
@@ -314,9 +298,6 @@ export const useWorkInfo = () => {
     const updatedWorkData = workData.filter((_, i) => i !== index);
     setWorkData(updatedWorkData);
 
-    // ローカルストレージを更新
-    localStorage.setItem("workData", JSON.stringify(updatedWorkData));
-
     // Firestoreからも削除
     const uid = getAuth().currentUser?.uid;
     if (uid && deletedWork.id !== undefined) {
@@ -327,12 +308,10 @@ export const useWorkInfo = () => {
     setUpdateFlag((prev) => !prev);
   };
 
-  //ローカルストレージから業務データを読み込む関数
+  //ローカルストレージから業務データを読み込む関数（互換性のため残すが、リアルタイム監視により自動取得）
   const loadWorkDataFromLocalStorage = useCallback(() => {
-    const savedData = localStorage.getItem("workData");
-    if (savedData) {
-      setWorkData(JSON.parse(savedData));
-    }
+    // リアルタイム監視により自動で最新データが取得されるため、何もしない
+    // 既存コードとの互換性のため関数は残す
   }, []);
 
   //idを生成する関数
@@ -378,10 +357,10 @@ export const useWorkInfo = () => {
     removeSchedule, //スケジュールを削除する関数
     calculateWorkingTime, //勤務時間を計算する関数
     calculateStartEndTimes, //時限から開始時刻、終了時刻、休憩時間を計算する関数
-    fetchWorkDataFromFirestore, //業務データをFirestoreから取得する関数
+    fetchWorkDataFromFirestore, //業務データをFirestoreから取得する関数（互換性のため残す）
     addWork, //新しい業務を追加または更新する関数
     handleDeleteWork, //業務データを削除する関数
-    loadWorkDataFromLocalStorage, //ローカルストレージから業務データを読み込む関数
+    loadWorkDataFromLocalStorage, //ローカルストレージから業務データを読み込む関数（互換性のため残す）
     periodTimes, //時限ごとの開始時刻と終了時刻
     generateUniqueId, //ユニークなIDを生成する関数
     initworkInfo, //業務情報を初期化する関数

@@ -12,6 +12,85 @@ export const parseTime = (time: string): Date => {
   return date; //変換したDateオブジェクトを返す
 };
 
+// 時刻文字列（HH:MM）を分に変換する関数
+const timeToMinutes = (time: string): number => {
+  if (!time || !time.includes(':')) return 0;
+  const [hours, minutes] = time.split(':').map(Number);
+  if (isNaN(hours) || isNaN(minutes)) return 0;
+  return hours * 60 + minutes;
+};
+
+// 分を時間:分の形式に変換する関数
+const minutesToTimeFormat = (totalMinutes: number): string => {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours}時間${minutes}分`;
+};
+
+// シフト1件の実働時間を計算する関数
+const calculateShiftWorkTime = (shift: Shift): number => {
+  const startMinutes = timeToMinutes(shift.starttime);
+  const endMinutes = timeToMinutes(shift.endtime);
+  const breakMinutes = shift.breaktime || 0;
+
+  // 実働時間 = 終了時刻 - 開始時刻 - 休憩時間
+  const workTimeMinutes = endMinutes - startMinutes - breakMinutes;
+
+  return Math.max(0, workTimeMinutes); // 負の値を防ぐ
+};
+
+// 週の開始日（月曜日）を取得する関数
+const getWeekStart = (date: Date): Date => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // 月曜日を週の開始とする
+  return new Date(d.setDate(diff));
+};
+
+// 週の終了日（日曜日）を取得する関数
+const getWeekEnd = (date: Date): Date => {
+  const weekStart = getWeekStart(date);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  return weekEnd;
+};
+
+// 週の合計勤務時間を計算する関数（新しいシフトを含む）
+const calculateWeeklyWorkTimeWithNewShift = (
+  selectedDate: Date,
+  shiftData: Shift[],
+  newWork: WorkData
+): { totalMinutes: number; formattedTime: string } => {
+  const weekStart = getWeekStart(selectedDate);
+  const weekEnd = getWeekEnd(selectedDate);
+
+  // 週の範囲内の既存シフトデータを取得
+  const weeklyShifts = shiftData.filter((shift) => {
+    const shiftDate = new Date(shift.year, shift.month - 1, shift.day);
+    return shiftDate >= weekStart && shiftDate <= weekEnd;
+  });
+
+  // 既存シフトの合計時間を計算
+  let totalMinutes = 0;
+  weeklyShifts.forEach((shift) => {
+    totalMinutes += calculateShiftWorkTime(shift);
+  });
+
+  // 新しいシフトの実働時間を計算
+  const newShiftStartMinutes = timeToMinutes(newWork.starttime);
+  const newShiftEndMinutes = timeToMinutes(newWork.endtime);
+  const newShiftBreakMinutes = newWork.breaktime || 0;
+  const newShiftWorkTime = Math.max(0, newShiftEndMinutes - newShiftStartMinutes - newShiftBreakMinutes);
+
+  // 新しいシフトを含めた合計時間
+  totalMinutes += newShiftWorkTime;
+
+  return {
+    totalMinutes,
+    formattedTime: minutesToTimeFormat(totalMinutes)
+  };
+};
+
 export const saveWorkDataToFirestore = async (uid: string, shift: Shift) => {
   const ref = doc(
     db,
@@ -37,9 +116,21 @@ export const handleAddShift = (
   selectedDate: Date | null, //選択された日付
   shiftData: Shift[], //既存のシフトデータ
   setShiftData: (shifts: Shift[]) => void, //シフトデータを更新する関数
-  saveShiftsToLocalStorage: (shifts: Shift[]) => void //シフトデータをlocalStorageに保存する関数
+  saveShiftsToLocalStorage: (shifts: Shift[]) => void //シフトデータをlocalStorageに保存する関数（互換性のため残す）
 ) => {
   if (!selectedDate) return; //日付が選択されていない場合は処理を終了
+
+  // 週の勤務時間チェック（8時間制限）
+  const { totalMinutes, formattedTime } = calculateWeeklyWorkTimeWithNewShift(
+    selectedDate,
+    shiftData,
+    work
+  );
+
+  if (totalMinutes > 8 * 60) { // 8時間 = 480分
+    alert(`週の勤務時間が8時間を超えます。\n現在の週の合計予定時間: ${formattedTime}\nシフトを追加できません。`);
+    return; //処理を終了
+  }
 
   //選択された日付のシフトを取得
   const shiftsForDate: Shift[] = shiftData.filter(
@@ -100,7 +191,7 @@ export const handleAddShift = (
   }
   const updatedShifts = [...shiftData, newShift];
   setShiftData(updatedShifts); //状態を更新
-  saveShiftsToLocalStorage(updatedShifts); //localStorageに保存
+  // リアルタイム監視により自動保存されるため、localStorageへの保存は不要
 };
 
 //シフトを削除する関数
@@ -111,7 +202,7 @@ export const handleRemoveShift = (
   day: number, //削除するシフトの日
   shiftData: Shift[], //既存のシフトデータ
   setShiftData: (shifts: Shift[]) => void, //シフトデータを更新する関数
-  saveShiftsToLocalStorage: (shifts: Shift[]) => void //シフトデータをlocalStorageに保存する関数
+  saveShiftsToLocalStorage: (shifts: Shift[]) => void //シフトデータをlocalStorageに保存する関数（互換性のため残す）
 ) => {
   //指定されたシフトを除外した新しいシフトデータを作成
   const updatedShifts = shiftData.filter(
@@ -130,7 +221,7 @@ export const handleRemoveShift = (
   }
 
   setShiftData(updatedShifts); //状態を更新
-  saveShiftsToLocalStorage(updatedShifts); //localStorageに保存
+  // リアルタイム監視により自動保存されるため、localStorageへの保存は不要
 };
 
 interface AddShiftDialogProps {

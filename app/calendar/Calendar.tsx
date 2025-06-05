@@ -16,8 +16,8 @@ import ExportDialog, {
 import { useAuth } from "../firebase/context/auth";
 import { Shift, WorkData } from "../types";
 import { useUserInfo } from "../setting/user_setting";
-import { getAuth } from "firebase/auth";
-import { collection, getDocs } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { collection, onSnapshot, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/lib/firebase";
 
 export default function Calendar() {
@@ -53,6 +53,103 @@ export default function Calendar() {
     (_, i) => new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1)
   );
 
+  // 週の開始日（月曜日）を取得する関数
+  const getWeekStart = (date: Date): Date => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // 月曜日を週の開始とする
+    return new Date(d.setDate(diff));
+  };
+
+  // 週の終了日（日曜日）を取得する関数
+  const getWeekEnd = (date: Date): Date => {
+    const weekStart = getWeekStart(date);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    return weekEnd;
+  };
+
+  // 時刻文字列（HH:MM）を分に変換する関数
+  const timeToMinutes = (time: string): number => {
+    if (!time || !time.includes(':')) return 0;
+    const [hours, minutes] = time.split(':').map(Number);
+    if (isNaN(hours) || isNaN(minutes)) return 0;
+    return hours * 60 + minutes;
+  };
+
+  // 分を時間:分の形式に変換する関数
+  const minutesToTimeFormat = (totalMinutes: number): string => {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${hours}時間${minutes}分`;
+  };
+
+  // シフト1件の実働時間を計算する関数
+  const calculateShiftWorkTime = (shift: Shift): number => {
+    const startMinutes = timeToMinutes(shift.starttime);
+    const endMinutes = timeToMinutes(shift.endtime);
+    const breakMinutes = shift.breaktime || 0;
+
+    // 実働時間 = 終了時刻 - 開始時刻 - 休憩時間
+    const workTimeMinutes = endMinutes - startMinutes - breakMinutes;
+
+    console.log(`シフト計算: ${shift.starttime}-${shift.endtime}, 休憩:${breakMinutes}分 → 実働:${workTimeMinutes}分`);
+
+    return Math.max(0, workTimeMinutes); // 負の値を防ぐ
+  };
+
+  // 週の合計勤務時間を計算する関数
+  const calculateWeeklyWorkTime = (date: Date): { totalMinutes: number; formattedTime: string; weekRange: string; details: string[] } => {
+    const weekStart = getWeekStart(date);
+    const weekEnd = getWeekEnd(date);
+
+    // 週の範囲内のシフトデータを取得
+    const weeklyShifts = shiftData.filter((shift) => {
+      const shiftDate = new Date(shift.year, shift.month - 1, shift.day);
+      return shiftDate >= weekStart && shiftDate <= weekEnd;
+    });
+
+    let totalMinutes = 0;
+    const details: string[] = [];
+
+    weeklyShifts.forEach((shift) => {
+      const workTimeMinutes = calculateShiftWorkTime(shift);
+      totalMinutes += workTimeMinutes;
+
+      const formattedWorkTime = minutesToTimeFormat(workTimeMinutes);
+      details.push(`${shift.month}/${shift.day} ${shift.starttime}-${shift.endtime} (休憩${shift.breaktime || 0}分) → ${formattedWorkTime}`);
+    });
+
+    const weekRangeStr = `${weekStart.getMonth() + 1}/${weekStart.getDate()} - ${weekEnd.getMonth() + 1}/${weekEnd.getDate()}`;
+
+    return {
+      totalMinutes,
+      formattedTime: minutesToTimeFormat(totalMinutes),
+      weekRange: weekRangeStr,
+      details
+    };
+  };
+
+  // 日付をタップして週の勤務時間を表示する関数
+  const handleShowWeeklyWorkTime = (date: Date) => {
+    if (!user) {
+      alert("ログインしてください。");
+      return;
+    }
+
+    const { formattedTime, weekRange, details } = calculateWeeklyWorkTime(date);
+
+    let message = `週の合計勤務時間\n期間: ${weekRange}\n合計: ${formattedTime}`;
+
+    if (details.length > 0) {
+      message += '\n\n詳細:\n' + details.join('\n');
+    } else {
+      message += '\n\nこの週にシフトはありません。';
+    }
+
+    alert(message);
+  };
+
   const isHoliday = (date: Date): boolean => {
     //ローカルタイムゾーンの日付を YYYY-MM-DD 形式に変換
     const formattedDate = date
@@ -67,27 +164,72 @@ export default function Calendar() {
   };
   const uid = getAuth().currentUser?.uid;
 
+  // 認証状態を監視してからFirestoreからシフトデータをリアルタイムで取得
   useEffect(() => {
-    // Firestoreからシフトデータを取得してローカルに保存
-    const fetchAndSetShifts = async () => {
-      // ユーザーのUIDを取得
-      const uid = getAuth().currentUser?.uid;
-      if (!uid) return;
-      const shiftsRef = collection(db, `users/${uid}/shifts`);
-      const querySnapshot = await getDocs(shiftsRef);
-      const shifts = querySnapshot.docs.map((doc) => doc.data());
-      setShiftData(shifts as Shift[]);
-      localStorage.setItem("shiftData", JSON.stringify(shifts));
-      console.log(shifts);
-    };
+    const auth = getAuth();
 
-    // workDataもlocalStorageから取得
-    const savedWorkData = localStorage.getItem("workData");
-    const parsedWorkData = savedWorkData ? JSON.parse(savedWorkData) : [];
-    setWorkData(parsedWorkData);
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // ユーザーがログインしている場合のみデータ監視を開始
+        const unsubscribeSnapshot = onSnapshot(
+          collection(db, `users/${user.uid}/shifts`),
+          (snapshot) => {
+            const shifts = snapshot.docs.map((doc) => ({
+              ...doc.data(),
+              id: Number(doc.data().id) || Number(doc.id)
+            })) as Shift[];
+            setShiftData(shifts);
+            console.log("シフトデータをFirestoreから取得しました。", shifts);
+          },
+          (error) => {
+            console.error("シフトデータの監視エラー:", error);
+          }
+        );
 
-    fetchAndSetShifts();
+        // 認証状態が変更されたときにFirestore監視を停止
+        return unsubscribeSnapshot;
+      } else {
+        // ログアウト時は初期状態に戻す
+        setShiftData([]);
+      }
+    });
 
+    return () => unsubscribeAuth();
+  }, []);
+
+  // 認証状態を監視してからFirestoreから業務データをリアルタイムで取得
+  useEffect(() => {
+    const auth = getAuth();
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // ユーザーがログインしている場合のみデータ監視を開始
+        const unsubscribeSnapshot = onSnapshot(
+          collection(db, `users/${user.uid}/works`),
+          (snapshot) => {
+            const works = snapshot.docs.map((doc) => ({
+              ...doc.data(),
+              id: Number(doc.data().id) || Number(doc.id)
+            })) as WorkData[];
+            setWorkData(works);
+          },
+          (error) => {
+            console.error("業務データの監視エラー:", error);
+          }
+        );
+
+        // 認証状態が変更されたときにFirestore監視を停止
+        return unsubscribeSnapshot;
+      } else {
+        // ログアウト時は初期状態に戻す
+        setWorkData([]);
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
+
+  useEffect(() => {
     // 祝日データ取得
     const fetchHolidays = async () => {
       try {
@@ -104,15 +246,17 @@ export default function Calendar() {
       }
     };
     fetchHolidays();
-  }, [uid]);
+  }, []);
 
   useEffect(() => {
     //月が変更されたときに選択日をリセット
     loadUserInfoFromLocalStorage(); //ユーザー情報をローカルストレージから読み込む
   }, [workData]); // loadUserInfoFromLocalStorageの依存関係を削除
 
+  // ローカルストレージ保存関数（互換性のため残すが、実際はFirestoreで自動保存）
   const saveShiftsToLocalStorage = (shifts: Shift[]) => {
-    localStorage.setItem("shiftData", JSON.stringify(shifts));
+    // リアルタイム監視により自動で保存されるため、何もしない
+    // 既存コードとの互換性のため関数は残す
   };
 
   const handlePrevMonth = () => {
@@ -144,12 +288,14 @@ export default function Calendar() {
       return; //処理を終了
     }
 
-    const savedWorkData = localStorage.getItem("workData");
-    const parsedWorkData = savedWorkData ? JSON.parse(savedWorkData) : [];
-    setWorkData(parsedWorkData);
     setSelectedDate(date); //クリックされた日付を選択
-    setFilteredWorkData(parsedWorkData); //フィルタリングされたデータを保存
+    setFilteredWorkData(workData); //フィルタリングされたデータを保存
     setIsDialogOpen(true); //ダイアログを開く
+  };
+
+  // 今週の勤務時間を表示するボタンのハンドラー
+  const handleShowCurrentWeekTime = () => {
+    handleShowWeeklyWorkTime(today);
   };
 
   const closeDialog = () => {
@@ -157,39 +303,59 @@ export default function Calendar() {
   };
 
   //シフト出力ボタンのクリックハンドラー
-  const handleOpenExportDialog = () => {
-    loadUserInfoFromLocalStorage(); //ユーザー情報をローカルストレージから読み込む
-    const savedUserInfo = localStorage.getItem("userInfo");
-    const parsedUserInfo = savedUserInfo ? JSON.parse(savedUserInfo) : null;
+  const handleOpenExportDialog = async () => {
     if (!user) {
       alert("ユーザ情報を登録してください");
       return;
     }
-    if (
-      !parsedUserInfo ||
-      !parsedUserInfo.id || //falsy値（空文字、null、undefined、0など）を弾く
-      !parsedUserInfo.name ||
-      !parsedUserInfo.value ||
-      !parsedUserInfo.name_kana
-    ) {
-      alert("ユーザ情報を登録してください");
+
+    // Firestoreからユーザー情報を取得
+    const uid = getAuth().currentUser?.uid;
+    if (!uid) {
+      alert("ログインしてください");
       return;
     }
 
-    //現在の月のシフトデータを取得
-    const currentMonthShifts = shiftData.filter(
-      (shift) =>
-        shift.year === currentDate.getFullYear() &&
-        shift.month === currentDate.getMonth() + 1
-    );
+    try {
+      const userRef = doc(db, `users/${uid}`);
+      const userSnap = await getDoc(userRef);
 
-    //科目名のリストを取得（重複を排除）
-    const uniqueSubjectNames = Array.from(
-      new Set(currentMonthShifts.map((shift) => shift.classname))
-    );
+      if (!userSnap.exists()) {
+        alert("ユーザ情報を登録してください");
+        return;
+      }
 
-    setSubjectNames(uniqueSubjectNames); //科目名リストを状態に保存
-    setIsExportDialogOpen(true); //ダイアログを開く
+      const userData = userSnap.data();
+
+      if (
+        !userData ||
+        !userData.id || //falsy値（空文字、null、undefined、0など）を弾く
+        !userData.name ||
+        !userData.value ||
+        !userData.name_kana
+      ) {
+        alert("ユーザ情報を登録してください");
+        return;
+      }
+
+      //現在の月のシフトデータを取得
+      const currentMonthShifts = shiftData.filter(
+        (shift) =>
+          shift.year === currentDate.getFullYear() &&
+          shift.month === currentDate.getMonth() + 1
+      );
+
+      //科目名のリストを取得（重複を排除）
+      const uniqueSubjectNames = Array.from(
+        new Set(currentMonthShifts.map((shift) => shift.classname))
+      );
+
+      setSubjectNames(uniqueSubjectNames); //科目名リストを状態に保存
+      setIsExportDialogOpen(true); //ダイアログを開く
+    } catch (error) {
+      console.error("エラーが発生しました:", error);
+      alert("エラーが発生しました。後でもう一度お試しください。");
+    }
   };
 
   return (
@@ -211,6 +377,7 @@ export default function Calendar() {
           次の月
         </button>
       </div>
+
       <div className="grid grid-cols-7 gap-1 text-center w-full max-w-[1200px]">
         {["日", "月", "火", "水", "木", "金", "土"].map((day) => (
           <div key={day} className="font-bold text-2xl">
@@ -263,13 +430,21 @@ export default function Calendar() {
         })}
       </div>
 
-      {/* シフト出力ボタン */}
-      <button
-        onClick={handleOpenExportDialog}
-        className="mt-6 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition rounded-lg border border-gray-400 font-bold"
-      >
-        Excel出力
-      </button>
+      {/* ボタンエリア */}
+      <div className="flex space-x-4 mt-6">
+        <button
+          onClick={handleShowCurrentWeekTime}
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition font-bold"
+        >
+          今週の勤務時間
+        </button>
+        <button
+          onClick={handleOpenExportDialog}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition font-bold"
+        >
+          Excel出力
+        </button>
+      </div>
 
       {/* ダイアログのレンダリング部分 */}
       <AddShiftDialog
