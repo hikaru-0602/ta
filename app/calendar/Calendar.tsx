@@ -360,16 +360,16 @@ export default function Calendar() {
       <div className="flex items-center justify-center mb-4 w-full max-w-[1200px] space-x-4">
         <button
           onClick={handlePrevMonth}
-          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+          className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
         >
           前の月
         </button>
-        <h2 className="text-2xl font-bold dark:text-white">
+        <h2 className="text-2xl font-bold text-foreground">
           {currentDate.getFullYear()}年 {currentDate.getMonth() + 1}月
         </h2>
         <button
           onClick={handleNextMonth}
-          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+          className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
         >
           次の月
         </button>
@@ -377,7 +377,7 @@ export default function Calendar() {
 
       <div className="grid grid-cols-7 gap-1 text-center w-full max-w-[1200px]">
         {["日", "月", "火", "水", "木", "金", "土"].map((day) => (
-          <div key={day} className="font-bold text-2xl">
+          <div key={day} className="font-bold text-2xl text-foreground">
             {day}
           </div>
         ))}
@@ -403,22 +403,27 @@ export default function Calendar() {
             <div
               key={date.toISOString()}
               onClick={() => handleDateClick(date)}
-              className={`p-6 rounded text-xl cursor-pointer relative hover:bg-gray-300 dark:bg-gray-600 ${
+              className={`p-6 rounded-md text-xl cursor-pointer relative hover:bg-accent hover:text-accent-foreground transition-colors ${
                 selectedDate?.toDateString() === date.toDateString()
-                  ? "bg-green-500 text-white"
-                  : isToday
-                  ? "border-2 border-blue-500" +
+                  ? "border-2 border-primary" +
                     (isSunday || isSaturday || holiday
-                      ? " bg-red-100 dark:bg-red-200"
-                      : "")
+                      ? " bg-destructive/10 text-destructive"
+                      : isToday
+                      ? " bg-card text-card-foreground"
+                      : " bg-card text-card-foreground")
+                  : isToday
+                  ? "border-2 border-ring" +
+                    (isSunday || isSaturday || holiday
+                      ? " bg-destructive/10 text-destructive"
+                      : " bg-card text-card-foreground")
                   : isSunday || isSaturday || holiday
-                  ? "bg-red-100 dark:bg-red-200 text-black"
-                  : "bg-gray-100 dark:bg-gray-700"
+                  ? "bg-destructive/10 text-destructive"
+                  : "bg-card text-card-foreground border border-border"
               }`}
             >
               {date.getDate()}
               {shiftCount > 0 && user && (
-                <div className="absolute top-1 right-1 bg-blue-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                <div className="absolute top-1 right-1 bg-primary text-primary-foreground text-xs w-5 h-5 flex items-center justify-center rounded-full">
                   {shiftCount}
                 </div>
               )}
@@ -431,7 +436,7 @@ export default function Calendar() {
       <div className="flex space-x-4 mt-6">
         <button
           onClick={handleOpenExportDialog}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition font-bold"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
         >
           Excel出力
         </button>

@@ -43,17 +43,17 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-white dark:bg-black shadow-md z-50">
+    <header className="fixed top-0 left-0 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border z-50">
       <div className="flex items-center justify-between p-4">
-        <h1 className="text-lg font-bold">勤務表アプリ</h1>
+        <h1 className="text-lg font-bold text-foreground">勤務表アプリ</h1>
         <button
-          className="sm:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300"
+          className="sm:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
           onClick={() => setIsOpen(!isOpen)}
         >
           <span className="sr-only">Toggle menu</span>
-          <div className="w-6 h-0.5 bg-black dark:bg-white mb-1"></div>
-          <div className="w-6 h-0.5 bg-black dark:bg-white mb-1"></div>
-          <div className="w-6 h-0.5 bg-black dark:bg-white"></div>
+          <div className="w-6 h-0.5 bg-foreground mb-1"></div>
+          <div className="w-6 h-0.5 bg-foreground mb-1"></div>
+          <div className="w-6 h-0.5 bg-foreground"></div>
         </button>
         <nav
           className={`${
@@ -62,13 +62,13 @@ export default function Header() {
         >
           <Link
             href="/"
-            className="block px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-800 rounded"
+            className="block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
           >
             勤務表
           </Link>
           <Link
             href="/setting"
-            className="block px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-800 rounded"
+            className="block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
           >
             仕事
           </Link>
@@ -79,10 +79,10 @@ export default function Header() {
             <button
               onClick={handleLogin}
               disabled={isLoading}
-              className={`px-3 py-1.5 sm:px-4 sm:py-2 text-white text-sm sm:text-base rounded transition ${
+              className={`px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-md font-medium transition-colors ${
                 isLoading
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-500 hover:bg-blue-600'
+                  ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                  : 'bg-primary text-primary-foreground hover:bg-primary/90'
               }`}
             >
               {isLoading ? 'ログイン中...' : '学内アカウントログイン'}
@@ -90,7 +90,7 @@ export default function Header() {
           ) : (
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+              className="px-4 py-2 bg-destructive text-destructive-foreground rounded-md hover:bg-destructive/90 transition-colors font-medium"
             >
               ログアウト
             </button>

@@ -82,7 +82,7 @@ export default function Work() {
       <div className="w-full h-full flex flex-col items-center justify-start max-w-[1200px]">
         {/* 中央揃えのタイトル */}
         <div className="w-full max-w-2xl text-center">
-          <h1 className="text-3xl font-extrabold mb-6 text-gray-800 tracking-wide dark:text-white">
+          <h1 className="text-3xl font-extrabold mb-6 text-foreground tracking-wide">
             仕事情報入力
           </h1>
         </div>
@@ -91,15 +91,15 @@ export default function Work() {
           onSubmit={(e) => e.preventDefault()} // デフォルト動作を防ぐ
         >
           {/* ユーザ情報 */}
-          <div className="space-y-6 bg-white dark:bg-gray-800 p-8 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="space-y-6 bg-card text-card-foreground p-8 rounded-lg border border-border">
             <div
               className="flex justify-between items-center cursor-pointer"
               onClick={() => setIsUserInfoOpen(!isUserInfoOpen)} // 折りたたみ状態を切り替え
             >
-              <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
+              <h2 className="text-2xl font-semibold text-foreground">
                 ユーザ情報
               </h2>
-              <button className="text-gray-500 dark:text-gray-400">
+              <button className="text-muted-foreground hover:text-foreground transition-colors">
                 {isUserInfoOpen ? "▲" : "▼"}{" "}
                 {/* 折りたたみ状態に応じてアイコンを変更 */}
               </button>
@@ -109,7 +109,7 @@ export default function Work() {
                 {/* 氏名とふりがな */}
                 <div className="flex space-x-4">
                   <div className="flex-1">
-                    <label className="block mb-2 font-medium text-gray-700 dark:text-gray-300">
+                    <label className="block mb-2 font-medium text-foreground">
                       氏名
                     </label>
                     <input
@@ -124,11 +124,11 @@ export default function Work() {
                           e.target.blur();
                         }
                       }}
-                      className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition mb-2 dark:bg-gray-700 dark:text-gray-200"
+                      className="w-full p-3 border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors mb-2"
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="block mb-2 font-medium text-gray-700 dark:text-gray-300">
+                    <label className="block mb-2 font-medium text-foreground">
                       ふりがな
                     </label>
                     <input
@@ -143,14 +143,14 @@ export default function Work() {
                           e.target.blur();
                         }
                       }}
-                      className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition mb-2 dark:bg-gray-700 dark:text-gray-200"
+                      className="w-full p-3 border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors mb-2"
                     />
                   </div>
                 </div>
                 {/* 学年と学籍番号 */}
                 <div className="flex space-x-4">
                   <div className="flex-1">
-                    <label className="block mb-2 font-medium text-gray-700 dark:text-gray-300">
+                    <label className="block mb-2 font-medium text-foreground">
                       学年
                     </label>
                     <select
@@ -163,7 +163,7 @@ export default function Work() {
                           showAlert("認証エラー", "ログインしてください。");
                         }
                       }}
-                      className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition dark:bg-gray-700 dark:text-gray-200"
+                      className="w-full p-3 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
                     >
                       {Object.entries(gradeInfoMap).map(([val, info]) => (
                         <option key={val} value={val}>
@@ -173,7 +173,7 @@ export default function Work() {
                     </select>
                   </div>
                   <div className="flex-1">
-                    <label className="block mb-2 font-medium text-gray-700 dark:text-gray-300">
+                    <label className="block mb-2 font-medium text-foreground">
                       学籍番号
                     </label>
                     <input
@@ -188,16 +188,16 @@ export default function Work() {
                           e.target.blur();
                         }
                       }}
-                      className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition dark:bg-gray-700 dark:text-gray-200"
+                      className="w-full p-3 border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
                     />
                   </div>
                 </div>
                 {/* 時給表示 */}
                 <div>
-                  <label className="block mb-2 font-medium text-gray-700 dark:text-gray-300">
+                  <label className="block mb-2 font-medium text-foreground">
                     時給
                   </label>
-                  <p className="text-lg font-bold text-gray-800 dark:text-gray-200">
+                  <p className="text-lg font-bold text-foreground">
                     {user && userInfo.value
                       ? `${gradeInfoMap[userInfo.value].wage}円`
                       : "    円"}
@@ -221,7 +221,7 @@ export default function Work() {
                       showAlert("登録完了", "登録しました。");
                       handleUserRegister(uid);
                     }}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                    className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
                   >
                     登録
                   </button>
@@ -231,9 +231,9 @@ export default function Work() {
           </div>
 
           {/* 仕事リスト */}
-          <div className="space-y-6 bg-white dark:bg-gray-800 p-8 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="space-y-6 bg-card text-card-foreground p-8 rounded-lg border border-border">
             <div className="flex justify-start items-center space-x-8">
-              <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 border-b pb-4">
+              <h2 className="text-2xl font-semibold text-foreground border-b pb-4">
                 登録済みの仕事
               </h2>
               <button
@@ -247,7 +247,7 @@ export default function Work() {
                   setId(uniqueId);
                   setIsDialogOpen(true);
                 }}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition mb-4"
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors mb-4"
               >
                 追加
               </button>
@@ -257,37 +257,37 @@ export default function Work() {
                 {workData.map((work, index) => (
                   <li
                     key={index}
-                    className="p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                    className="p-4 bg-background border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow"
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1 min-w-0 mr-4">
-                        <p className="text-lg font-bold text-gray-800 dark:text-gray-200 break-words">
-                          <span className="text-sm text-gray-500 dark:text-gray-400">ラベル:</span>{" "}
+                        <p className="text-lg font-bold text-foreground break-words">
+                          <span className="text-sm text-muted-foreground">ラベル:</span>{" "}
                           <span title={work.label || "（ラベルなし）"}>
                             {work.label || "（ラベルなし）"}
                           </span>
                         </p>
-                        <p className="text-sm font-bold text-gray-800 dark:text-gray-200 truncate">
-                          <span className="text-gray-500 dark:text-gray-400">科目名:</span>{" "}
+                        <p className="text-sm font-bold text-foreground truncate">
+                          <span className="text-muted-foreground">科目名:</span>{" "}
                           <span title={work.classname || "（未設定）"}>
                             {work.classname || "（未設定）"}
                           </span>
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-muted-foreground">
                           業務内容: {work.category}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                        <p className="text-sm text-muted-foreground truncate">
                           <span>教員名:</span>{" "}
                           <span title={work.teacher || "（未設定）"}>
                             {work.teacher || "（未設定）"}
                           </span>
                         </p>
                         <div className="flex space-x-4">
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className="text-sm text-muted-foreground">
                             曜日:{" "}
                             {work.dayofweek === "" ? "なし" : work.dayofweek}
                           </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className="text-sm text-muted-foreground">
                             時限:{" "}
                             {work.schedule && work.schedule.length > 0
                               ? work.schedule.join(", ") + "限"
@@ -295,13 +295,13 @@ export default function Work() {
                           </p>
                         </div>
                         <div className="flex space-x-4">
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className="text-sm text-muted-foreground">
                             時刻: {work.starttime}~{work.endtime}
                           </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className="text-sm text-muted-foreground">
                             休憩: {work.breaktime}分
                           </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className="text-sm text-muted-foreground">
                             実働: {work.worktime}
                           </p>
                         </div>
@@ -313,13 +313,13 @@ export default function Work() {
                             setId(work.id);
                             setIsDialogOpen(true);
                           }}
-                          className="text-blue-500 hover:text-blue-700 text-sm"
+                          className="text-primary hover:text-primary/80 text-sm transition-colors"
                         >
                           編集
                         </button>
                         <button
                           onClick={() => handleDeleteWork(index)}
-                          className="text-red-500 hover:text-red-700"
+                          className="text-destructive hover:text-destructive/80 transition-colors"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -343,7 +343,7 @@ export default function Work() {
               </ul>
             )}
             {!user && (
-              <p className="text-gray-500 dark:text-gray-400">
+              <p className="text-muted-foreground">
                 ログインしてください
               </p>
             )}

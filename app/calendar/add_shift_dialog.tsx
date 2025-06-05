@@ -359,12 +359,12 @@ export default function AddShiftDialog({
       {/* メインダイアログ */}
       {isDialogOpen && (
         <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
           onClick={backDialog}
         >
-          <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded shadow-lg w-full max-w-xs sm:max-w-md">
-            <h2 className="text-xl font-bold mb-4 dark:text-white">仕事リスト</h2>
-            <h3 className="text-lg font-semibold mb-2 dark:text-gray-200">-- 追加 --</h3>
+          <div className="bg-card text-card-foreground p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-xs sm:max-w-md border border-border">
+            <h2 className="text-xl font-bold mb-4 text-foreground">仕事リスト</h2>
+            <h3 className="text-lg font-semibold mb-2 text-foreground">-- 追加 --</h3>
             <ul>
               {shiftData
                 .filter(
@@ -380,11 +380,11 @@ export default function AddShiftDialog({
                     className="mb-2 flex justify-between items-center"
                   >
                     <div className="flex-1 mr-2 min-w-0">
-                      <span className="block text-sm">
+                      <span className="block text-sm text-muted-foreground">
                         {shift.starttime}~{shift.endtime}
                       </span>
                       <span
-                        className="block text-sm font-medium truncate"
+                        className="block text-sm font-medium truncate text-foreground"
                         title={shift.label || "（ラベルなし）"}
                       >
                         {shift.label || "（ラベルなし）"}
@@ -399,7 +399,7 @@ export default function AddShiftDialog({
                             setIsEditDialogOpen
                           )
                         }
-                        className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-xs"
+                        className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 text-xs transition-colors"
                       >
                         編集
                       </button>
@@ -415,7 +415,7 @@ export default function AddShiftDialog({
                             saveShiftsToLocalStorage
                           )
                         }
-                        className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs"
+                        className="px-2 py-1 bg-destructive text-destructive-foreground rounded-md hover:bg-destructive/90 text-xs transition-colors"
                       >
                         削除
                       </button>
@@ -423,7 +423,7 @@ export default function AddShiftDialog({
                   </li>
                 ))}
             </ul>
-            <h3 className="text-lg font-semibold mt-4 mb-2">-- 一覧 --</h3>
+            <h3 className="text-lg font-semibold mt-4 mb-2 text-foreground">-- 一覧 --</h3>
             <ul>
               {filteredWorkData
                 .filter(
@@ -441,11 +441,11 @@ export default function AddShiftDialog({
                 .map((work, index) => (
                   <li key={index} className="mb-2 flex justify-between items-center">
                     <div className="flex-1 mr-2 min-w-0">
-                      <span className="block text-sm">
+                      <span className="block text-sm text-muted-foreground">
                         {work.starttime}~{work.endtime}
                       </span>
                       <span
-                        className="block text-sm font-medium truncate"
+                        className="block text-sm font-medium truncate text-foreground"
                         title={work.label || "（ラベルなし）"}
                       >
                         {work.label || "（ラベルなし）"}
@@ -453,7 +453,7 @@ export default function AddShiftDialog({
                     </div>
                     <button
                       onClick={() => handleAddShiftWithAlert(work)}
-                      className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs flex-shrink-0"
+                      className="px-2 py-1 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 text-xs flex-shrink-0 transition-colors"
                     >
                       追加
                     </button>
@@ -462,7 +462,7 @@ export default function AddShiftDialog({
             </ul>
             <button
               onClick={closeDialog}
-              className="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              className="mt-4 px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
             >
               閉じる
             </button>

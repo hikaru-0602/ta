@@ -330,11 +330,11 @@ export default function ExportDialog({
   return (
     isExportDialogOpen && ( // ダイアログが開いている場合のみ表示
       <div
-        className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
+        className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50"
         onClick={backDialog} // 背景クリックで閉じる
       >
-        <div className="bg-white dark:bg-gray-800 p-6 rounded shadow-lg w-96 max-h-[80vh] overflow-y-auto">
-          <h2 className="text-lg font-bold mb-4 text-gray-800 dark:text-gray-200">
+        <div className="bg-card text-card-foreground p-6 rounded-lg shadow-lg w-96 max-h-[80vh] overflow-y-auto border border-border">
+          <h2 className="text-lg font-bold mb-4 text-foreground">
             出力する科目を選択
           </h2>
           <ul>
@@ -349,7 +349,7 @@ export default function ExportDialog({
                     setIsExportDialogOpen
                   )
                 }
-                className="mb-2 p-2 bg-blue-500 dark:bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-600 dark:hover:bg-blue-700"
+                className="mb-2 p-2 bg-primary text-primary-foreground rounded-md cursor-pointer hover:bg-primary/90 transition-colors"
               >
                 {subject || "科目名がありません"}
               </li>
@@ -357,7 +357,7 @@ export default function ExportDialog({
           </ul>
           <button
             onClick={() => setIsExportDialogOpen(false)}
-            className="mt-4 p-2 bg-gray-500 dark:bg-gray-600 text-white rounded hover:bg-gray-600 dark:hover:bg-gray-700"
+            className="mt-4 p-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors w-full"
           >
             キャンセル
           </button>

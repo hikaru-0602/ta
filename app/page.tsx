@@ -76,16 +76,16 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="py-5 flex justify-end pr-8">
         {!user ? (
           <button
             onClick={handleLogin}
             disabled={isLoading}
-            className={`px-4 py-2 text-white rounded transition ${
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               isLoading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-500 hover:bg-blue-600'
+                ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                : 'bg-primary text-primary-foreground hover:bg-primary/90'
             }`}
           >
             {isLoading ? 'ログイン中...' : '学内アカウントログイン'}
@@ -93,7 +93,7 @@ function AppContent() {
         ) : (
           <button
             onClick={handleLogout}
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+            className="px-4 py-2 bg-destructive text-destructive-foreground rounded-md text-sm font-medium hover:bg-destructive/90 transition-colors"
           >
             ログアウト
           </button>
