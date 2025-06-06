@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useCallback } from "react";
+import { Button } from "@/components/ui/button";
 
 interface WorkDialogProps {
   isDialogOpen: boolean;
@@ -72,7 +73,6 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
   handleWorkChange,
   handleScheduleChange,
   handleScheduleTimeEdit,
-  removeSchedule,
   calculateStartEndTimes,
   calculateWorkingTime,
   addWork,
@@ -267,12 +267,6 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                       )}
                     </div>
                   </div>
-                  <button
-                    onClick={() => removeSchedule(index)}
-                    className="text-destructive hover:text-destructive/80 underline transition-colors"
-                  >
-                    削除
-                  </button>
                 </div>
                 <div className="text-sm text-muted-foreground">
                   <div className="flex items-center space-x-2 mb-2">
@@ -341,7 +335,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                         className="w-12 p-1 border border-input rounded-md text-center bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
                       />
                     </div>
-                    <button
+                    <Button
                       onClick={() => {
                         handleScheduleTimeEdit(
                           index,
@@ -349,11 +343,12 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           adjustTime(schedule.startTime || startTime, -10)
                         );
                       }}
-                      className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+                      variant="secondary"
+                      size="sm"
                     >
                       -10分
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() =>
                         handleScheduleTimeEdit(
                           index,
@@ -361,10 +356,11 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           adjustTime(schedule.startTime || startTime, 10)
                         )
                       }
-                      className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+                      variant="secondary"
+                      size="sm"
                     >
                       +10分
-                    </button>
+                    </Button>
                   </div>
                   <div className="flex items-center space-x-2 mb-2">
                     <p className="text-foreground">
@@ -428,7 +424,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                         className="w-12 p-1 border border-input rounded-md text-center bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
                       />
                     </div>
-                    <button
+                    <Button
                       onClick={() =>
                         handleScheduleTimeEdit(
                           index,
@@ -436,11 +432,12 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           adjustTime(schedule.endTime || endTime, -10)
                         )
                       }
-                      className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+                      variant="secondary"
+                      size="sm"
                     >
                       -10分
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() =>
                         handleScheduleTimeEdit(
                           index,
@@ -448,10 +445,11 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           adjustTime(schedule.endTime || endTime, 10)
                         )
                       }
-                      className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+                      variant="secondary"
+                      size="sm"
                     >
                       +10分
-                    </button>
+                    </Button>
                   </div>
                   <div className="flex items-center space-x-2 mb-2">
                     <p className="text-foreground">
@@ -490,7 +488,7 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                         分
                       </span>
                     </div>
-                    <button
+                    <Button
                       onClick={() => {
                         handleScheduleTimeEdit(
                           index,
@@ -500,11 +498,12 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           )
                         );
                       }}
-                      className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+                      variant="secondary"
+                      size="sm"
                     >
                       -10分
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() =>
                         handleScheduleTimeEdit(
                           index,
@@ -512,10 +511,11 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
                           String(Number(schedule.breakTime || 0) + 10)
                         )
                       }
-                      className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+                      variant="secondary"
+                      size="sm"
                     >
                       +10分
-                    </button>
+                    </Button>
                   </div>
                   <p className="text-foreground">
                     実働時間: {hours}時間{minutes}分
@@ -526,21 +526,20 @@ const WorkDialog: React.FC<WorkDialogProps> = ({
           })}
         </div>
         <div className="flex justify-end mt-4 space-x-2">
-          <button
+          <Button
             onClick={() => {
               setIsDialogOpen(false);
               initworkInfo();
             }}
-            className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+            variant="secondary"
           >
             キャンセル
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => addWork(workid)}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
           >
             {checkWorkIdExists() ? "更新" : "登録"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

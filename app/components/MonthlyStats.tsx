@@ -12,6 +12,7 @@ import ExportDialog, {
   handleCloseExportDialog,
   handleExportSubject,
 } from "../calendar/export_dialog";
+import { Button } from "@/components/ui/button";
 
 interface MonthlyStatsProps {
   currentDate: Date;
@@ -166,13 +167,12 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
             <h3 className="text-lg font-semibold text-foreground">
               {currentDate.getFullYear()}年{currentDate.getMonth() + 1}月の統計
             </h3>
-            <button
+            <Button
               onClick={handleOpenExportDialog}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
               disabled={currentMonthShifts.length === 0}
             >
               Excel出力
-            </button>
+            </Button>
           </div>
           <p className="text-muted-foreground text-center py-8">
             この月にはシフトデータがありません
@@ -189,12 +189,11 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
           <h3 className="text-lg font-semibold text-foreground">
             {currentDate.getFullYear()}年{currentDate.getMonth() + 1}月の統計
           </h3>
-          <button
+          <Button
             onClick={handleOpenExportDialog}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
           >
             Excel出力
-          </button>
+          </Button>
         </div>
 
         {/* 全体統計 */}

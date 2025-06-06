@@ -7,6 +7,7 @@ import { login, logout } from "./firebase/lib/auth";
 import { useLoginContext } from "./firebase/context/LoginContext";
 import { useState, useEffect } from "react";
 import { AlertProvider, useAlert } from "./components/AlertProvider";
+import { Button } from "@/components/ui/button";
 
 function AppContent() {
   const user = useAuth();
@@ -79,24 +80,20 @@ function AppContent() {
     <div className="min-h-screen bg-background text-foreground">
       <div className="py-5 flex justify-end pr-8">
         {!user ? (
-          <button
+          <Button
             onClick={handleLogin}
             disabled={isLoading}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              isLoading
-                ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                : 'bg-primary text-primary-foreground hover:bg-primary/90'
-            }`}
+            variant={isLoading ? "secondary" : "default"}
           >
             {isLoading ? 'ログイン中...' : '学内アカウントログイン'}
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
             onClick={handleLogout}
-            className="px-4 py-2 bg-destructive text-destructive-foreground rounded-md text-sm font-medium hover:bg-destructive/90 transition-colors"
+            variant="destructive"
           >
             ログアウト
-          </button>
+          </Button>
         )}
       </div>
 

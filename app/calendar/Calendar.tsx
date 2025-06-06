@@ -17,6 +17,7 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/lib/firebase";
 import { useAlert } from "../components/AlertProvider";
 import MonthlyStats from "../components/MonthlyStats";
+import { Button } from "@/components/ui/button";
 
 export default function Calendar() {
   const today = new Date();
@@ -200,21 +201,21 @@ export default function Calendar() {
     <div className="w-full h-full flex flex-col items-center justify-center padding lg:ml-20 mr-20">
       <div className="flex items-center justify-center mb-4 w-full max-w-[1200px]">
         <div className="flex items-center space-x-4">
-          <button
+          <Button
             onClick={handlePrevMonth}
-            className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+            variant="secondary"
           >
             前の月
-          </button>
+          </Button>
           <h2 className="text-2xl font-bold text-foreground">
             {currentDate.getFullYear()}年 {currentDate.getMonth() + 1}月
           </h2>
-          <button
+          <Button
             onClick={handleNextMonth}
-            className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+            variant="secondary"
           >
             次の月
-          </button>
+          </Button>
         </div>
       </div>
 

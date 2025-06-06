@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "../firebase/context/auth"; // 認証情報を取得
 import { login, logout } from "../firebase/lib/auth"; // ログイン・ログアウト関数をインポート
 import { useAlert } from './AlertProvider';
+import { Button } from "@/components/ui/button";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -76,24 +77,22 @@ export default function Header() {
         {/* ログイン・ログアウトボタン */}
         <div className="ml-4">
           {user === null ? (
-            <button
+            <Button
               onClick={handleLogin}
               disabled={isLoading}
-              className={`px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-md font-medium transition-colors ${
-                isLoading
-                  ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                  : 'bg-primary text-primary-foreground hover:bg-primary/90'
-              }`}
+              variant={isLoading ? "secondary" : "default"}
+              size="sm"
+              className="text-sm sm:text-base"
             >
               {isLoading ? 'ログイン中...' : '学内アカウントログイン'}
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               onClick={handleLogout}
-              className="px-4 py-2 bg-destructive text-destructive-foreground rounded-md hover:bg-destructive/90 transition-colors font-medium"
+              variant="destructive"
             >
               ログアウト
-            </button>
+            </Button>
           )}
         </div>
       </div>

@@ -10,6 +10,7 @@ import { getAuthEmail } from "../firebase/lib/auth";
 import { getAuth } from "firebase/auth";
 import { gradeInfoMap } from "../types";
 import { useAlert } from "../components/AlertProvider";
+import { Button } from "@/components/ui/button";
 
 export default function Work() {
   //ユーザ情報のカスタムフックを使用
@@ -203,7 +204,7 @@ export default function Work() {
                   </p>
                 </div>
                 <div className="flex justify-end mt-4">
-                  <button
+                  <Button
                     onClick={() => {
                       if (!user) {
                         showAlert("認証エラー", "ログインしてください。");
@@ -220,10 +221,9 @@ export default function Work() {
                       showAlert("登録完了", "登録しました。");
                       handleUserRegister(uid);
                     }}
-                    className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
                   >
                     登録
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -235,7 +235,7 @@ export default function Work() {
               <h2 className="text-2xl font-semibold text-foreground border-b pb-4">
                 登録済みの仕事
               </h2>
-              <button
+              <Button
                 onClick={(e) => {
                   e.preventDefault();
                   if (!user) {
@@ -246,10 +246,10 @@ export default function Work() {
                   setId(uniqueId);
                   setIsDialogOpen(true);
                 }}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors mb-4"
+                className="mb-4"
               >
                 追加
-              </button>
+              </Button>
             </div>
             {user && (
               <ul className="space-y-4">
@@ -306,19 +306,23 @@ export default function Work() {
                         </div>
                       </div>
                       <div className="flex flex-col space-y-2 flex-shrink-0">
-                        <button
+                        <Button
                           onClick={(e) => {
                             e.preventDefault();
                             setId(work.id);
                             setIsDialogOpen(true);
                           }}
-                          className="text-primary hover:text-primary/80 text-sm transition-colors"
+                          variant="link"
+                          size="sm"
+                          className="text-primary hover:text-primary/80 p-0 h-auto"
                         >
                           編集
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => handleDeleteWork(index)}
-                          className="text-destructive hover:text-destructive/80 transition-colors"
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive/80 p-1 h-auto"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -334,7 +338,7 @@ export default function Work() {
                               d="M6 18L18 6M6 6l12 12"
                             />
                           </svg>
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </li>

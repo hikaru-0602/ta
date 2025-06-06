@@ -4,6 +4,7 @@ import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/lib/firebase";
 import { getAuth } from "firebase/auth";
 import { useAlert } from "../components/AlertProvider";
+import { Button } from "@/components/ui/button";
 
 //時間をDateオブジェクトに変換する関数
 export const parseTime = (time: string): Date => {
@@ -381,7 +382,7 @@ export default function AddShiftDialog({
                       </span>
                     </div>
                     <div className="flex space-x-2 flex-shrink-0">
-                      <button
+                      <Button
                         onClick={() =>
                           handleEditShift(
                             shift,
@@ -389,11 +390,13 @@ export default function AddShiftDialog({
                             setIsEditDialogOpen
                           )
                         }
-                        className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 text-xs transition-colors"
+                        variant="secondary"
+                        size="sm"
+                        className="text-xs"
                       >
                         編集
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() =>
                           handleRemoveShift(
                             shift.id,
@@ -405,10 +408,12 @@ export default function AddShiftDialog({
                             saveShiftsToLocalStorage
                           )
                         }
-                        className="px-2 py-1 bg-destructive text-destructive-foreground rounded-md hover:bg-destructive/90 text-xs transition-colors"
+                        variant="destructive"
+                        size="sm"
+                        className="text-xs"
                       >
                         削除
-                      </button>
+                      </Button>
                     </div>
                   </li>
                 ))}
@@ -441,21 +446,23 @@ export default function AddShiftDialog({
                         {work.label || "（ラベルなし）"}
                       </span>
                     </div>
-                    <button
+                    <Button
                       onClick={() => handleAddShiftWithAlert(work)}
-                      className="px-2 py-1 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 text-xs flex-shrink-0 transition-colors"
+                      size="sm"
+                      className="text-xs"
                     >
                       追加
-                    </button>
+                    </Button>
                   </li>
                 ))}
             </ul>
-            <button
+            <Button
               onClick={closeDialog}
-              className="mt-4 px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+              variant="secondary"
+              className="mt-4"
             >
               閉じる
-            </button>
+            </Button>
           </div>
         </div>
       )}

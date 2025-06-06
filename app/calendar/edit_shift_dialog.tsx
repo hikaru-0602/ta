@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 //編集対象のシフトを設定し、編集ダイアログを開く関数
 export const handleEditShift = (
@@ -397,7 +398,7 @@ export default function EditShiftDialog({
                     休憩時間(分)
                   </label>
                   <div className="flex items-center space-x-2">
-                    <button
+                    <Button
                       type="button"
                       onClick={() =>
                         setEditingShift({
@@ -408,10 +409,11 @@ export default function EditShiftDialog({
                           ),
                         })
                       }
-                      className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+                      variant="secondary"
+                      size="sm"
                     >
                       -10分
-                    </button>
+                    </Button>
                     <input
                       type="text"
                       value={editingShift.breaktime || "0"}
@@ -436,7 +438,7 @@ export default function EditShiftDialog({
                       }}
                       className="w-12 p-1 border border-input rounded-md text-center bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
                     />
-                    <button
+                    <Button
                       type="button"
                       onClick={() =>
                         setEditingShift({
@@ -444,26 +446,27 @@ export default function EditShiftDialog({
                           breaktime: Number(editingShift.breaktime || 0) + 10,
                         })
                       }
-                      className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+                      variant="secondary"
+                      size="sm"
                     >
                       +10分
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </form>
               <div className="flex justify-end space-x-2">
-                <button
+                <Button
                   onClick={() => setIsEditDialogOpen(false)} //編集ダイアログを閉じる
-                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+                  variant="secondary"
                 >
                   キャンセル
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleSaveWithValidation} //週の実働時間チェック付きの保存処理
-                  className="px-4 py-2 text-sm sm:text-base bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                  className="text-sm sm:text-base"
                 >
                   保存
-                </button>
+                </Button>
               </div>
             </div>
           </div>

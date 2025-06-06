@@ -11,6 +11,7 @@ import { getAuth } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/lib/firebase";
 import { useAlert } from "../components/AlertProvider";
+import { Button } from "@/components/ui/button";
 
 interface ExportDialogProps {
   isExportDialogOpen: boolean; // ダイアログの開閉状態
@@ -307,12 +308,13 @@ export default function ExportDialog({
               </li>
             ))}
           </ul>
-          <button
+          <Button
             onClick={() => setIsExportDialogOpen(false)}
-            className="mt-4 p-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors w-full"
+            variant="secondary"
+            className="mt-4 w-full"
           >
             キャンセル
-          </button>
+          </Button>
         </div>
       </div>
     )
