@@ -139,7 +139,7 @@ const getSubjectTailwindColor = (index: number): string => {
 
 const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) => {
   const { userInfo } = useUserInfo();
-  const user = useAuth();
+  const auth = useAuth();
   const { showAlert } = useAlert();
 
   // Excel出力用の状態
@@ -155,7 +155,7 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
 
   // シフト出力ボタンのクリックハンドラー
   const handleOpenExportDialog = async () => {
-    if (!user) {
+    if (!auth.user) {
       showAlert("認証エラー", "ユーザ情報を登録してください");
       return;
     }

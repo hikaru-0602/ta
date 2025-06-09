@@ -11,12 +11,18 @@ import {
   useState,
 } from "react";
 
-type UserContextType = boolean | undefined;
+type AuthState = {
+  user: boolean | null;
+  isLoading: boolean;
+};
 
-const AuthContext = createContext<UserContextType>(undefined);
+const AuthContext = createContext<AuthState>({ user: null, isLoading: true });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<UserContextType>(undefined);
+  const [authState, setAuthState] = useState<AuthState>({
+    user: null,
+    isLoading: true,
+  });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -26,19 +32,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         //console.log("firebaseUser", firebaseUser);
         if (snap.exists()) {
           //const appUser = (await getDoc(ref)).data() as User;
-          setUser(true);
+          setAuthState({ user: true, isLoading: false });
         } else {
           await setDoc(ref, {}); // 空ドキュメントを作成
-          setUser(true); // 必要に応じてnullやundefinedをセット
+          setAuthState({ user: true, isLoading: false }); // 必要に応じてnullやundefinedをセット
         }
       } else {
-        setUser(false);
+        setAuthState({ user: false, isLoading: false });
       }
     });
     return unsubscribe;
   }, []);
 
-  return <AuthContext.Provider value={user}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={authState}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);

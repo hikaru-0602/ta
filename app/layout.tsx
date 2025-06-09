@@ -5,6 +5,7 @@ import { AuthProvider } from "./firebase/context/auth";
 import { UserDataProvider } from "./firebase/context/userDataProvider";
 import { LoginProvider } from "./firebase/context/LoginContext";
 import { AlertProvider } from "./components/AlertProvider";
+import AuthWrapper from "./components/AuthWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,13 +51,15 @@ export default function RootLayout({
       >
         {/* AuthProvider で全体をラップ */}
         <AuthProvider>
-          <UserDataProvider>
-            <LoginProvider>
-              <AlertProvider>
-                {children}
-              </AlertProvider>
-            </LoginProvider>
-          </UserDataProvider>
+          <AuthWrapper>
+            <UserDataProvider>
+              <LoginProvider>
+                <AlertProvider>
+                  {children}
+                </AlertProvider>
+              </LoginProvider>
+            </UserDataProvider>
+          </AuthWrapper>
         </AuthProvider>
       </body>
     </html>
