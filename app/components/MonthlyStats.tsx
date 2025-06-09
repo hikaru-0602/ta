@@ -38,9 +38,10 @@ ChartJS.register(
 // ドーナツグラフの中央にテキストを表示するプラグイン
 const centerTextPlugin = {
   id: 'centerText',
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   beforeDraw: function(chart: any) {
     if (chart.config.options.plugins.centerText && chart.config.options.plugins.centerText.display) {
-      const { ctx, chartArea: { top, bottom, left, right, width, height } } = chart;
+      const { ctx, chartArea: { top, left, width, height } } = chart;
       const centerX = left + width / 2;
       const centerY = top + height / 2;
 
@@ -300,6 +301,7 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
                         },
                         tooltip: {
                           callbacks: {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             label: function(context: any) {
                               const minutes = context.parsed;
                               const hours = Math.floor(minutes / 60);
@@ -313,7 +315,8 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
                           text: `${totalHours.hours}h ${totalHours.minutes}m `,
                           subText: '合計実働時間'
                         }
-                      } as any,
+                      },
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     } as any}
                   />
                 </div>
