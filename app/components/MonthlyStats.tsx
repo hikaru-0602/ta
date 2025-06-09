@@ -13,6 +13,62 @@ import ExportDialog, {
   handleExportSubject,
 } from "../calendar/export_dialog";
 import { Button } from "@/components/ui/button";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js';
+import { Doughnut } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
+
+// ドーナツグラフの中央にテキストを表示するプラグイン
+const centerTextPlugin = {
+  id: 'centerText',
+  beforeDraw: function(chart: any) {
+    if (chart.config.options.plugins.centerText && chart.config.options.plugins.centerText.display) {
+      const { ctx, chartArea: { top, bottom, left, right, width, height } } = chart;
+      const centerX = left + width / 2;
+      const centerY = top + height / 2;
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // ダークモード対応の色取得
+      const isDarkMode = document.documentElement.classList.contains('dark');
+
+      // メインテキスト
+      ctx.fillStyle = isDarkMode ? '#ffffff' : '#000000';
+      ctx.font = 'bold 20px Arial';
+      ctx.fillText(chart.config.options.plugins.centerText.text, centerX, centerY - 10);
+
+      // サブテキスト
+      if (chart.config.options.plugins.centerText.subText) {
+        ctx.fillStyle = isDarkMode ? '#9ca3af' : '#666666';
+        ctx.font = '12px Arial';
+        ctx.fillText(chart.config.options.plugins.centerText.subText, centerX, centerY + 15);
+      }
+
+      ctx.restore();
+    }
+  }
+};
+
+ChartJS.register(centerTextPlugin);
 
 interface MonthlyStatsProps {
   currentDate: Date;
@@ -48,6 +104,23 @@ const calculateShiftWorkTime = (shift: Shift): number => {
 
 // 科目ごとの色を生成する関数
 const getSubjectColor = (index: number): string => {
+  const colors = [
+    "#3b82f6", // blue-500
+    "#22c55e", // green-500
+    "#a855f7", // purple-500
+    "#eab308", // yellow-500
+    "#ec4899", // pink-500
+    "#6366f1", // indigo-500
+    "#ef4444", // red-500
+    "#14b8a6", // teal-500
+    "#f97316", // orange-500
+    "#06b6d4", // cyan-500
+  ];
+  return colors[index % colors.length];
+};
+
+// 科目ごとの色を生成する関数（Tailwind用）
+const getSubjectTailwindColor = (index: number): string => {
   const colors = [
     "bg-blue-500",
     "bg-green-500",
@@ -196,77 +269,113 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
           </Button>
         </div>
 
-        {/* 全体統計 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-            <div className="text-sm font-medium text-primary mb-1">総実働時間</div>
-            <div className="text-2xl font-bold text-foreground">
-              {totalHours.hours}時間{totalHours.minutes}分
-            </div>
-          </div>
-
-          <div className="bg-secondary/20 border border-secondary/30 rounded-lg p-4">
-            <div className="text-sm font-medium text-secondary-foreground mb-1">総シフト回数</div>
-            <div className="text-2xl font-bold text-foreground">
-              {currentMonthShifts.length}回
-            </div>
-          </div>
-
-          <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-            <div className="text-sm font-medium text-green-700 dark:text-green-300 mb-1">推定給料</div>
-            <div className="text-2xl font-bold text-foreground">
-              ¥{totalSalary.toLocaleString()}
-            </div>
-          </div>
-        </div>
-
-        {/* 科目別統計 */}
+        {/* 科目別統計（新しいグラフ表示） */}
         {subjects.length > 0 && (
           <div>
-            <h4 className="text-md font-semibold text-foreground mb-4">科目別詳細</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {subjects.map(([subject, stats], index) => {
-                const subjectHours = minutesToTimeFormat(stats.totalMinutes);
-                const subjectSalary = Math.round((stats.totalMinutes / 60) * hourlyRate);
-                const percentage = totalMinutes > 0 ? Math.round((stats.totalMinutes / totalMinutes) * 100) : 0;
+            {/* ドーナツグラフ：実働時間 */}
+            <div className="flex flex-col items-center mb-8">
+              <div className="p-6 w-full max-w-md">
+                <h5 className="text-sm font-medium text-foreground mb-4 text-center">実働時間</h5>
+                <div className="h-64">
+                  <Doughnut
+                    key={`${currentDate.getFullYear()}-${currentDate.getMonth()}`}
+                    data={{
+                      labels: subjects.map(([subject]) => subject),
+                      datasets: [
+                        {
+                          data: subjects.map(([, stats]) => stats.totalMinutes),
+                          backgroundColor: subjects.map((_, index) => getSubjectColor(index)),
+                          borderColor: subjects.map((_, index) => getSubjectColor(index)),
+                          borderWidth: 1,
+                        },
+                      ],
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      cutout: '80%',
+                      plugins: {
+                        legend: {
+                          display: false,
+                        },
+                        tooltip: {
+                          callbacks: {
+                            label: function(context: any) {
+                              const minutes = context.parsed;
+                              const hours = Math.floor(minutes / 60);
+                              const remainingMinutes = minutes % 60;
+                              return `${context.label}: ${hours}時間${remainingMinutes}分`;
+                            }
+                          }
+                        },
+                        centerText: {
+                          display: true,
+                          text: `${totalHours.hours}h ${totalHours.minutes}m `,
+                          subText: '合計実働時間'
+                        }
+                      } as any,
+                    } as any}
+                  />
+                </div>
+              </div>
+            </div>
 
-                return (
-                  <div
-                    key={subject}
-                    className="bg-background border border-border rounded-lg p-4 hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        <div
-                          className={`w-3 h-3 rounded-full ${getSubjectColor(index)}`}
-                        />
-                        <span className="font-medium text-foreground text-sm">{subject}</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">{percentage}%</span>
-                    </div>
-
-                    <div className="space-y-1">
-                      <div className="text-sm text-muted-foreground">{stats.category}</div>
-                      <div className="font-semibold text-foreground">
-                        {subjectHours.hours}h {subjectHours.minutes}m
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {stats.shiftCount}回 • ¥{subjectSalary.toLocaleString()}
-                      </div>
-                    </div>
-
-                    {/* プログレスバー */}
-                    <div className="mt-3">
-                      <div className="w-full bg-secondary/20 rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full ${getSubjectColor(index)} opacity-80`}
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
-                    </div>
+            {/* 科目別サマリーテーブル */}
+            <div className="bg-background border border-border rounded-lg p-6">
+              {/* 推定給料表示 */}
+              <div className="mb-6 pb-4 border-b border-border">
+                <div className="text-center">
+                  <div className="text-sm font-medium text-muted-foreground mb-1">推定給料</div>
+                  <div className="text-2xl font-semibold text-foreground">
+                    ¥{totalSalary.toLocaleString()}
                   </div>
-                );
-              })}
+                </div>
+              </div>
+
+              {/* 科目別詳細表 */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-3 px-4 font-medium text-foreground">科目</th>
+                      <th className="text-right py-3 px-4 font-medium text-foreground">勤務時間</th>
+                      <th className="text-right py-3 px-4 font-medium text-foreground">勤務回数</th>
+                      <th className="text-right py-3 px-4 font-medium text-foreground">給料</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {subjects.map(([subject, stats], index) => {
+                      const subjectHours = minutesToTimeFormat(stats.totalMinutes);
+                      const subjectSalary = Math.round((stats.totalMinutes / 60) * hourlyRate);
+
+                      return (
+                        <tr key={subject} className="border-b border-border hover:bg-secondary/5">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-3">
+                              <div
+                                className={`w-4 h-4 rounded-full ${getSubjectTailwindColor(index)}`}
+                              />
+                              <div>
+                                <div className="font-medium text-foreground">{subject}</div>
+                                <div className="text-xs text-muted-foreground">{stats.category}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-right font-medium text-foreground">
+                            {subjectHours.hours}h {subjectHours.minutes}m
+                          </td>
+                          <td className="py-3 px-4 text-right text-foreground">
+                            {stats.shiftCount}回
+                          </td>
+                          <td className="py-3 px-4 text-right font-medium text-foreground">
+                            ¥{subjectSalary.toLocaleString()}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
