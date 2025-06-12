@@ -52,13 +52,13 @@ export default function RootLayout({
         {/* AuthProvider で全体をラップ */}
         <AuthProvider>
           <AuthWrapper>
-            <UserDataProvider>
-              <LoginProvider>
-                <AlertProvider>
-                  {children}
-                </AlertProvider>
-              </LoginProvider>
-            </UserDataProvider>
+          <UserDataProvider>
+            <LoginProvider>
+              <AlertProvider>
+                {children}
+              </AlertProvider>
+            </LoginProvider>
+          </UserDataProvider>
           </AuthWrapper>
         </AuthProvider>
       </body>

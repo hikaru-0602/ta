@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Shift, gradeInfoMap } from "../types";
 import { useUserInfo } from "../setting/user_setting";
+import { useAuth } from "../firebase/context/auth";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/lib/firebase";
@@ -139,6 +140,7 @@ const getSubjectTailwindColor = (index: number): string => {
 
 const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) => {
   const { userInfo } = useUserInfo();
+  const auth = useAuth();
   const { showAlert } = useAlert();
   const { checkAuth } = useAuthCheck();
 
@@ -242,7 +244,7 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
             </h3>
             <Button
               onClick={handleOpenExportDialog}
-              disabled={currentMonthShifts.length === 0}
+              disabled={!!auth.user && currentMonthShifts.length === 0}
             >
               Excel出力
             </Button>
@@ -264,6 +266,7 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
           </h3>
           <Button
             onClick={handleOpenExportDialog}
+            disabled={!!auth.user && currentMonthShifts.length === 0}
           >
             Excel出力
           </Button>
