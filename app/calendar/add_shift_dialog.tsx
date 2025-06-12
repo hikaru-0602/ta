@@ -354,7 +354,12 @@ export default function AddShiftDialog({
           onClick={backDialog}
         >
           <div className="bg-card text-card-foreground p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-xs sm:max-w-md border border-border">
-            <h2 className="text-xl font-bold mb-4 text-foreground">仕事リスト</h2>
+            <h2 className="text-xl font-bold mb-4 text-foreground">
+              {selectedDate ?
+                `${selectedDate.getMonth() + 1}月${selectedDate.getDate()}日(${['日', '月', '火', '水', '木', '金', '土'][selectedDate.getDay()]}) - 仕事リスト` :
+                '仕事リスト'
+              }
+            </h2>
             <h3 className="text-lg font-semibold mb-2 text-foreground">-- 追加 --</h3>
             <ul>
               {shiftData
@@ -371,11 +376,11 @@ export default function AddShiftDialog({
                     className="mb-2 flex justify-between items-center"
                   >
                     <div className="flex-1 mr-2 min-w-0">
-                      <span className="block text-sm text-muted-foreground">
+                      <span className="block text-sm text-muted-foreground whitespace-nowrap">
                         {shift.starttime}~{shift.endtime}
                       </span>
                       <span
-                        className="block text-sm font-medium truncate text-foreground"
+                        className="block text-sm font-medium truncate whitespace-nowrap text-foreground"
                         title={shift.label || "（ラベルなし）"}
                       >
                         {shift.label || "（ラベルなし）"}
@@ -436,11 +441,11 @@ export default function AddShiftDialog({
                 .map((work, index) => (
                   <li key={index} className="mb-2 flex justify-between items-center">
                     <div className="flex-1 mr-2 min-w-0">
-                      <span className="block text-sm text-muted-foreground">
+                      <span className="block text-sm text-muted-foreground whitespace-nowrap">
                         {work.starttime}~{work.endtime}
                       </span>
                       <span
-                        className="block text-sm font-medium truncate text-foreground"
+                        className="block text-sm font-medium truncate whitespace-nowrap text-foreground"
                         title={work.label || "（ラベルなし）"}
                       >
                         {work.label || "（ラベルなし）"}

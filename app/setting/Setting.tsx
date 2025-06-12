@@ -259,48 +259,48 @@ export default function Work() {
                     className="p-4 bg-background border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow"
                   >
                     <div className="flex justify-between items-start">
-                      <div className="flex-1 min-w-0 mr-4">
-                        <p className="text-lg font-bold text-foreground break-words">
+                      <div className="flex-1 min-w-0 mr-4 overflow-hidden">
+                        <p className="text-lg font-bold text-foreground truncate whitespace-nowrap">
                           <span className="text-sm text-muted-foreground">ラベル:</span>{" "}
                           <span title={work.label || "（ラベルなし）"}>
                             {work.label || "（ラベルなし）"}
                           </span>
                         </p>
-                        <p className="text-sm font-bold text-foreground truncate">
+                        <p className="text-sm font-bold text-foreground truncate whitespace-nowrap">
                           <span className="text-muted-foreground">科目名:</span>{" "}
                           <span title={work.classname || "（未設定）"}>
                             {work.classname || "（未設定）"}
                           </span>
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground truncate whitespace-nowrap">
                           業務内容: {work.category}
                         </p>
-                        <p className="text-sm text-muted-foreground truncate">
+                        <p className="text-sm text-muted-foreground truncate whitespace-nowrap">
                           <span>教員名:</span>{" "}
                           <span title={work.teacher || "（未設定）"}>
                             {work.teacher || "（未設定）"}
                           </span>
                         </p>
-                        <div className="flex space-x-4">
-                          <p className="text-sm text-muted-foreground">
+                        <div className="flex space-x-4 overflow-hidden">
+                          <p className="text-sm text-muted-foreground truncate whitespace-nowrap">
                             曜日:{" "}
                             {work.dayofweek === "" ? "なし" : work.dayofweek}
                           </p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground truncate whitespace-nowrap">
                             時限:{" "}
                             {work.schedule && work.schedule.length > 0
                               ? work.schedule.join(", ") + "限"
                               : "なし"}
                           </p>
                         </div>
-                        <div className="flex space-x-4">
-                          <p className="text-sm text-muted-foreground">
+                        <div className="flex space-x-4 overflow-hidden">
+                          <p className="text-sm text-muted-foreground truncate whitespace-nowrap">
                             時刻: {work.starttime}~{work.endtime}
                           </p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground truncate whitespace-nowrap">
                             休憩: {work.breaktime}分
                           </p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground truncate whitespace-nowrap">
                             実働: {work.worktime}
                           </p>
                         </div>

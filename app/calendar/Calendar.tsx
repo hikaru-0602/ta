@@ -248,14 +248,7 @@ export default function Calendar() {
               key={date.toISOString()}
               onClick={() => handleDateClick(date)}
               className={`p-6 rounded-md text-xl cursor-pointer relative hover:bg-accent hover:text-accent-foreground transition-colors ${
-                selectedDate?.toDateString() === date.toDateString()
-                  ? "border-2 border-primary" +
-                    (isSunday || isSaturday || holiday
-                      ? " bg-destructive/10 text-destructive"
-                      : isToday
-                      ? " bg-card text-card-foreground"
-                      : " bg-card text-card-foreground")
-                  : isToday
+                isToday
                   ? "border-2 border-ring" +
                     (isSunday || isSaturday || holiday
                       ? " bg-destructive/10 text-destructive"

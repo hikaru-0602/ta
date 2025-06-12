@@ -294,7 +294,7 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
                     options={{
                       responsive: true,
                       maintainAspectRatio: false,
-                      cutout: '80%',
+                      cutout: '90%',
                       plugins: {
                         legend: {
                           display: false,
@@ -360,7 +360,7 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
                               />
                               <div>
                                 <div className="font-medium text-foreground">{subject}</div>
-                                <div className="text-xs text-muted-foreground">{stats.category}</div>
+                                {/*<div className="text-xs text-muted-foreground">{stats.category}</div>*/}
                               </div>
                             </div>
                           </td>
