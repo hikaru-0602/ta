@@ -18,6 +18,7 @@ import { db } from "../firebase/lib/firebase";
 import { useAlert } from "../components/AlertProvider";
 import MonthlyStats from "../components/MonthlyStats";
 import { Button } from "@/components/ui/button";
+import { useAuthCheck } from "../hooks/useAuthCheck";
 
 export default function Calendar() {
   const today = new Date();
@@ -32,6 +33,7 @@ export default function Calendar() {
   const [holidays, setHolidays] = useState<{ [date: string]: string }>({});
   const user = useAuth();
   const { showAlert } = useAlert();
+  const { checkAuth } = useAuthCheck();
 
   const { loadUserInfoFromLocalStorage } = useUserInfo();
 
@@ -174,8 +176,7 @@ export default function Calendar() {
   };
 
   const handleDateClick = (date: Date) => {
-    if (!user) {
-      showAlert("認証エラー", "ログインしてください。");
+    if (!checkAuth()) {
       return;
     }
 
@@ -259,7 +260,7 @@ export default function Calendar() {
               }`}
             >
               {date.getDate()}
-              {shiftCount > 0 && user && (
+              {shiftCount > 0 && user.user && (
                 <div className="absolute top-1 right-1 bg-primary text-primary-foreground text-xs w-5 h-5 flex items-center justify-center rounded-full">
                   {shiftCount}
                 </div>

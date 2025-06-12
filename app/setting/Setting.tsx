@@ -11,6 +11,7 @@ import { getAuth } from "firebase/auth";
 import { gradeInfoMap } from "../types";
 import { useAlert } from "../components/AlertProvider";
 import { Button } from "@/components/ui/button";
+import { useAuthCheck } from "../hooks/useAuthCheck";
 
 export default function Work() {
   //ユーザ情報のカスタムフックを使用
@@ -54,6 +55,7 @@ export default function Work() {
   const auth = getAuth();
   const uid = auth.currentUser?.uid;
   const { showAlert } = useAlert();
+  const { checkAuth } = useAuthCheck();
 
   //初期化時にローカルストレージからデータを読み込む
   useEffect(() => {
@@ -115,12 +117,11 @@ export default function Work() {
                     <input
                       type="text"
                       name="name"
-                      value={!user ? "" : userInfo.name ?? ""}
+                      value={!user.user ? "" : userInfo.name ?? ""}
                       onChange={handleUserChange}
                       placeholder="例: 山田 太郎"
                       onFocus={(e) => {
-                        if (!user) {
-                          showAlert("認証エラー", "ログインしてください。");
+                        if (!checkAuth()) {
                           e.target.blur();
                         }
                       }}
@@ -134,12 +135,11 @@ export default function Work() {
                     <input
                       type="text"
                       name="name_kana"
-                      value={!user ? "" : userInfo.name_kana ?? ""}
+                      value={!user.user ? "" : userInfo.name_kana ?? ""}
                       onChange={handleUserChange}
                       placeholder="例: やまだ たろう"
                       onFocus={(e) => {
-                        if (!user) {
-                          showAlert("認証エラー", "ログインしてください。");
+                        if (!checkAuth()) {
                           e.target.blur();
                         }
                       }}
@@ -155,12 +155,11 @@ export default function Work() {
                     </label>
                     <select
                       name="grade"
-                      value={!user ? "" : userInfo.value ?? "1"}
+                      value={!user.user ? "" : userInfo.value ?? "1"}
                       onChange={handleGradeChange}
                       onMouseDown={(e) => {
-                        if (!user) {
+                        if (!checkAuth()) {
                           e.preventDefault(); // デフォルトのフォーカスを防ぐ
-                          showAlert("認証エラー", "ログインしてください。");
                         }
                       }}
                       className="w-full p-3 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
@@ -179,12 +178,11 @@ export default function Work() {
                     <input
                       type="text"
                       name="id"
-                      value={!user ? "" : userInfo.id}
+                      value={!user.user ? "" : userInfo.id}
                       onChange={handleUserChange}
                       placeholder="例: 1234567"
                       onFocus={(e) => {
-                        if (!user) {
-                          showAlert("認証エラー", "ログインしてください。");
+                        if (!checkAuth()) {
                           e.target.blur();
                         }
                       }}
@@ -198,7 +196,7 @@ export default function Work() {
                     時給
                   </label>
                   <p className="text-lg font-bold text-foreground">
-                    {user && userInfo.value
+                    {user.user && userInfo.value
                       ? `${gradeInfoMap[userInfo.value].wage}円`
                       : "    円"}
                   </p>
@@ -206,8 +204,7 @@ export default function Work() {
                 <div className="flex justify-end mt-4">
                   <Button
                     onClick={() => {
-                      if (!user) {
-                        showAlert("認証エラー", "ログインしてください。");
+                      if (!checkAuth()) {
                         return;
                       } else if (
                         userInfo.name === "" &&
@@ -238,8 +235,7 @@ export default function Work() {
               <Button
                 onClick={(e) => {
                   e.preventDefault();
-                  if (!user) {
-                    showAlert("認証エラー", "ログインしてください。");
+                  if (!checkAuth()) {
                     return;
                   }
                   const uniqueId = generateUniqueId();
@@ -251,7 +247,7 @@ export default function Work() {
                 追加
               </Button>
             </div>
-            {user && (
+            {user.user && (
               <ul className="space-y-4">
                 {workData.map((work, index) => (
                   <li
@@ -345,7 +341,7 @@ export default function Work() {
                 ))}
               </ul>
             )}
-            {!user && (
+            {!user.user && (
               <p className="text-muted-foreground">
                 ログインしてください
               </p>

@@ -13,6 +13,7 @@ import ExportDialog, {
   handleExportSubject,
 } from "../calendar/export_dialog";
 import { Button } from "@/components/ui/button";
+import { useAuthCheck } from "../hooks/useAuthCheck";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -141,6 +142,7 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
   const { userInfo } = useUserInfo();
   const auth = useAuth();
   const { showAlert } = useAlert();
+  const { checkAuth } = useAuthCheck();
 
   // Excel出力用の状態
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
@@ -155,8 +157,7 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
 
   // シフト出力ボタンのクリックハンドラー
   const handleOpenExportDialog = async () => {
-    if (!auth.user) {
-      showAlert("認証エラー", "ユーザ情報を登録してください");
+    if (!checkAuth()) {
       return;
     }
 
@@ -243,7 +244,7 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
             </h3>
             <Button
               onClick={handleOpenExportDialog}
-              disabled={currentMonthShifts.length === 0}
+              disabled={!!auth.user && currentMonthShifts.length === 0}
             >
               Excel出力
             </Button>
@@ -265,6 +266,7 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
           </h3>
           <Button
             onClick={handleOpenExportDialog}
+            disabled={!!auth.user && currentMonthShifts.length === 0}
           >
             Excel出力
           </Button>

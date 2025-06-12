@@ -79,7 +79,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="py-5 flex justify-end pr-8">
-        {!user ? (
+        {!user.user ? (
           <Button
             onClick={handleLogin}
             disabled={isLoading}
