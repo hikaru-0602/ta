@@ -76,7 +76,7 @@ export default function Header() {
         </nav>
         {/* ログイン・ログアウトボタン */}
         <div className="ml-4">
-          {user === null ? (
+          {!user.user ? (
             <Button
               onClick={handleLogin}
               disabled={isLoading}

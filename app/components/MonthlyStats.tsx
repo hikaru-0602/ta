@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { Shift, gradeInfoMap } from "../types";
 import { useUserInfo } from "../setting/user_setting";
-import { useAuth } from "../firebase/context/auth";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/lib/firebase";
@@ -13,6 +12,7 @@ import ExportDialog, {
   handleExportSubject,
 } from "../calendar/export_dialog";
 import { Button } from "@/components/ui/button";
+import { useAuthCheck } from "../hooks/useAuthCheck";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -139,8 +139,8 @@ const getSubjectTailwindColor = (index: number): string => {
 
 const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) => {
   const { userInfo } = useUserInfo();
-  const auth = useAuth();
   const { showAlert } = useAlert();
+  const { checkAuth } = useAuthCheck();
 
   // Excel出力用の状態
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
@@ -155,8 +155,7 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
 
   // シフト出力ボタンのクリックハンドラー
   const handleOpenExportDialog = async () => {
-    if (!auth.user) {
-      showAlert("認証エラー", "ユーザ情報を登録してください");
+    if (!checkAuth()) {
       return;
     }
 
