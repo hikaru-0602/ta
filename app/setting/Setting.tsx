@@ -12,6 +12,10 @@ import { gradeInfoMap } from "../types";
 import { useAlert } from "../components/AlertProvider";
 import { Button } from "@/components/ui/button";
 import { useAuthCheck } from "../hooks/useAuthCheck";
+import SubjectDialog from "./SubjectDialog";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "../firebase/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function Work() {
   //ユーザ情報のカスタムフックを使用
@@ -56,6 +60,8 @@ export default function Work() {
   const uid = auth.currentUser?.uid;
   const { showAlert } = useAlert();
   const { checkAuth } = useAuthCheck();
+  const [isSubjectDialogOpen, setIsSubjectDialogOpen] = useState(false);
+  const [userSubjects, setUserSubjects] = useState<any[]>([]);
 
   //初期化時にローカルストレージからデータを読み込む
   useEffect(() => {
@@ -78,6 +84,35 @@ export default function Work() {
       }));
     }
   }, [isLoginTriggered, user]);
+
+  // ユーザーの担当科目データをリアルタイムで取得
+  useEffect(() => {
+    const auth = getAuth();
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (user: any) => {
+      if (user) {
+        const unsubscribeSnapshot = onSnapshot(
+          collection(db, `users/${user.uid}/subjects`),
+          (snapshot) => {
+            const subjects = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+            setUserSubjects(subjects);
+          },
+          (error) => {
+            console.error("担当科目データの監視エラー:", error);
+          }
+        );
+
+        return unsubscribeSnapshot;
+      } else {
+        setUserSubjects([]);
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
 
   return (
     <>
@@ -226,6 +261,65 @@ export default function Work() {
             )}
           </div>
 
+          {/* 担当科目管理 */}
+          <div className="space-y-6 bg-card text-card-foreground p-8 rounded-lg border border-border">
+            <div className="flex justify-start items-center space-x-8">
+              <h2 className="text-2xl font-semibold text-foreground border-b pb-4">
+                担当科目管理
+              </h2>
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (!checkAuth()) {
+                    return;
+                  }
+                  setIsSubjectDialogOpen(true);
+                }}
+                className="mb-4"
+              >
+                科目追加
+              </Button>
+            </div>
+            {user.user && (
+              <div className="space-y-4">
+                {userSubjects.length === 0 ? (
+                  <p className="text-muted-foreground">登録された担当科目はありません</p>
+                ) : (
+                  <ul className="space-y-3">
+                    {userSubjects.map((subject) => (
+                      <li
+                        key={subject.id}
+                        className="p-4 bg-background border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1 min-w-0 mr-4 overflow-hidden">
+                            <p className="text-lg font-bold text-foreground truncate whitespace-nowrap">
+                              <span className="text-sm text-muted-foreground">科目名:</span>{" "}
+                              <span title={subject.subjectName || "（科目名なし）"}>
+                                {subject.subjectName || "（科目名なし）"}
+                              </span>
+                            </p>
+                            <p className="text-sm text-muted-foreground truncate whitespace-nowrap">
+                              <span>担当教員:</span>{" "}
+                              <span title={subject.teacherName || "（教員名なし）"}>
+                                {subject.teacherName || "（教員名なし）"}
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+            {!user.user && (
+              <p className="text-muted-foreground">
+                ログインしてください
+              </p>
+            )}
+          </div>
+
           {/* 仕事リスト */}
           <div className="space-y-6 bg-card text-card-foreground p-8 rounded-lg border border-border">
             <div className="flex justify-start items-center space-x-8">
@@ -367,6 +461,12 @@ export default function Work() {
           editingIndex={editingIndex}
           setEditingIndex={setEditingIndex}
           saveScheduleTimeEdit={saveScheduleTimeEdit}
+        />
+
+        {/* 担当科目ダイアログ */}
+        <SubjectDialog
+          isDialogOpen={isSubjectDialogOpen}
+          setIsDialogOpen={setIsSubjectDialogOpen}
         />
       </div>
     </>
