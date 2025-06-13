@@ -365,6 +365,13 @@ export default function AddShiftDialog({
                     shift.month === selectedDate.getMonth() + 1 &&
                     shift.day === selectedDate.getDate()
                 )
+                .sort((a, b) => {
+                  // 五十音順ソート（日本語対応）
+                  return (a.label || "").localeCompare(b.label || "", 'ja', {
+                    numeric: true,
+                    sensitivity: 'base'
+                  });
+                })
                 .map((shift, index) => (
                   <li
                     key={index}
@@ -433,6 +440,13 @@ export default function AddShiftDialog({
                         shift.day === selectedDate.getDate()
                     )
                 )
+                .sort((a, b) => {
+                  // 五十音順ソート（日本語対応）
+                  return (a.label || "").localeCompare(b.label || "", 'ja', {
+                    numeric: true,
+                    sensitivity: 'base'
+                  });
+                })
                 .map((work, index) => (
                   <li key={index} className="mb-2 flex justify-between items-center">
                     <div className="flex-1 mr-2 min-w-0">
