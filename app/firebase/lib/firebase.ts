@@ -30,14 +30,14 @@ declare global {
 }
 
 // AppCheck 初期化処理
-if (typeof document !== 'undefined' && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+if (typeof document !== 'undefined') {
   // 1.デバック環境用設定
   if (process.env.NODE_ENV === 'development') {
     window.self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
   }
   // 2.AppCheck 初期化
   const appCheck = initializeAppCheck(firebase, {
-    provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY),
+    provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''),
     isTokenAutoRefreshEnabled: true,
   })
   // 3.AppCheck　結果 ＆ トークン確認
@@ -46,7 +46,7 @@ if (typeof document !== 'undefined' && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KE
       console.log('AppCheck:Success')
     })
     .catch((error) => {
-      console.log('AppCheck Error:', error.message)
+      console.log(error.message)
     })
 }
 
