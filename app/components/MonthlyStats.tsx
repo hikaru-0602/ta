@@ -79,43 +79,6 @@ interface MonthlyStatsProps {
 
 type StatsType = 'monthly' | 'weekly';
 
-// 隔週期間の計算関数
-const getBiweeklyPeriod = (date: Date, weekOffset: number = 0) => {
-  const dayOfWeek = date.getDay();
-  const mondayOfWeek = new Date(date);
-  mondayOfWeek.setDate(date.getDate() - dayOfWeek + 1);
-  mondayOfWeek.setHours(0, 0, 0, 0);
-  
-  // 基準日（例：2024年1月1日）からの経過週数を計算
-  const baseDate = new Date(2024, 0, 1);
-  const baseDayOfWeek = baseDate.getDay();
-  const baseMondayOfWeek = new Date(baseDate);
-  baseMondayOfWeek.setDate(baseDate.getDate() - baseDayOfWeek + 1);
-  baseMondayOfWeek.setHours(0, 0, 0, 0);
-  
-  const diffTime = mondayOfWeek.getTime() - baseMondayOfWeek.getTime();
-  const diffWeeks = Math.floor(diffTime / (7 * 24 * 60 * 60 * 1000));
-  
-  // 隔週の開始週を調整
-  const adjustedWeeks = Math.floor(diffWeeks / 2) * 2 + weekOffset * 2;
-  
-  const startDate = new Date(baseMondayOfWeek);
-  startDate.setDate(baseMondayOfWeek.getDate() + adjustedWeeks * 7);
-  
-  const endDate = new Date(startDate);
-  endDate.setDate(startDate.getDate() + 13); // 2週間-1日
-  endDate.setHours(23, 59, 59, 999);
-  
-  return { startDate, endDate };
-};
-
-// 隔週期間の文字列表現
-const formatBiweeklyPeriod = (startDate: Date, endDate: Date): string => {
-  const formatDate = (date: Date) => {
-    return `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
-  };
-  return `${formatDate(startDate)} - ${formatDate(endDate)}`;
-};
 
 // 月の週一覧を取得する関数
 const getWeeksInMonth = (date: Date) => {
