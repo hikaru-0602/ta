@@ -77,6 +77,103 @@ interface MonthlyStatsProps {
   shiftData: Shift[];
 }
 
+type StatsType = 'monthly' | 'weekly';
+
+// 隔週期間の計算関数
+const getBiweeklyPeriod = (date: Date, weekOffset: number = 0) => {
+  const dayOfWeek = date.getDay();
+  const mondayOfWeek = new Date(date);
+  mondayOfWeek.setDate(date.getDate() - dayOfWeek + 1);
+  mondayOfWeek.setHours(0, 0, 0, 0);
+  
+  // 基準日（例：2024年1月1日）からの経過週数を計算
+  const baseDate = new Date(2024, 0, 1);
+  const baseDayOfWeek = baseDate.getDay();
+  const baseMondayOfWeek = new Date(baseDate);
+  baseMondayOfWeek.setDate(baseDate.getDate() - baseDayOfWeek + 1);
+  baseMondayOfWeek.setHours(0, 0, 0, 0);
+  
+  const diffTime = mondayOfWeek.getTime() - baseMondayOfWeek.getTime();
+  const diffWeeks = Math.floor(diffTime / (7 * 24 * 60 * 60 * 1000));
+  
+  // 隔週の開始週を調整
+  const adjustedWeeks = Math.floor(diffWeeks / 2) * 2 + weekOffset * 2;
+  
+  const startDate = new Date(baseMondayOfWeek);
+  startDate.setDate(baseMondayOfWeek.getDate() + adjustedWeeks * 7);
+  
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + 13); // 2週間-1日
+  endDate.setHours(23, 59, 59, 999);
+  
+  return { startDate, endDate };
+};
+
+// 隔週期間の文字列表現
+const formatBiweeklyPeriod = (startDate: Date, endDate: Date): string => {
+  const formatDate = (date: Date) => {
+    return `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
+  };
+  return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+};
+
+// 月の週一覧を取得する関数
+const getWeeksInMonth = (date: Date) => {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const firstDayOfMonth = new Date(year, month, 1);
+  const lastDayOfMonth = new Date(year, month + 1, 0);
+  
+  const weeks = [];
+  let currentDate = new Date(firstDayOfMonth);
+  
+  // 月の最初の月曜日を見つける
+  const firstMonday = new Date(currentDate);
+  const dayOfWeek = firstMonday.getDay();
+  const daysToMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek) % 7;
+  if (daysToMonday > 0) {
+    firstMonday.setDate(firstMonday.getDate() + daysToMonday);
+  }
+  
+  // 月の最初の日が月曜日より前の場合、前の月曜日から開始
+  if (firstMonday > firstDayOfMonth) {
+    const prevMonday = new Date(firstMonday);
+    prevMonday.setDate(prevMonday.getDate() - 7);
+    currentDate = prevMonday;
+  } else {
+    currentDate = firstMonday;
+  }
+  
+  // 週を生成
+  while (currentDate <= lastDayOfMonth) {
+    const monday = new Date(currentDate);
+    const friday = new Date(currentDate);
+    friday.setDate(friday.getDate() + 4);
+    
+    // 月曜日または金曜日が対象月に含まれている場合のみ追加
+    if ((monday.getMonth() === month && monday.getFullYear() === year) ||
+        (friday.getMonth() === month && friday.getFullYear() === year)) {
+      weeks.push({
+        startDate: monday,
+        endDate: friday,
+        weekNumber: weeks.length + 1
+      });
+    }
+    
+    currentDate.setDate(currentDate.getDate() + 7);
+  }
+  
+  return weeks;
+};
+
+// 週の文字列表現
+const formatWeekPeriod = (startDate: Date, endDate: Date): string => {
+  const formatDate = (date: Date) => {
+    return `${date.getMonth() + 1}/${date.getDate()}`;
+  };
+  return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+};
+
 // 時刻文字列（HH:MM）を分に変換する関数
 const timeToMinutes = (time: string): number => {
   if (!time || !time.includes(':')) return 0;
@@ -147,13 +244,31 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
   // Excel出力用の状態
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [subjectNames, setSubjectNames] = useState<string[]>([]);
+  
+  // 統計タイプと選択された週
+  const [statsType, setStatsType] = useState<StatsType>('monthly');
+  const [selectedWeek, setSelectedWeek] = useState<number>(0);
 
-  // 現在表示している月のシフトデータをフィルタリング
-  const currentMonthShifts = shiftData.filter(
-    (shift) =>
-      shift.year === currentDate.getFullYear() &&
-      shift.month === currentDate.getMonth() + 1
-  );
+  // 現在表示している期間のシフトデータをフィルタリング
+  const currentPeriodShifts = (() => {
+    if (statsType === 'monthly') {
+      return shiftData.filter(
+        (shift) =>
+          shift.year === currentDate.getFullYear() &&
+          shift.month === currentDate.getMonth() + 1
+      );
+    } else {
+      // weekly
+      const weeks = getWeeksInMonth(currentDate);
+      if (weeks.length === 0) return [];
+      
+      const week = weeks[selectedWeek] || weeks[0];
+      return shiftData.filter((shift) => {
+        const shiftDate = new Date(shift.year, shift.month - 1, shift.day);
+        return shiftDate >= week.startDate && shiftDate <= week.endDate;
+      });
+    }
+  })();
 
   // シフト出力ボタンのクリックハンドラー
   const handleOpenExportDialog = async () => {
@@ -192,7 +307,7 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
 
       //科目名のリストを取得（重複を排除）
       const uniqueSubjectNames = Array.from(
-        new Set(currentMonthShifts.map((shift) => shift.classname))
+        new Set(currentPeriodShifts.map((shift) => shift.classname))
       );
 
       setSubjectNames(uniqueSubjectNames); //科目名リストを状態に保存
@@ -204,7 +319,7 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
   };
 
   // 科目ごとに集計
-  const subjectStats = currentMonthShifts.reduce((acc, shift) => {
+  const subjectStats = currentPeriodShifts.reduce((acc, shift) => {
     const workTime = calculateShiftWorkTime(shift);
     const subject = shift.classname || "未設定";
 
@@ -234,23 +349,121 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
   // 科目一覧（統計がある科目のみ）
   const subjects = Object.entries(subjectStats);
 
-  if (currentMonthShifts.length === 0) {
+  // 期間のタイトルを生成
+  const periodTitle = (() => {
+    if (statsType === 'monthly') {
+      return `${currentDate.getFullYear()}年${currentDate.getMonth() + 1}月の統計`;
+    } else {
+      // weekly
+      const weeks = getWeeksInMonth(currentDate);
+      if (weeks.length === 0) return '週統計';
+      
+      const week = weeks[selectedWeek] || weeks[0];
+      return `${formatWeekPeriod(week.startDate, week.endDate)}の統計`;
+    }
+  })();
+  
+  // 週リスト
+  const weeksInMonth = getWeeksInMonth(currentDate);
+
+  if (currentPeriodShifts.length === 0) {
     return (
       <div className="w-full max-w-[1200px] mt-8">
         <div className="bg-card text-card-foreground p-6 rounded-lg border border-border">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-foreground">
-              {currentDate.getFullYear()}年{currentDate.getMonth() + 1}月の統計
+              {periodTitle}
             </h3>
             <Button
               onClick={handleOpenExportDialog}
-              disabled={!!auth.user && currentMonthShifts.length === 0}
+              disabled={!!auth.user && currentPeriodShifts.length === 0}
             >
               Excel出力
             </Button>
           </div>
+          
+          {/* 期間切り替えボタン */}
+          <div className="flex items-center justify-center mb-6">
+            <div className="flex bg-secondary rounded-lg p-1">
+              <button
+                onClick={() => setStatsType('monthly')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  statsType === 'monthly'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-foreground hover:bg-background'
+                }`}
+              >
+                月次
+              </button>
+              <button
+                onClick={() => setStatsType('weekly')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  statsType === 'weekly'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-foreground hover:bg-background'
+                }`}
+              >
+                週次
+              </button>
+            </div>
+          </div>
+          
+          {/* 週リスト表示 */}
+          {statsType === 'weekly' && (
+            <div className="mb-6">
+              <h4 className="text-md font-medium text-foreground mb-4">
+                {currentDate.getFullYear()}年{currentDate.getMonth() + 1}月の週一覧
+              </h4>
+              <div className="space-y-2">
+                {weeksInMonth.map((week, index) => {
+                  const weekShifts = shiftData.filter((shift) => {
+                    const shiftDate = new Date(shift.year, shift.month - 1, shift.day);
+                    return shiftDate >= week.startDate && shiftDate <= week.endDate;
+                  });
+                  
+                  const totalMinutes = weekShifts.reduce((sum, shift) => {
+                    return sum + calculateShiftWorkTime(shift);
+                  }, 0);
+                  
+                  const weekHours = minutesToTimeFormat(totalMinutes);
+                  
+                  return (
+                    <div
+                      key={index}
+                      onClick={() => setSelectedWeek(index)}
+                      className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                        selectedWeek === index
+                          ? 'bg-primary/10 border-primary'
+                          : 'bg-card border-border hover:bg-secondary/50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-foreground">
+                            第{week.weekNumber}週 ({formatWeekPeriod(week.startDate, week.endDate)})
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {weekShifts.length}件のシフト
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-medium text-foreground">
+                            {weekHours.hours}h {weekHours.minutes}m
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            合計時間
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          
           <p className="text-muted-foreground text-center py-8">
-            この月にはシフトデータがありません
+            この期間にはシフトデータがありません
           </p>
         </div>
       </div>
@@ -262,15 +475,96 @@ const MonthlyStats: React.FC<MonthlyStatsProps> = ({ currentDate, shiftData }) =
       <div className="bg-card text-card-foreground p-6 rounded-lg border border-border">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-foreground">
-            {currentDate.getFullYear()}年{currentDate.getMonth() + 1}月の統計
+            {periodTitle}
           </h3>
           <Button
             onClick={handleOpenExportDialog}
-            disabled={!!auth.user && currentMonthShifts.length === 0}
+            disabled={!!auth.user && currentPeriodShifts.length === 0}
           >
             Excel出力
           </Button>
         </div>
+        
+        {/* 期間切り替えボタン */}
+        <div className="flex items-center justify-center mb-6">
+          <div className="flex bg-secondary rounded-lg p-1">
+            <button
+              onClick={() => setStatsType('monthly')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                statsType === 'monthly'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-foreground hover:bg-background'
+              }`}
+            >
+              月次
+            </button>
+            <button
+              onClick={() => setStatsType('weekly')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                statsType === 'weekly'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-foreground hover:bg-background'
+              }`}
+            >
+              週次
+            </button>
+          </div>
+          
+        </div>
+        
+        {/* 週リスト表示 */}
+        {statsType === 'weekly' && (
+          <div className="mb-6">
+            <h4 className="text-md font-medium text-foreground mb-4">
+              {currentDate.getFullYear()}年{currentDate.getMonth() + 1}月の週一覧
+            </h4>
+            <div className="space-y-2">
+              {weeksInMonth.map((week, index) => {
+                const weekShifts = shiftData.filter((shift) => {
+                  const shiftDate = new Date(shift.year, shift.month - 1, shift.day);
+                  return shiftDate >= week.startDate && shiftDate <= week.endDate;
+                });
+                
+                const totalMinutes = weekShifts.reduce((sum, shift) => {
+                  return sum + calculateShiftWorkTime(shift);
+                }, 0);
+                
+                const weekHours = minutesToTimeFormat(totalMinutes);
+                
+                return (
+                  <div
+                    key={index}
+                    onClick={() => setSelectedWeek(index)}
+                    className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                      selectedWeek === index
+                        ? 'bg-primary/10 border-primary'
+                        : 'bg-card border-border hover:bg-secondary/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium text-foreground">
+                          第{week.weekNumber}週 ({formatWeekPeriod(week.startDate, week.endDate)})
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {weekShifts.length}件のシフト
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium text-foreground">
+                          {weekHours.hours}h {weekHours.minutes}m
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          合計時間
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* 科目別統計（新しいグラフ表示） */}
         {subjects.length > 0 && (
