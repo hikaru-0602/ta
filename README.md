@@ -30,13 +30,13 @@
 
 ```bash
 # テストの実行
-npm run test
+pnpm test
 
 # テストをwatch モードで実行
-npm run test:watch
+pnpm test:watch
 
 # カバレッジ付きでテスト実行
-npm run test:ci
+pnpm test:ci
 ```
 
 ### テストカバレッジ
@@ -57,7 +57,7 @@ cd ta
 2. 依存関係をインストール:
 
 ```bash
-npm install
+pnpm install
 ```
 
 3. 環境変数を設定:
@@ -70,21 +70,21 @@ cp .env.example .env.local
 4. 開発サーバーを起動:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 [http://localhost:3000](http://localhost:3000) でアプリケーションにアクセスできます。
 
 ## 📋 利用可能なスクリプト
 
-- `npm run dev` - 開発サーバーを起動
-- `npm run build` - プロダクション用ビルドを作成
-- `npm run start` - プロダクションサーバーを起動
-- `npm run lint` - ESLint でコードをチェック
-- `npm run type-check` - TypeScript 型チェックを実行
-- `npm run test` - テストを実行
-- `npm run test:watch` - テストを watch モードで実行
-- `npm run test:ci` - CI 用テスト（カバレッジ付き）
+- `pnpm dev` - 開発サーバーを起動
+- `pnpm build` - プロダクション用ビルドを作成
+- `pnpm start` - プロダクションサーバーを起動
+- `pnpm lint` - ESLint でコードをチェック
+- `pnpm type-check` - TypeScript 型チェックを実行
+- `pnpm test` - テストを実行
+- `pnpm test:watch` - テストを watch モードで実行
+- `pnpm test:ci` - CI 用テスト（カバレッジ付き）
 
 ## 💰 給料計算システム
 
