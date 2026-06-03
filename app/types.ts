@@ -34,12 +34,12 @@ export type WorkData = {
 };
 
 export const gradeInfoMap: Record<string, { label: string; wage: number }> = {
-  "1": { label: "学部１年生", wage: 1010 },
-  "2": { label: "学部２年生", wage: 1020 },
-  "3": { label: "学部３年生", wage: 1030 },
-  "4": { label: "学部４年生", wage: 1040 },
-  "5": { label: "博士（前期）課程１年", wage: 1050 },
-  "6": { label: "博士（前期）課程２年", wage: 1090 },
+  "1": { label: "学部１年生", wage: 1080 },
+  "2": { label: "学部２年生", wage: 1080 },
+  "3": { label: "学部３年生", wage: 1080 },
+  "4": { label: "学部４年生", wage: 1080 },
+  "5": { label: "博士（前期）課程１年", wage: 1100 },
+  "6": { label: "博士（前期）課程２年", wage: 1100 },
   "7": { label: "博士（後期）課程１年", wage: 1140 },
   "8": { label: "博士（後期）課程２年", wage: 1160 },
   "9": { label: "博士（後期）課程３年", wage: 1170 },
